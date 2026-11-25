@@ -154,8 +154,6 @@ const LISTS = {
     esporra foder *vaitefoder* *vaitomarnocu* paneleiro porra sacanagem vadia veado xana xochota queca kloten
     klote flikker slet teef stront hufter rotzak reet`,
 };
-const WORDS = Object.values(LISTS).join(" ").trim().split(/\s+/);
-
 // Digits and symbols that stand in for letters.
 const LOOKALIKES = { 0: "o", 1: "i", 3: "e", 4: "a", 5: "s", 7: "t", "@": "a", $: "s", "!": "i" };
 
@@ -166,27 +164,44 @@ const normalise = (text) =>
     .replace(/ł/g, "l").replace(/ß/g, "ss").replace(/ς/g, "σ")
     .normalize("NFD").replace(/\p{M}/gu, "");
 
-/** One entry of WORDS as a regular expression source. Every letter may be repeated. */
-const toPattern = (word) => word.replace(/\*|\p{L}/gu, (c) => (c === "*" ? "\\p{L}*" : c + "+"));
-
-const PROFANE = new RegExp(`^(?:${WORDS.map(toPattern).join("|")})$`, "u");
-
-// The LDNOOBW entries are looked up, not compiled into the expression above: several thousand
-// alternatives cost more processor time than a Worker request is allowed. Both sides have their
-// repeated letters collapsed, so "asss" finds "ass"; the length check keeps "as" from doing so.
-const collapse = (word) => word.replace(/(\p{L})\1+/gu, "$1");
-const LISTED = new Map(); // collapsed entry -> length of the shortest entry that collapses to it
-for (const entry of Object.values(LDNOOBW).join(" ").split(" ").filter(Boolean)) {
-  const key = collapse(entry);
-  LISTED.set(key, Math.min(LISTED.get(key) ?? Infinity, [...entry].length));
-}
-const isListed = (word) => [...word].length >= (LISTED.get(collapse(word)) ?? Infinity);
-
 /** The words of a name or phrase: lowercase letters only, look-alikes and accents resolved. */
 export const wordsOf = (text) => normalise(String(text)).split(/[^\p{L}]+/u).filter(Boolean);
+
+// Matching happens in two steps, because one expression with thousands of alternatives costs
+// more processor time than a Worker request is allowed. First a cheap search with repeated
+// letters collapsed on both sides ("puuula" and "pula" become the same) finds the few entries
+// that could apply. Then each of those is checked exactly: every letter may be repeated, but a
+// double letter in the entry stays required, so "as" is not taken for "ass".
+const collapse = (word) => word.replace(/(\p{L})\1+/gu, "$1");
+
+const WHOLE = new Map(); // collapsed word -> the "word" entries
+const PARTS = [];        // the "word*" and "*word*" entries
+for (const entry of [...Object.values(LISTS), ...Object.values(LDNOOBW)].join(" ").trim().split(/\s+/)) {
+  const key = collapse(entry.replace(/\*/g, ""));
+  if (!entry.endsWith("*")) WHOLE.set(key, [...(WHOLE.get(key) || []), entry]);
+  else PARTS.push({ entry, key, anywhere: entry.startsWith("*") });
+}
+
+const exact = new Map(); // entry -> its regular expression, built when first needed
+function matchesExactly(entry, word) {
+  if (!exact.has(entry)) {
+    const source = entry.replace(/\*|\p{L}/gu, (c) => (c === "*" ? "\\p{L}*" : c + "+"));
+    exact.set(entry, new RegExp(`^${source}$`, "u"));
+  }
+  return exact.get(entry).test(word);
+}
+
+function isOffensiveWord(word) {
+  const collapsed = collapse(word);
+  const candidates = [
+    ...(WHOLE.get(collapsed) || []),
+    ...PARTS.filter((p) => (p.anywhere ? collapsed.includes(p.key) : collapsed.startsWith(p.key))).map((p) => p.entry),
+  ];
+  return candidates.some((entry) => matchesExactly(entry, word));
+}
 
 export function isProfane(name) {
   const words = wordsOf(name);
   // The words one by one, then all of them joined: that catches "p u l a" and "pu-la".
-  return [...words, words.join("")].some((word) => PROFANE.test(word) || isListed(word));
+  return [...words, words.join("")].some(isOffensiveWord);
 }
