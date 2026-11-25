@@ -8,6 +8,7 @@ import { today, clock, num } from '../format.js';
 import { registerScreen, currentScreen } from '../router.js';
 
 const POLL_MS = 20000;
+export const NICK_MAX_LENGTH = 16;
 const LIST_SIZE = 100;
 
 // ---------- identity ----------
@@ -138,10 +139,17 @@ function openBoard() {
   renderBoard();
 }
 
-function saveNick() {
-  player.nick = $('#nick').value.trim().slice(0, 16);
+export const cleanNick = name => String(name).trim().slice(0, NICK_MAX_LENGTH);
+
+/** Stores the player's leaderboard name and posts it. */
+export function setNick(name) {
+  player.nick = cleanNick(name);
   persist();
   sync();
+}
+
+function saveNick() {
+  setNick($('#nick').value);
   $('#bnote').textContent = 'Saved';
 }
 

@@ -15,6 +15,7 @@ import { show } from '../router.js';
 import { modal } from '../ui/modal.js';
 import { previewLevel } from '../ui/preview.js';
 import { sync } from '../ui/leaderboard.js';
+import { nickFieldHtml, armNickField } from '../ui/nickname.js';
 import { game } from './state.js';
 import { loadBoard, restartGame, startRush, exitGame } from './session.js';
 import { renderHud, toast } from './hud.js';
@@ -92,8 +93,9 @@ function win() {
   <div class="bigstars">${stars(earned)}</div><h2>${boss ? 'Boss defeated!' : WIN_TITLES[earned]}</h2>
   <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`Total ${newBest(isNew)}`, num(final)], 'tot')}</table>
   <div class="gain"><span>${COIN}+${coins}${coinMultiplier() > 1 ? ' (weekend ×2)' : ''}</span>${[...extra, ...badges.map(b => b.name)].map(rewardLine).join('')}</div>
-  <div class="acts"><button class="btn" data-act="back">Back</button><button class="btn" data-act="again">Replay</button>${next ? '<button class="btn main" data-act="next">Next</button>' : ''}</div>`,
+  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">Back</button><button class="btn" data-act="again">Replay</button>${next ? '<button class="btn main" data-act="next">Next</button>' : ''}</div>`,
   { back: exitGame, again: restartGame, next: () => previewLevel(next) });
+  armNickField();
 }
 
 function endRush() {
@@ -105,8 +107,9 @@ function endRush() {
   modal(`<span class="kick" style="--c:${cfg.col}">Time Attack</span><h2>Time’s up!</h2>
   <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`Score ${newBest(isNew)}`, num(score)], 'tot')}</table>
   <div class="gain"><span>${COIN}+${coins}</span>${badges.map(b => rewardLine(b.name)).join('')}</div>
-  <div class="acts"><button class="btn" data-act="back">Back</button><button class="btn main" data-act="again">Run again</button></div>`,
+  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">Back</button><button class="btn main" data-act="again">Run again</button></div>`,
   { back: () => show('event'), again: () => startRush() });
+  armNickField();
 }
 
 /** Resumes a lost game: more time or one heart, once per game. */
