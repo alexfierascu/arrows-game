@@ -16,12 +16,6 @@
 			"database_name": "arrows-escape",
 			"database_id": "3da07fef-f298-4f0a-842b-18c910f7c93d",
 			"migrations_dir": "migrations"
-		},
-		{
-			"binding": "arrows_escape",
-			"database_name": "arrows-escape",
-			"database_id": "3da07fef-f298-4f0a-842b-18c910f7c93d",
-			"remote": true
 		}
 	],
 	"observability": {
