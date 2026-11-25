@@ -160,8 +160,9 @@ Offensive player names are refused by the server. The words, in the game's eight
 listed in `src/profanity.js`; the top of that file explains how to add one. On top of
 that comes the whole [LDNOOBW](https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words)
 list in 28 languages (CC BY 4.0), kept in `src/ldnoobw.js`; refresh it with
-`node scripts/update-ldnoobw.mjs`. That list also contains ordinary words and names (Peter, Regina,
-Anita, Mama), which are refused as whole names or whole words of a name. Spelling tricks such
+`node scripts/update-ldnoobw.mjs`. That list also contains ordinary words and names. The
+common ones (Peter, Regina, Anita, Mama) are exempted in `ALLOWED` in `src/profanity.js`; add a name
+there when a player's ordinary name is refused. Spelling tricks such
 as `p.u.l.a`, `puuula` or `sh1t` are caught without listing them.
 
 Three refused names within ten minutes lock that player out of the game for five minutes: a

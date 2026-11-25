@@ -174,9 +174,17 @@ export const wordsOf = (text) => normalise(String(text)).split(/[^\p{L}]+/u).fil
 // double letter in the entry stays required, so "as" is not taken for "ass".
 const collapse = (word) => word.replace(/(\p{L})\1+/gu, "$1");
 
+// LDNOOBW entries that are everyday first names or harmless words in another language. They are
+// left out. Add to this list when a player's ordinary name is refused; it never overrides LISTS.
+const ALLOWED = new Set(`
+  peter regina anita johny mama lolita concha mona pinto martillo pau pina mose fan got pot trio gol
+  hardcore pipi bobo
+`.trim().split(/\s+/));
+const listed = Object.values(LDNOOBW).join(" ").split(" ").filter((entry) => entry && !ALLOWED.has(entry));
+
 const WHOLE = new Map(); // collapsed word -> the "word" entries
 const PARTS = [];        // the "word*" and "*word*" entries
-for (const entry of [...Object.values(LISTS), ...Object.values(LDNOOBW)].join(" ").trim().split(/\s+/)) {
+for (const entry of [...Object.values(LISTS).join(" ").trim().split(/\s+/), ...listed]) {
   const key = collapse(entry.replace(/\*/g, ""));
   if (!entry.endsWith("*")) WHOLE.set(key, [...(WHOLE.get(key) || []), entry]);
   else PARTS.push({ entry, key, anywhere: entry.startsWith("*") });
