@@ -163,6 +163,10 @@ screen with a countdown covers everything, and reloading does not lift it. The n
 `MAX_STRIKES`, `STRIKE_WINDOW_MS` and `LOCKOUT_MS` in `src/worker.js`. Attempts are counted in the
 `strikes` table against a hash of the player's secret token, and deleted when they expire.
 
+Every refused name is written to the Worker's logs with the player id and the country the request
+came from (never the IP address). To see them: Cloudflare dashboard → Workers & Pages →
+`arrows-game` → Logs, and search for `name refused`. Logs are kept for a few days.
+
 The filter only checks names as they are posted. To find and remove names that got in earlier:
 ```bash
 npx wrangler d1 execute arrows-game --remote --command "SELECT id, nick, total, d_score FROM scores ORDER BY total DESC LIMIT 20"

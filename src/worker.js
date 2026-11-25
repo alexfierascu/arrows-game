@@ -154,7 +154,11 @@ async function postScore(request, env) {
   if (score.error) return error(score.error, 400);
   const values = Object.keys(FIELDS).map((key) => score.values[key]), now = Date.now(), { nick } = score.values;
   const tokenHash = await sha256(score.token);
-  if (isProfane(nick)) return rejectName(env.DB, tokenHash, now);
+  if (isProfane(nick)) {
+    // Shows up in the Worker's logs, so repeat offenders can be spotted. No IP address.
+    console.log({ message: "name refused", player: score.id, name: nick, country: request.cf?.country || "" });
+    return rejectName(env.DB, tokenHash, now);
+  }
   const statements = [env.DB.prepare(UPSERT).bind(score.id, tokenHash, ...values, now)];
   if (nick) statements.unshift(env.DB.prepare(RELEASE_STALE_NICK).bind(nick, score.id, now - NICK_HOLD_MS));
   let results;
