@@ -1,3 +1,5 @@
+import LDNOOBW from "./ldnoobw.js";
+
 // Decides whether a player name is offensive. Covers the game's eight languages, plus words
 // common among players everywhere.
 //
@@ -10,9 +12,8 @@
 // accents and separators ("p.u.l.a") are handled by isProfane(), so do not list such variants.
 
 // One list per language, only to keep them readable: every name is checked against all of them.
-// Part of the entries come from the "List of Dirty, Naughty, Obscene, and Otherwise Bad Words"
-// (github.com/LDNOOBW), used under the Creative Commons Attribution 4.0 licence. Only its entries
-// that are not ordinary words or names were taken.
+// On top of these comes the whole "List of Dirty, Naughty, Obscene, and Otherwise Bad Words" in
+// its 28 languages (src/ldnoobw.js), matched as whole names or whole words only.
 const LISTS = {
   english: `
     *fuck* fck* fuk fuq fuker fuking *phuck* *fuxk* shit* *bullshit* *dipshit* *shithead* *shitface* *horseshit*
@@ -153,7 +154,7 @@ const LISTS = {
     esporra foder *vaitefoder* *vaitomarnocu* paneleiro porra sacanagem vadia veado xana xochota queca kloten
     klote flikker slet teef stront hufter rotzak reet`,
 };
-const WORDS = Object.values(LISTS).join(" ").trim().split(/\s+/);
+const WORDS = [...Object.values(LISTS), ...Object.values(LDNOOBW)].join(" ").trim().split(/\s+/);
 
 // Digits and symbols that stand in for letters.
 const LOOKALIKES = { 0: "o", 1: "i", 3: "e", 4: "a", 5: "s", 7: "t", "@": "a", $: "s", "!": "i" };
@@ -170,8 +171,11 @@ const toPattern = (word) => word.replace(/\*|\p{L}/gu, (c) => (c === "*" ? "\\p{
 
 const PROFANE = new RegExp(`^(?:${WORDS.map(toPattern).join("|")})$`, "u");
 
+/** The words of a name or phrase: lowercase letters only, look-alikes and accents resolved. */
+export const wordsOf = (text) => normalise(String(text)).split(/[^\p{L}]+/u).filter(Boolean);
+
 export function isProfane(name) {
-  const words = normalise(String(name)).split(/[^\p{L}]+/u).filter(Boolean);
+  const words = wordsOf(name);
   // The words one by one, then all of them joined: that catches "p u l a" and "pu-la".
   return [...words, words.join("")].some((word) => PROFANE.test(word));
 }

@@ -15,6 +15,8 @@ public/styles.css          all styling
 public/js/                 the game, as ES modules (see "Code map" below)
 src/worker.js              API: scores, usage counts and admin routes (listed at the top of the file)
 src/profanity.js          the list of offensive words a player name may not contain
+src/ldnoobw.js            generated: the LDNOOBW word lists in 28 languages, used by profanity.js
+scripts/update-ldnoobw.mjs  downloads those lists again and rewrites src/ldnoobw.js
 migrations/                D1 schema, one numbered file per change
 wrangler.jsonc             Worker + D1 configuration
 ```
@@ -155,8 +157,11 @@ Two things must stay stable, because players' browsers and the leaderboard depen
 
 ## Moderating the leaderboard
 Offensive player names are refused by the server. The words, in the game's eight languages, are
-listed in `src/profanity.js`; the top of that file explains how to add one. Part of the list comes
-from [LDNOOBW](https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words) (CC BY 4.0). Spelling tricks such
+listed in `src/profanity.js`; the top of that file explains how to add one. On top of
+that comes the whole [LDNOOBW](https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words)
+list in 28 languages (CC BY 4.0), kept in `src/ldnoobw.js`; refresh it with
+`node scripts/update-ldnoobw.mjs`. That list also contains ordinary words and names (Peter, Regina,
+Anita, Mama), which are refused as whole names or whole words of a name. Spelling tricks such
 as `p.u.l.a`, `puuula` or `sh1t` are caught without listing them.
 
 Three refused names within ten minutes lock that player out of the game for five minutes: a
