@@ -32,14 +32,18 @@ function facts(cfg, board) {
   return `<div class="facts">${items.filter(Boolean).map(text => `<span>${text}</span>`).join('')}</div>`;
 }
 
-function goals(cfg) {
+/**
+ * The three things that each earn a star. `met` says which ones were achieved (all lit by
+ * default, as a preview of what there is to win).
+ */
+export function goalsHtml(cfg, met = [true, true, true]) {
   const items = [cfg.boss ? t('goal.boss') : t('goal.clear'), t('goal.hearts'), t('goal.time', { time: clock(cfg.par) })];
-  return `<div class="goals">${items.map(text => `<div>${star(true)}${text}</div>`).join('')}</div>`;
+  return `<div class="goals">${items.map((text, i) => `<div class="${met[i] ? '' : 'missed'}">${star(met[i])}${text}</div>`).join('')}</div>`;
 }
 
 export function previewLevel(cfg) {
   const board = build(cfg), best = bestFor(cfg);
-  modal(`${HEADERS[cfg.kind](cfg)}${facts(cfg, board)}${goals(cfg)}
+  modal(`${HEADERS[cfg.kind](cfg)}${facts(cfg, board)}${goalsHtml(cfg)}
   ${best ? `<p style="margin:12px 0 0;color:var(--mute)">${t('preview.best', { score: `<b style="color:var(--ink)">${num(best.b || 0)}</b>`, time: clock(best.t || 0) })}</p>` : ''}
   <div class="acts"><button class="btn" data-act="close">${t('close')}</button><button class="btn main" data-act="play">${cfg.boss ? t('fight') : t('play')}</button></div>`,
   { play: () => startGame(cfg) });

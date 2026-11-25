@@ -217,7 +217,27 @@ export default {
     "badge.arrows.name": "Pfeilbändiger",
     "badge.arrows.desc": "Schick 1.000 Pfeile vom Brett",
     "badge.stars.name": "Sternensammler",
-    "badge.stars.desc": "Sammle 90 Sterne"
+    "badge.stars.desc": "Sammle 90 Sterne",
+    "help.title": "So wird gespielt",
+    "help.1": "Tippe einen Pfeil an, damit er in seine Richtung vom Brett gleitet.",
+    "help.2": "Steht ein anderer Pfeil im Weg, prallt er ab und du verlierst ein Herz.",
+    "help.3": "Räum alle Pfeile ab, bevor die Zeit abläuft.",
+    "help.4": "Eispfeile brauchen erst einen Tipp zum Knacken. Goldpfeile zählen dreifach.",
+    "help.5": "Kommst du nicht weiter? Die Superkräfte unter dem Brett helfen, und das Radar zeigt freie Pfeile.",
+    "help.stars": "Hol dir bis zu 3 Sterne: Brett leer räumen, kein Herz verlieren und in der Zeit bleiben.",
+    "help.keys": "Tastatur: Pfeiltasten wählen, Enter tippt, Esc pausiert.",
+    "got.it": "Verstanden",
+    "cancel": "Abbrechen",
+    "confirm.restart": "Dieses Brett neu starten? Dein Fortschritt auf diesem Brett geht verloren.",
+    "confirm.quit": "Spiel verlassen? Dein Fortschritt auf diesem Brett geht verloren.",
+    "board.about.daily": "Beste Punktzahl im heutigen Tagesrätsel. Neues Brett um Mitternacht, Ortszeit.",
+    "board.about.event": "Deine Punktzahl im Event dieser Woche.",
+    "board.about.total": "Summe deiner besten Punktzahlen aller Level.",
+    "board.about.stars": "Gesammelte Sterne aus allen Leveln.",
+    "nick.public": "Dein Name ist für andere Spieler sichtbar.",
+    "motion": "Weniger Bewegung",
+    "board.aria": "Spielbrett",
+    "tip.tutorial": "Blinkende Pfeile können raus. Tippe einen an!"
   },
   "worlds": [
     {

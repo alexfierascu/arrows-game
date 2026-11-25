@@ -14,7 +14,7 @@ import { sfx } from '../feedback.js';
 import { show } from '../router.js';
 import { t } from '../i18n.js';
 import { modal } from '../ui/modal.js';
-import { previewLevel } from '../ui/preview.js';
+import { previewLevel, goalsHtml } from '../ui/preview.js';
 import { sync } from '../ui/leaderboard.js';
 import { nickFieldHtml, armNickField } from '../ui/nickname.js';
 import { game } from './state.js';
@@ -92,6 +92,7 @@ function win() {
   ].filter(Boolean);
   modal(`${boss ? portrait(boss) : ''}<span class="kick" style="--c:${cfg.col}">${cfg.resultLabel}</span>
   <div class="bigstars">${stars(earned)}</div><h2>${t(boss ? 'win.boss' : WIN_TITLES[earned])}</h2>
+  ${goalsHtml(cfg, [true, flawless, used <= cfg.par])}
   <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`${t('total')} ${newBest(isNew)}`, num(final)], 'tot')}</table>
   <div class="gain"><span>${COIN}+${coins}${coinMultiplier() > 1 ? ' ' + t('weekend.x2') : ''}</span>${[...extra, ...badges.map(badgeName)].map(rewardLine).join('')}</div>
   ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn" data-act="again">${t('replay')}</button>${next ? `<button class="btn main" data-act="next">${t('next')}</button>` : ''}</div>`,

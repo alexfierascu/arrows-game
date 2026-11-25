@@ -35,6 +35,7 @@ export function launch(a) {
   const runway = Math.ceil(game.W + game.H + a.pts.length + (view.width + view.height) / view.scale + 4);
   a.state = 'exit';
   removeFromBoard(a);
+  if (game.tutorial) { game.tutorial = false; game.radarUntil = 0; } // lesson learned
   a.ext = extendedPath(a, runway);
   a.slide = 0;
   game.combo = comboActive(now) ? Math.min(MAX_COMBO, game.combo + 1) : 1;

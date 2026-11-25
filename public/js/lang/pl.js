@@ -224,7 +224,27 @@ export default {
     "badge.arrows.name": "Poskramiacz strzałek",
     "badge.arrows.desc": "Wyślij 1000 strzałek poza planszę",
     "badge.stars.name": "Kolekcjoner gwiazdek",
-    "badge.stars.desc": "Zbierz 90 gwiazdek"
+    "badge.stars.desc": "Zbierz 90 gwiazdek",
+    "help.title": "Jak grać",
+    "help.1": "Dotknij strzałki, a zsunie się z planszy w kierunku, który wskazuje.",
+    "help.2": "Jeśli inna strzałka stoi jej na drodze, odbije się, a ty stracisz serce.",
+    "help.3": "Usuń wszystkie strzałki, zanim skończy się czas.",
+    "help.4": "Lodowe strzałki trzeba najpierw dotknąć, żeby pękł lód. Złote liczą się potrójnie.",
+    "help.5": "Nie wiesz, co dalej? Supermoce pod planszą pomogą, a Radar pokaże wolne strzałki.",
+    "help.stars": "Zdobądź do 3 gwiazdek: wyczyść planszę, nie strać serca i zmieść się w czasie.",
+    "help.keys": "Klawiatura: strzałki wybierają, Enter dotyka, Esc pauzuje.",
+    "got.it": "Rozumiem",
+    "cancel": "Anuluj",
+    "confirm.restart": "Zacząć tę planszę od nowa? Stracisz postęp na tej planszy.",
+    "confirm.quit": "Wyjść z gry? Stracisz postęp na tej planszy.",
+    "board.about.daily": "Najlepszy wynik w dzisiejszym wyzwaniu. Nowa plansza o północy czasu lokalnego.",
+    "board.about.event": "Twój wynik w wydarzeniu tego tygodnia.",
+    "board.about.total": "Suma twoich najlepszych wyników ze wszystkich poziomów.",
+    "board.about.stars": "Gwiazdki zdobyte na wszystkich poziomach.",
+    "nick.public": "Twoją nazwę widzą inni gracze.",
+    "motion": "Mniej animacji",
+    "board.aria": "Plansza",
+    "tip.tutorial": "Migające strzałki mogą wyjechać. Dotknij jednej!"
   },
   "worlds": [
     {

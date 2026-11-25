@@ -79,8 +79,8 @@ Each file in `public/js/` has one job, and there are no circular imports.
 | `levels.js` | Turns a level number, the date or an event stage into a board config. |
 | `player.js`, `progress.js`, `badges.js`, `economy.js` | Save data (localStorage), recording results, badges and coins. |
 | `week.js`, `format.js`, `icons.js`, `dom.js`, `feedback.js` | Weekly calendar, formatting, SVG snippets, DOM helpers, sound and vibration. |
-| `router.js`, `ui/*.js` | Screen switching and one file per screen or dialog (home, map, event, shop, badges, settings, leaderboard, level preview, modal). |
-| `game/*.js` | The game screen: shared state (`state.js`), tap rules, bosses, superpowers, clock, animations, canvas rendering, input, and win/lose handling (`outcome.js`). |
+| `router.js`, `ui/*.js` | Screen switching and one file per screen or dialog (home, map, event, shop, badges, settings, leaderboard, level preview, how to play, language menu, modal). |
+| `game/*.js` | The game screen: shared state (`state.js`), tap rules, bosses, superpowers, clock, animations, canvas rendering, pointer and keyboard input, and win/lose handling (`outcome.js`). |
 | `main.js` | Entry point: starts every module. |
 
 Common changes:
@@ -90,6 +90,15 @@ Common changes:
 - New weekly event: add it to `EVENTS` in `content.js`. Its `mod` values feed `stageCfg` in `levels.js`.
 - New badge: add an entry to `BADGES` in `badges.js` and `badge.<id>.name` / `badge.<id>.desc` to the
   language files.
+
+## Accessibility
+- Keyboard: every menu is reachable with Tab. On the board, the arrow keys move a highlight between
+  arrows, Enter or Space taps the highlighted one and Escape pauses (`game/keyboard.js`).
+- Dialogs take the keyboard focus when they open and give it back when they close.
+- Settings has a "Reduce motion" switch; the system-wide reduced-motion preference is also respected
+  (`motion.js`).
+- In-game messages are announced to screen readers. The board itself is drawn on a canvas, so its
+  arrows are not individually described.
 
 ## Languages
 The game speaks English, Spanish, French, Italian, German, Romanian, Greek and Polish. It starts in

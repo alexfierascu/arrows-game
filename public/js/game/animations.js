@@ -7,8 +7,8 @@ import { view, toScreen } from './view.js';
 import { pointAt } from './arrows.js';
 import { bump } from './rules.js';
 import { checkEnd } from './outcome.js';
+import { reducedMotion } from '../motion.js';
 
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const POOF_SECONDS = .35;
 const BOUNCE_OUT = 24, BOUNCE_BACK = 30; // cells per second
 
@@ -22,7 +22,7 @@ const STEPPERS = {
 
   // Accelerates along its runway until the tail is off the board and off the screen.
   exit({ a }, t) {
-    a.slide = reducedMotion ? t * 90 : 18 * t + 46 * t * t;
+    a.slide = reducedMotion() ? t * 90 : 18 * t + 46 * t * t;
     const tail = pointAt(a.ext, a.slide), [px, py] = toScreen(tail[0], tail[1]), margin = view.scale;
     const offBoard = tail[0] < -1 || tail[1] < -1 || tail[0] > game.W || tail[1] > game.H;
     const offScreen = px < -margin || py < -margin || px > view.width + margin || py > view.height + margin;

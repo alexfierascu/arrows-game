@@ -2,6 +2,7 @@
 // The language loads first, because every screen draws its texts from it.
 
 import { initLanguage } from './i18n.js';
+import { applyMotionSetting } from './motion.js';
 import { initNavigation, show } from './router.js';
 import { initModal } from './ui/modal.js';
 import { initLanguageMenu } from './ui/language-menu.js';
@@ -14,6 +15,7 @@ import { initLeaderboard } from './ui/leaderboard.js';
 import { initGame } from './game/index.js';
 
 await initLanguage();
+applyMotionSetting();
 initModal();
 initLanguageMenu();
 initNavigation();

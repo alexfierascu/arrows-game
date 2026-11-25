@@ -4,7 +4,7 @@
 import { $, $$, esc, onDataClick } from '../dom.js';
 import { player, persist, totalScore, totalStars, clearedCount, bossesBeaten, eventScore } from '../player.js';
 import { weekInfo } from '../week.js';
-import { today, clock, num } from '../format.js';
+import { today, clock, num, duration } from '../format.js';
 import { registerScreen, currentScreen } from '../router.js';
 import { t } from '../i18n.js';
 
@@ -40,22 +40,24 @@ let syncing = false, syncAgain = false, pollTimer = 0;
 
 const byValue = (a, b) => b.value - a.value;
 
-// How each tab picks, ranks and labels rows. `wk` is the current week; `empty` is a text key.
+// How each tab picks, ranks and labels rows. `wk` is the current week; `empty` is a text key
+// and `about` explains to the player what the tab ranks.
 const TABS = {
   daily: {
     includes: r => r.dDate === today() && r.dScore > 0, value: r => r.dScore,
     sub: r => clock(r.dTime || 0), order: (a, b) => byValue(a, b) || a.dTime - b.dTime,
-    empty: 'board.empty.daily',
+    empty: 'board.empty.daily', about: () => t('board.about.daily'),
   },
   event: {
     includes: (r, wk) => r.eKey === wk.key && r.eScore > 0, value: r => r.eScore,
     empty: 'board.empty.event',
+    about: wk => t('board.about.event') + ' ' + t('ends.in', { time: duration(wk.end - Date.now()) }),
   },
   total: {
     includes: r => r.total > 0, value: r => r.total,
-    sub: r => t('board.bosses', { n: r.bosses || 0 }),
+    sub: r => t('board.bosses', { n: r.bosses || 0 }), about: () => t('board.about.total'),
   },
-  stars: { includes: r => r.stars > 0, value: r => r.stars, format: v => esc(v) + '★' },
+  stars: { includes: r => r.stars > 0, value: r => r.stars, format: v => esc(v) + '★', about: () => t('board.about.stars') },
 };
 
 // ---------- network ----------
@@ -134,6 +136,7 @@ function renderBoard() {
   $('#rows').innerHTML = list.length
     ? list.map((r, i) => rowHtml(r, i + 1, view.format)).join('')
     : `<div class="card note" style="margin:0">${emptyText(view)}</div>`;
+  $('#babout').textContent = view.about(wk);
   $('#bnote').textContent = noteText();
 }
 
@@ -150,7 +153,8 @@ function openBoard() {
   renderBoard();
 }
 
-export const cleanNick = name => String(name).trim().slice(0, NICK_MAX_LENGTH);
+// Counted in characters, not UTF-16 units, so an emoji at the limit is never cut in half.
+export const cleanNick = name => [...String(name).trim()].slice(0, NICK_MAX_LENGTH).join('').trim();
 
 /**
  * Asks the server for a name (names are unique) and keeps it if it is free. Resolves to false

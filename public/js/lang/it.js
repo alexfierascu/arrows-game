@@ -217,7 +217,27 @@ export default {
     "badge.arrows.name": "Domafrecce",
     "badge.arrows.desc": "Fai uscire 1.000 frecce dalla griglia",
     "badge.stars.name": "Acchiappastelle",
-    "badge.stars.desc": "Raccogli 90 stelle"
+    "badge.stars.desc": "Raccogli 90 stelle",
+    "help.title": "Come si gioca",
+    "help.1": "Tocca una freccia per farla scivolare fuori dalla griglia nella direzione in cui punta.",
+    "help.2": "Se un’altra freccia le blocca la strada, rimbalza e perdi un cuore.",
+    "help.3": "Fai uscire tutte le frecce prima che scada il tempo.",
+    "help.4": "Le frecce di ghiaccio vanno toccate una volta per romperle. Le frecce d’oro valgono triplo.",
+    "help.5": "Bloccato? I superpoteri sotto la griglia ti aiutano, e il Radar mostra le frecce libere.",
+    "help.stars": "Ottieni fino a 3 stelle: svuota la griglia, non perdere cuori e finisci in tempo.",
+    "help.keys": "Tastiera: le frecce scelgono, Invio tocca, Esc mette in pausa.",
+    "got.it": "Ho capito",
+    "cancel": "Annulla",
+    "confirm.restart": "Ricominciare questa griglia? I progressi su questa griglia andranno persi.",
+    "confirm.quit": "Uscire dalla partita? I progressi su questa griglia andranno persi.",
+    "board.about.daily": "Miglior punteggio nella sfida di oggi. Nuova griglia a mezzanotte, ora locale.",
+    "board.about.event": "Il tuo punteggio nell’evento di questa settimana.",
+    "board.about.total": "Somma dei tuoi migliori punteggi in tutti i livelli.",
+    "board.about.stars": "Stelle ottenute in tutti i livelli.",
+    "nick.public": "Il tuo nome è visibile agli altri giocatori.",
+    "motion": "Riduci animazioni",
+    "board.aria": "Griglia di gioco",
+    "tip.tutorial": "Le frecce che lampeggiano possono uscire. Toccane una!"
   },
   "worlds": [
     {

@@ -47,7 +47,7 @@
  <div class="boss" id="bossBar" hidden><div class="bp" id="bossPic"></div><div class="bi"><div class="bn"><b id="bossName"></b><span id="bossAtk"></span></div><div class="hp"><i id="bossHp"></i></div></div></div>
  <div class="timer" id="timer"><div class="tbar"><i id="tFill"></i></div><span id="tTxt">0:00</span></div>
  <div class="srow"><span><span data-i18n="score">Score</span> <b id="gScore">0</b></span><span id="gCombo"></span><span class="sp"></span><span id="gLeft"></span></div>
- <div id="stage"><canvas id="cv"></canvas><div id="pops"></div><div class="toast" id="toast"></div>
+ <div id="stage"><canvas id="cv" tabindex="0" role="application" data-i18n-label="board.aria" aria-label="Puzzle board"></canvas><div id="pops"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="zoom"><button class="ib" id="zin" data-i18n-label="zoom.in" aria-label="Zoom in"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button><button class="ib" id="zout" data-i18n-label="zoom.out" aria-label="Zoom out"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button class="ib" id="zfit" data-i18n-label="zoom.fit" aria-label="Fit board"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
  </div>
  <div class="powers" id="powers"></div>
@@ -58,7 +58,8 @@
  <div class="tabs" id="btabs"><button class="tab on" data-t="daily" data-i18n="tab.today">Today</button><button class="tab" data-t="event" id="evTab">Event</button><button class="tab" data-t="total" data-i18n="tab.alltime">All-time</button><button class="tab" data-t="stars" data-i18n="tab.stars">Stars</button></div>
  <div class="body">
   <div class="nick"><input id="nick" maxlength="16" data-i18n-placeholder="nick.placeholder" placeholder="Your player name" data-i18n-label="nick.aria" aria-label="Player name"><button class="btn" id="nickSave" data-i18n="save">Save</button></div>
-  <div class="rows" id="rows"></div><p class="note" id="bnote"></p>
+  <p class="note nickpub" data-i18n="nick.public">Your name is shown to other players.</p>
+  <p class="note" id="babout"></p><div class="rows" id="rows"></div><p class="note" id="bnote"></p>
  </div>
 </section>
 
@@ -77,7 +78,7 @@
  <div class="body"><div class="stats" id="stats"></div><div class="badges" id="badges"></div></div>
 </section>
 
-<div class="modal" id="modal"><div class="mcard" id="mcard"></div></div>
+<div class="modal" id="modal"><div class="mcard" id="mcard" role="dialog" aria-modal="true" tabindex="-1"></div></div>
 
 <svg width="0" height="0" style="position:absolute"><defs>
  <symbol id="coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f5b70a"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#c98f00" stroke-width="2"/><path d="M12 8.5v7" stroke="#c98f00" stroke-width="2.2" stroke-linecap="round"/></symbol>

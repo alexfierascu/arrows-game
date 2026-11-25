@@ -47,4 +47,5 @@ export function armNickField() {
   input.addEventListener('input', () => { setMessage(t('nick.ask'), false); update(); });
   input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
   update();
+  $('#mcard').focus({ preventScroll: true }); // the buttons are disabled for now: do not leave focus on one
 }

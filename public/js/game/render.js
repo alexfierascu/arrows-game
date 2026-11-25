@@ -6,6 +6,7 @@ import { game } from './state.js';
 import { view, toScreen, resize, fit } from './view.js';
 import { pointAt, canLeave } from './arrows.js';
 import { requestFrame } from './frame.js';
+import { cursorArrow } from './keyboard.js';
 
 const canvas = $('#cv'), ctx = canvas.getContext('2d');
 const FULL_CIRCLE = Math.PI * 2;
@@ -76,6 +77,20 @@ function drawPoof(a, lineWidth) {
   ctx.globalAlpha = 1;
 }
 
+/** A soft glow behind the arrow chosen with the keyboard, while the board has the focus. */
+function drawCursor(lineWidth) {
+  const a = cursorArrow();
+  if (!a || document.activeElement !== canvas) return;
+  const line = new Path2D(), heads = new Path2D();
+  traceArrow(line, heads, a);
+  ctx.globalAlpha = .35;
+  ctx.strokeStyle = game.cfg.col;
+  ctx.lineWidth = lineWidth * 3.4;
+  ctx.stroke(line);
+  ctx.stroke(heads);
+  ctx.globalAlpha = 1;
+}
+
 /** Arrows are batched by look, so each look is stroked once. Returns true if still animating. */
 function drawArrows(colours, now) {
   const lineWidth = Math.max(1.4, view.scale * .14);
@@ -89,6 +104,7 @@ function drawArrows(colours, now) {
   };
   let animating = radar;
   ctx.lineCap = ctx.lineJoin = 'round';
+  drawCursor(lineWidth);
 
   for (const a of game.arrows) {
     if (a.state === 'gone') continue;
@@ -168,6 +184,11 @@ export function draw(now) {
 export function resizeBoard() {
   resize(canvas, $('#stage'), game.W, game.H);
   requestFrame();
+}
+
+/** Gives the board the keyboard focus, so arrow keys work without clicking it first. */
+export function focusBoard() {
+  canvas.focus({ preventScroll: true });
 }
 
 export function fitBoard() {

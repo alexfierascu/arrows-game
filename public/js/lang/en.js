@@ -220,7 +220,27 @@ export default {
     "badge.arrows.name": "Arrow wrangler",
     "badge.arrows.desc": "Send 1,000 arrows off the board",
     "badge.stars.name": "Star collector",
-    "badge.stars.desc": "Collect 90 stars"
+    "badge.stars.desc": "Collect 90 stars",
+    "help.title": "How to play",
+    "help.1": "Tap an arrow to slide it off the board in the direction it points.",
+    "help.2": "If another arrow is in its way, it bumps and you lose a heart.",
+    "help.3": "Clear every arrow before the clock runs out.",
+    "help.4": "Ice arrows need one tap to crack first. Gold arrows score triple.",
+    "help.5": "Stuck? The superpowers under the board can help, and Radar shows which arrows are free.",
+    "help.stars": "Earn up to 3 stars: clear the board, lose no hearts and finish in time.",
+    "help.keys": "Keyboard: arrow keys choose an arrow, Enter taps it, Esc pauses.",
+    "got.it": "Got it",
+    "cancel": "Cancel",
+    "confirm.restart": "Restart this board? Your progress on it will be lost.",
+    "confirm.quit": "Quit this game? Your progress on this board will be lost.",
+    "board.about.daily": "Best score in today’s daily challenge. A new board starts at midnight, your local time.",
+    "board.about.event": "Your score in this week’s event.",
+    "board.about.total": "Sum of your best scores on every level.",
+    "board.about.stars": "Stars earned across all levels.",
+    "nick.public": "Your name is shown to other players.",
+    "motion": "Reduce motion",
+    "board.aria": "Puzzle board",
+    "tip.tutorial": "Blinking arrows are free to leave. Tap one!"
   },
   "worlds": [
     {

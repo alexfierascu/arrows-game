@@ -142,6 +142,14 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 .kick{display:inline-block;background:var(--c,var(--acc));color:#fff;border-radius:999px;padding:4px 12px 2px;font-size:14px;font-weight:800}
 .facts{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0 12px}
 .facts span{background:var(--soft);border-radius:10px;padding:5px 10px 3px;font-size:14px;white-space:nowrap}
+.goals .missed{color:var(--mute)}
+.rules{text-align:left;margin:6px 0 0;padding-left:22px;display:grid;gap:8px;font-size:15px;line-height:1.35}
+.ask{font-size:18px;color:var(--ink)!important;margin:6px 0 0!important}
+.badge .prog{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px}
+.nickpub{margin:-6px 2px 10px;font-size:13px}
+#babout{margin:0 2px 8px}
+#cv:focus{outline:none}#cv:focus-visible{outline:3px solid var(--blue);outline-offset:-3px;border-radius:20px}
+.mcard:focus{outline:none}
 .goals{text-align:left;display:grid;gap:6px;margin:0 auto;max-width:300px}
 .goals div{display:flex;gap:8px;align-items:center}.goals svg{width:20px;height:20px;flex:none}
 .bigstars{display:flex;justify-content:center;gap:6px;margin:4px 0 8px}
@@ -200,3 +208,4 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 #rushGo{background:var(--c);border-color:var(--c);margin-top:4px}
 @media(max-width:360px){.pw{font-size:0}.pw svg.i{width:22px;height:22px}.levels{gap:8px}.hero svg{width:92px;height:92px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:root[data-reduce-motion] *{animation:none!important;transition:none!important}

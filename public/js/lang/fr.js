@@ -217,7 +217,27 @@ export default {
     "badge.arrows.name": "Dompteur de flèches",
     "badge.arrows.desc": "Fais sortir 1 000 flèches de la grille",
     "badge.stars.name": "Chasseur d’étoiles",
-    "badge.stars.desc": "Récolte 90 étoiles"
+    "badge.stars.desc": "Récolte 90 étoiles",
+    "help.title": "Comment jouer",
+    "help.1": "Touche une flèche pour la faire glisser hors de la grille, dans la direction qu’elle indique.",
+    "help.2": "Si une autre flèche lui barre la route, elle rebondit et tu perds un cœur.",
+    "help.3": "Sors toutes les flèches avant la fin du chrono.",
+    "help.4": "Les flèches de glace demandent un premier toucher pour se briser. Les flèches d’or comptent triple.",
+    "help.5": "Bloqué ? Les super-pouvoirs sous la grille peuvent t’aider, et le Radar montre les flèches libres.",
+    "help.stars": "Gagne jusqu’à 3 étoiles : vide la grille, ne perds aucun cœur et finis dans les temps.",
+    "help.keys": "Clavier : les flèches choisissent, Entrée touche, Échap met en pause.",
+    "got.it": "Compris",
+    "cancel": "Annuler",
+    "confirm.restart": "Recommencer cette grille ? Ta progression sur cette grille sera perdue.",
+    "confirm.quit": "Quitter la partie ? Ta progression sur cette grille sera perdue.",
+    "board.about.daily": "Meilleur score au défi du jour. Nouvelle grille à minuit, heure locale.",
+    "board.about.event": "Ton score à l’événement de la semaine.",
+    "board.about.total": "Somme de tes meilleurs scores sur tous les niveaux.",
+    "board.about.stars": "Étoiles gagnées sur tous les niveaux.",
+    "nick.public": "Ton nom est visible par les autres joueurs.",
+    "motion": "Réduire les animations",
+    "board.aria": "Grille de jeu",
+    "tip.tutorial": "Les flèches qui clignotent peuvent sortir. Touches-en une !"
   },
   "worlds": [
     {

@@ -9,14 +9,16 @@ import { show } from '../router.js';
 import { t } from '../i18n.js';
 import { game, resetRun } from './state.js';
 import { arrowWeight } from './arrows.js';
-import { resizeBoard } from './render.js';
+import { resizeBoard, focusBoard } from './render.js';
 import { renderBoardHeader, renderHud, renderPowers, toast } from './hud.js';
 
 const FIRST_ICE_LEVEL = 37;       // first level of the Frozen world
 const BOSS_FIRST_ATTACK_DELAY = 2; // extra seconds before a boss's first attack
+const TUTORIAL_MS = 120000;        // how long the first-game hint keeps blinking if nothing is tapped
 
 /** A hint shown as the board opens, as [message, milliseconds], or null. */
 function openingTip(cfg) {
+  if (game.tutorial) return [t('tip.tutorial'), 6000];
   if (cfg.kind === 'level' && cfg.g === 1) return [t('tip.first'), 4200];
   if (cfg.boss) return [t('tip.boss', { name: cfg.boss.name }), 3800];
   if (cfg.blackout) return [t('tip.lamp'), 3500];
@@ -37,7 +39,7 @@ export function loadBoard(cfg) {
   });
   const boss = cfg.boss || null;
   Object.assign(game, {
-    cfg, W, H, own, arrows, anims: [],
+    cfg, W, H, own, arrows, anims: [], cursor: null,
     total: arrows.length, left: arrows.length,
     fogs: [], blackoutUntil: 0, lamp: [W / 2 - .5, H / 2 - .5],
     boss, bossNext: boss ? boss.every + BOSS_FIRST_ATTACK_DELAY : 0, attackIndex: 0,
@@ -54,6 +56,12 @@ export function startGame(cfg) {
   persist();
   show('game'); // before loading: the canvas can only be measured while visible
   loadBoard(cfg);
+  focusBoard();
+  // The very first game shows which arrows can go, instead of explaining it in words.
+  if (player.st.arrows === 0 && cfg.kind === 'level') {
+    game.tutorial = true;
+    game.radarUntil = performance.now() + TUTORIAL_MS;
+  }
   game.timeLeft = game.timeMax = cfg.kind === 'rush' ? RUSH_SECONDS : cfg.limit;
   const tip = openingTip(cfg);
   if (tip) toast(...tip);

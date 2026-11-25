@@ -1,7 +1,7 @@
 // The player's save data (kept in this browser's localStorage) and questions asked about it.
 //
 // Shape of `player`:
-//   nick, coins, gift (date of the last daily gift), snd, hap (sound / vibration on)
+//   nick, coins, gift (date of the last daily gift), snd, hap, rm (sound / vibration / reduced motion)
 //   pw      { powerId: count owned }
 //   lv      { levelNumber: { s: stars, b: best score, t: best time } }
 //   daily   { d: date, score, time }
@@ -18,7 +18,7 @@ const DEFAULTS = {
   pw: { smash: 1, radar: 3, freeze: 1, shield: 2, magnet: 1, heart: 1 },
   lv: {}, daily: { d: '', score: 0, time: 0 }, gift: '', ev: {}, bosses: {},
   st: { cleared: 0, flawless: 0, bestCombo: 0, speed: 0, dailies: 0, powers: 0, arrows: 0, bumps: 0, plays: 0, events: 0, rushBest: 0 },
-  ach: {}, snd: true, hap: true,
+  ach: {}, snd: true, hap: true, rm: false,
 };
 const fresh = () => JSON.parse(JSON.stringify(DEFAULTS));
 

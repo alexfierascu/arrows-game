@@ -218,7 +218,27 @@ export default {
     "badge.arrows.name": "Domaflechas",
     "badge.arrows.desc": "Saca 1000 flechas del tablero",
     "badge.stars.name": "Cazaestrellas",
-    "badge.stars.desc": "Consigue 90 estrellas"
+    "badge.stars.desc": "Consigue 90 estrellas",
+    "help.title": "Cómo jugar",
+    "help.1": "Toca una flecha para deslizarla fuera del tablero en la dirección a la que apunta.",
+    "help.2": "Si otra flecha está en su camino, choca y pierdes un corazón.",
+    "help.3": "Saca todas las flechas antes de que se acabe el tiempo.",
+    "help.4": "Las flechas de hielo necesitan un toque para romperse. Las doradas valen el triple.",
+    "help.5": "¿Atascado? Los superpoderes bajo el tablero te ayudan, y el Radar muestra qué flechas están libres.",
+    "help.stars": "Gana hasta 3 estrellas: vacía el tablero, no pierdas corazones y termina a tiempo.",
+    "help.keys": "Teclado: las flechas eligen, Intro toca y Esc pausa.",
+    "got.it": "Entendido",
+    "cancel": "Cancelar",
+    "confirm.restart": "¿Reiniciar este tablero? Perderás lo que llevas.",
+    "confirm.quit": "¿Salir de la partida? Perderás lo que llevas en este tablero.",
+    "board.about.daily": "Mejor puntuación en el reto diario de hoy. Hay tablero nuevo a medianoche, en tu hora local.",
+    "board.about.event": "Tu puntuación en el evento de esta semana.",
+    "board.about.total": "Suma de tus mejores puntuaciones en todos los niveles.",
+    "board.about.stars": "Estrellas conseguidas en todos los niveles.",
+    "nick.public": "Los demás jugadores ven tu nombre.",
+    "motion": "Reducir movimiento",
+    "board.aria": "Tablero del puzle",
+    "tip.tutorial": "Las flechas que parpadean pueden salir. ¡Toca una!"
   },
   "worlds": [
     {

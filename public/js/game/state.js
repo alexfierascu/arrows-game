@@ -12,6 +12,7 @@ export const game = {
   arrows: [],
   own: null,          // Int32Array: arrow id on each cell, -1 when empty
   anims: [],          // running animations: { kind, a: arrow, t0, ... }
+  cursor: null,       // id of the arrow highlighted for keyboard play
   total: 0, left: 0,  // arrows on the board at the start / still on it
   // boss fight
   boss: null, bossHP: 0, bossMax: 1,
@@ -31,6 +32,7 @@ export const game = {
   shield: false,
   smash: false,       // Smash is armed: the next tap destroys an arrow
   radarUntil: 0,
+  tutorial: false,    // first game ever: free arrows blink until one is sent off
   rushBoards: 0, rushArrows: 0,
 };
 
@@ -40,7 +42,7 @@ export function resetRun() {
     over: false, pendingLose: null, continued: false,
     hearts: START_HEARTS, heartsLost: 0,
     score: 0, combo: 0, lastClear: 0, bestCombo: 0, goldCleared: 0,
-    frozen: 0, shield: false, smash: false, radarUntil: 0,
+    frozen: 0, shield: false, smash: false, radarUntil: 0, tutorial: false,
     rushBoards: 0, rushArrows: 0,
   });
 }

@@ -60,7 +60,8 @@ function parseScore(body) {
   if (!body || !ID_RE.test(body.id || "") || typeof body.token !== "string" || body.token.length < 20 || body.token.length > 100)
     return { error: "bad id or token" };
   const values = {
-    nick: String(body.nick || "").replace(UNSAFE_NICK_CHARS, "").trim().slice(0, NICK_MAX_LENGTH),
+    // Cut by characters, not UTF-16 units, so an emoji at the limit is never split.
+    nick: [...String(body.nick || "").replace(UNSAFE_NICK_CHARS, "").trim()].slice(0, NICK_MAX_LENGTH).join("").trim(),
     dDate: DATE_RE.test(body.dDate || "") ? body.dDate : "",
     eKey: EVENT_RE.test(body.eKey || "") ? body.eKey : "",
   };

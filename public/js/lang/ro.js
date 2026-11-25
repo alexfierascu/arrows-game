@@ -230,7 +230,27 @@ export default {
     "badge.arrows.name": "Îmblânzitor de săgeți",
     "badge.arrows.desc": "Scoate 1.000 de săgeți de pe tablă",
     "badge.stars.name": "Colecționar de stele",
-    "badge.stars.desc": "Adună 90 de stele"
+    "badge.stars.desc": "Adună 90 de stele",
+    "help.title": "Cum se joacă",
+    "help.1": "Atinge o săgeată ca să alunece de pe tablă în direcția în care arată.",
+    "help.2": "Dacă o altă săgeată îi stă în cale, se lovește și pierzi o inimă.",
+    "help.3": "Scoate toate săgețile înainte să expire timpul.",
+    "help.4": "Săgețile de gheață trebuie atinse o dată ca să crape. Cele de aur valorează triplu.",
+    "help.5": "Te-ai blocat? Superputerile de sub tablă te ajută, iar Radarul îți arată săgețile libere.",
+    "help.stars": "Câștigă până la 3 stele: golește tabla, nu pierde nicio inimă și termină la timp.",
+    "help.keys": "Tastatură: săgețile aleg, Enter atinge, Esc pune pauză.",
+    "got.it": "Am înțeles",
+    "cancel": "Anulează",
+    "confirm.restart": "O iei de la capăt cu această tablă? Progresul de pe ea se pierde.",
+    "confirm.quit": "Ieși din joc? Progresul de pe această tablă se pierde.",
+    "board.about.daily": "Cel mai bun scor la provocarea de azi. Tablă nouă la miezul nopții, ora ta locală.",
+    "board.about.event": "Scorul tău la evenimentul săptămânii.",
+    "board.about.total": "Suma celor mai bune scoruri de la toate nivelurile.",
+    "board.about.stars": "Stele câștigate la toate nivelurile.",
+    "nick.public": "Numele tău este vizibil pentru ceilalți jucători.",
+    "motion": "Mai puțină mișcare",
+    "board.aria": "Tabla de joc",
+    "tip.tutorial": "Săgețile care clipesc pot ieși. Atinge una!"
   },
   "worlds": [
     {
