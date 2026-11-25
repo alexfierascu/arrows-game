@@ -13,6 +13,7 @@ import { friends, isFriend, addFriend, removeFriend } from '../friends.js';
 import { track } from '../analytics.js';
 import { modal } from './modal.js';
 import { openAvatarPicker } from './avatar-picker.js';
+import { lockOut } from './lockout.js';
 
 const POLL_MS = 20000;
 export const NICK_MAX_LENGTH = 16;
@@ -69,7 +70,9 @@ const TABS = {
 
 // ---------- network ----------
 
-const HTTP_FORBIDDEN = 403, HTTP_NAME_TAKEN = 409;
+const HTTP_FORBIDDEN = 403, HTTP_NAME_TAKEN = 409, HTTP_BAD_NAME = 422, HTTP_LOCKED_OUT = 429;
+// Why the server refused a name: HTTP status -> the text that tells the player.
+const NAME_REFUSED = { [HTTP_NAME_TAKEN]: 'nick.taken', [HTTP_BAD_NAME]: 'nick.bad', [HTTP_LOCKED_OUT]: 'nick.bad' };
 
 /** Sends the player's scores under the given name. Returns the HTTP status, or 0 when offline. */
 async function postScores(nick) {
@@ -82,6 +85,7 @@ async function postScores(nick) {
   };
   try {
     const res = await fetch('/api/score', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    if (res.status === HTTP_LOCKED_OUT) lockOut((await res.json()).wait); // too many offensive names
     return res.status;
   } catch { return 0; }
 }
@@ -93,9 +97,9 @@ export async function sync() {
   syncing = true;
   const status = await postScores(player.nick || '');
   if (status === HTTP_FORBIDDEN) canWrite = false;
-  // A name saved while offline turned out to be someone else's: drop it, post the scores
-  // without it, and let the next win ask for a new one.
-  if (status === HTTP_NAME_TAKEN) { player.nick = ''; persist(); syncAgain = true; }
+  // A name saved while offline turned out to be someone else's, or the name is no longer
+  // allowed: drop it, post the scores without it, and let the next win ask for a new one.
+  if (NAME_REFUSED[status]) { player.nick = ''; persist(); syncAgain = true; }
   syncing = false;
   if (syncAgain) { syncAgain = false; sync(); }
   else if (currentScreen() === 'board') fetchBoard();
@@ -237,22 +241,23 @@ async function acceptInvite() {
 export const cleanNick = name => [...String(name).trim()].slice(0, NICK_MAX_LENGTH).join('').trim();
 
 /**
- * Asks the server for a name (names are unique) and keeps it if it is free. Resolves to false
- * when another player has it. Offline, the name is kept for now and checked by the next sync.
+ * Asks the server for a name and keeps it if the server accepts it. Resolves to null, or to
+ * the key of the text saying why not: another player has it, or it is offensive. Offline, the
+ * name is kept for now and checked by the next sync.
  */
 export async function claimNick(name) {
   const nick = cleanNick(name);
-  if (playerId && token && canWrite && await postScores(nick) === HTTP_NAME_TAKEN) return false;
+  const refused = playerId && token && canWrite && NAME_REFUSED[await postScores(nick)];
+  if (refused) return refused;
   if (nick && !player.nick) track('name_set');
   player.nick = nick;
   persist();
   if (currentScreen() === 'board') fetchBoard();
-  return true;
+  return null;
 }
 
 async function saveNick() {
-  const saved = await claimNick($('#nick').value);
-  $('#bnote').textContent = saved ? t('saved') : t('nick.taken');
+  $('#bnote').textContent = t(await claimNick($('#nick').value) || 'saved');
 }
 
 export function initLeaderboard() {

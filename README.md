@@ -14,6 +14,7 @@ public/index.html          markup for every screen
 public/styles.css          all styling
 public/js/                 the game, as ES modules (see "Code map" below)
 src/worker.js              API: scores, usage counts and admin routes (listed at the top of the file)
+src/profanity.js          the list of offensive words a player name may not contain
 migrations/                D1 schema, one numbered file per change
 wrangler.jsonc             Worker + D1 configuration
 ```
@@ -153,6 +154,16 @@ Two things must stay stable, because players' browsers and the leaderboard depen
 - The save format: the localStorage keys and the property names documented at the top of `player.js`.
 
 ## Moderating the leaderboard
+Offensive player names are refused by the server. The words, in the game's eight languages, are
+listed in `src/profanity.js`; the top of that file explains how to add one. Spelling tricks such
+as `p.u.l.a`, `puuula` or `sh1t` are caught without listing them.
+
+Three refused names within ten minutes lock that player out of the game for five minutes: a
+screen with a countdown covers everything, and reloading does not lift it. The numbers are
+`MAX_STRIKES`, `STRIKE_WINDOW_MS` and `LOCKOUT_MS` in `src/worker.js`. Attempts are counted in the
+`strikes` table against a hash of the player's secret token, and deleted when they expire.
+
+The filter only checks names as they are posted. To find and remove names that got in earlier:
 ```bash
 npx wrangler d1 execute arrows-game --remote --command "SELECT id, nick, total, d_score FROM scores ORDER BY total DESC LIMIT 20"
 npx wrangler d1 execute arrows-game --remote --command "DELETE FROM scores WHERE id='<player-id>'"

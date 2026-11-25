@@ -15,6 +15,7 @@ import { initEvent } from './ui/event.js';
 import { initShop } from './ui/shop.js';
 import { initBadges } from './ui/badges.js';
 import { initLeaderboard } from './ui/leaderboard.js';
+import { initLockout } from './ui/lockout.js';
 import { initGame } from './game/index.js';
 
 await initLanguage();
@@ -30,6 +31,7 @@ initBadges();
 initLeaderboard();
 initGame();
 show('home');
+initLockout();
 rollWeek();
 showLastWeekRecap();
 trackVisit();

@@ -133,6 +133,8 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 /* modal */
 .modal{position:fixed;inset:0;background:#0b0e1fb8;display:none;place-items:center;padding:18px;z-index:5}
 .modal.on{display:grid}
+.lock{z-index:9;background:#0b0e1ff2}
+.lockclock{font:800 56px/1 "Baloo 2",sans-serif;font-variant-numeric:tabular-nums;margin:10px 0 4px}
 .mcard{background:var(--paper);border-radius:26px;padding:24px 20px 20px;width:min(400px,100%);text-align:center;box-shadow:0 30px 60px -20px #000a;max-height:92dvh;overflow:auto}
 .mcard h2{font:800 32px/1.05 "Baloo 2",sans-serif;margin:4px 0 6px}
 .mcard>p{margin:0 0 14px;color:var(--mute)}

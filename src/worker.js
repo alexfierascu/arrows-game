@@ -1,15 +1,24 @@
 // Arrows Escape — Cloudflare Worker: serves the game (static assets) and the leaderboard API (D1).
 //   GET    /api/scores?d=YYYY-MM-DD&e=<eventKey>   top players for each leaderboard tab
 //   POST   /api/score                              create/update your own row (id + secret token);
-//                                                  409 when the name belongs to another player
+//                                                  409 when the name belongs to another player,
+//                                                  422 when the name is offensive, 429 { wait } once
+//                                                  that has happened too often: locked out for `wait` ms
 //   DELETE /api/score/<id>                         admin only: header "Authorization: Bearer <ADMIN_KEY>"
 //   POST   /api/event                              count one anonymous usage event: { name }
 //   GET    /api/stats?days=30                      admin only: the usage counts per day
+
+import { isProfane } from "./profanity.js";
 
 const LEADERBOARD_SIZE = 100;
 const NICK_MAX_LENGTH = 16;
 // A name is released for others once its owner has not posted a score for this long.
 const NICK_HOLD_MS = 90 * 24 * 60 * 60 * 1000;
+
+// Offensive names: this many attempts within the window lock the player out for a while.
+const MAX_STRIKES = 3;
+const STRIKE_WINDOW_MS = 10 * 60 * 1000;
+const LOCKOUT_MS = 5 * 60 * 1000;
 
 // Score fields a player can post: the name used in JSON -> the column in the `scores` table.
 const FIELDS = {
@@ -44,6 +53,17 @@ const UPSERT = `
   WHERE scores.token_hash = excluded.token_hash`;
 
 const RELEASE_STALE_NICK = "UPDATE scores SET nick = '' WHERE nick = ? COLLATE NOCASE AND id <> ? AND updated_at < ?";
+
+// Counts one offensive-name attempt. Parameters: who, now, start of the window, MAX_STRIKES and
+// the end of a new lockout. The right-hand sides all read the row as it was before the update.
+const ADD_STRIKE = `
+  INSERT INTO strikes (who, count, first_at, blocked_until) VALUES (?1, 1, ?2, 0)
+  ON CONFLICT(who) DO UPDATE SET
+    count = CASE WHEN blocked_until > ?2 THEN count WHEN first_at < ?3 THEN 1 WHEN count + 1 >= ?4 THEN 0 ELSE count + 1 END,
+    first_at = CASE WHEN first_at < ?3 THEN ?2 ELSE first_at END,
+    blocked_until = CASE WHEN blocked_until <= ?2 AND first_at >= ?3 AND count + 1 >= ?4 THEN ?5 ELSE blocked_until END
+  RETURNING blocked_until`;
+const DROP_OLD_STRIKES = "DELETE FROM strikes WHERE first_at < ? AND blocked_until < ?";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -116,13 +136,26 @@ async function getScores(request, env) {
   return json({ rows: [...rows.values()] });
 }
 
+/** Refuses an offensive name and counts the attempt. Too many in a row lock the player out. */
+async function rejectName(db, who, now) {
+  const windowStart = now - STRIKE_WINDOW_MS;
+  const [strike] = await db.batch([
+    db.prepare(ADD_STRIKE).bind(who, now, windowStart, MAX_STRIKES, now + LOCKOUT_MS),
+    db.prepare(DROP_OLD_STRIKES).bind(windowStart, now),
+  ]);
+  const wait = strike.results[0].blocked_until - now;
+  return wait > 0 ? json({ error: "locked out", wait }, 429) : error("name not allowed", 422);
+}
+
 async function postScore(request, env) {
   let body;
   try { body = await request.json(); } catch { return error("bad json", 400); }
   const score = parseScore(body);
   if (score.error) return error(score.error, 400);
   const values = Object.keys(FIELDS).map((key) => score.values[key]), now = Date.now(), { nick } = score.values;
-  const statements = [env.DB.prepare(UPSERT).bind(score.id, await sha256(score.token), ...values, now)];
+  const tokenHash = await sha256(score.token);
+  if (isProfane(nick)) return rejectName(env.DB, tokenHash, now);
+  const statements = [env.DB.prepare(UPSERT).bind(score.id, tokenHash, ...values, now)];
   if (nick) statements.unshift(env.DB.prepare(RELEASE_STALE_NICK).bind(nick, score.id, now - NICK_HOLD_MS));
   let results;
   try {

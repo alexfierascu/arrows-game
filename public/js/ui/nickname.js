@@ -1,6 +1,6 @@
 // Asks for a leaderboard name inside a result dialog, once: players who already have a name
 // never see it. The dialog's buttons only work once a name is entered and the server has
-// confirmed nobody else has it, so the question cannot be skipped.
+// accepted it (it must be free and not offensive), so the question cannot be skipped.
 
 import { $, $$ } from '../dom.js';
 import { player } from '../player.js';
@@ -36,10 +36,11 @@ export function armNickField() {
     checking = true;
     update();
     setMessage(t('nick.checking'), false);
-    confirmed = await claimNick(input.value);
+    const refused = await claimNick(input.value);
+    confirmed = !refused;
     checking = false;
     if (confirmed) { button.disabled = false; button.click(); return; }
-    setMessage(t('nick.taken'), true);
+    setMessage(t(refused), true);
     for (const b of buttons) b.disabled = true; // until the name is edited
   }
 
