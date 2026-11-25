@@ -1,21 +1,30 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "arrows-escape",
-  "main": "./src/worker.js",
-  "compatibility_date": "2025-09-01",
-  "assets": {
-    "directory": "./public",
-    "binding": "ASSETS",
-    "run_worker_first": ["/api/*"]
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "arrows-escape",
-      // Paste the database_id printed by: npx wrangler d1 create arrows-escape
-      "database_id": "REPLACE_WITH_YOUR_DATABASE_ID",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "observability": { "enabled": true }
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "arrows-escape",
+	"main": "./src/worker.js",
+	"compatibility_date": "2025-09-01",
+	"assets": {
+		"directory": "./public",
+		"binding": "ASSETS",
+		"run_worker_first": [
+			"/api/*"
+		]
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "arrows-escape",
+			"database_id": "3da07fef-f298-4f0a-842b-18c910f7c93d",
+			"migrations_dir": "migrations"
+		},
+		{
+			"binding": "arrows_escape",
+			"database_name": "arrows-escape",
+			"database_id": "3da07fef-f298-4f0a-842b-18c910f7c93d",
+			"remote": true
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
 }
