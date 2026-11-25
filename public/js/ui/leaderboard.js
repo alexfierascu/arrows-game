@@ -7,6 +7,12 @@ import { weekInfo } from '../week.js';
 import { today, clock, num, duration } from '../format.js';
 import { registerScreen, currentScreen } from '../router.js';
 import { t } from '../i18n.js';
+import { ico } from '../icons.js';
+import { avatarOf, avatarHtml } from '../avatars.js';
+import { friends, isFriend, addFriend, removeFriend } from '../friends.js';
+import { track } from '../analytics.js';
+import { modal } from './modal.js';
+import { openAvatarPicker } from './avatar-picker.js';
 
 const POLL_MS = 20000;
 export const NICK_MAX_LENGTH = 16;
@@ -34,6 +40,7 @@ let canWrite = true;      // false once the server says this id belongs to anoth
 let rows = [];            // last rows fetched
 let loadState = 'off';    // off | loading | ok | stale | err
 let tab = 'daily';
+let friendsOnly = false;  // show only the player and their friends
 let syncing = false, syncAgain = false, pollTimer = 0;
 
 // ---------- tabs ----------
@@ -68,7 +75,7 @@ const HTTP_FORBIDDEN = 403, HTTP_NAME_TAKEN = 409;
 async function postScores(nick) {
   const wk = weekInfo();
   const body = {
-    id: playerId, token, nick,
+    id: playerId, token, nick, avatar: player.av,
     total: totalScore(), stars: totalStars(), cleared: clearedCount(), bosses: bossesBeaten(),
     dDate: player.daily.d || '', dScore: player.daily.score || 0, dTime: player.daily.time || 0,
     eKey: wk.key, eScore: eventScore(wk.key),
@@ -96,7 +103,10 @@ export async function sync() {
 
 async function fetchBoard() {
   try {
-    const res = await fetch('/api/scores?d=' + encodeURIComponent(today()) + '&e=' + encodeURIComponent(weekInfo().key), { cache: 'no-store' });
+    // Friends are asked for by name, so they are listed even when they are outside the top lists.
+    const query = new URLSearchParams({ d: today(), e: weekInfo().key });
+    for (const name of friends()) query.append('f', name);
+    const res = await fetch('/api/scores?' + query, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     rows = Array.isArray(data.rows) ? data.rows : [];
@@ -109,15 +119,24 @@ async function fetchBoard() {
 
 // ---------- rendering ----------
 
+const STAR_ICON = '<path d="M12 3l2.7 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17.2l-5.6 3.1 1.2-6.3L3 9.6l6.3-.8z"/>';
+
+/** The star that adds or removes a named player as a friend. Not shown on the player's own row. */
+function friendButton(r, mine) {
+  if (mine || !r.nick) return '';
+  const on = isFriend(r.nick);
+  return `<button class="fr ${on ? 'on' : ''}" data-friend="${esc(r.nick)}" aria-pressed="${on}" aria-label="${t(on ? 'friend.remove' : 'friend.add')}">${ico(STAR_ICON)}</button>`;
+}
+
 function rowHtml(r, rank, format = num) {
   const mine = r.id === playerId, name = r.nick || t('board.player', { id: String(r.id).slice(0, 4).toUpperCase() });
-  return `<div class="row ${mine ? 'me' : ''} ${rank <= 3 ? 'g' + rank : ''}"><span class="rk">${rank}</span><span class="nm">${esc(name)}${mine ? ' ' + t('you') : ''}</span><small style="color:var(--mute)">${esc(r.sub)}</small><span class="vl">${format(r.value)}</span></div>`;
+  return `<div class="row ${mine ? 'me' : ''} ${rank <= 3 ? 'g' + rank : ''}"><span class="rk">${rank}</span>${avatarHtml(avatarOf(r.avatar, r.id))}<span class="nm">${esc(name)}${mine ? ' ' + t('you') : ''}</span><small style="color:var(--mute)">${esc(r.sub)}</small><span class="vl">${format(r.value)}</span>${friendButton(r, mine)}</div>`;
 }
 
 function emptyText(view) {
   if (loadState === 'loading') return t('board.loading');
   if (loadState === 'err') return t('board.error');
-  return t(view.empty || 'board.empty');
+  return t(friendsOnly && !friends().length ? 'friends.empty' : view.empty || 'board.empty');
 }
 
 function noteText() {
@@ -129,7 +148,8 @@ function noteText() {
 function renderBoard() {
   if (currentScreen() !== 'board') return;
   const view = TABS[tab], wk = weekInfo();
-  const list = rows.filter(r => view.includes(r, wk))
+  const shown = r => !friendsOnly || r.id === playerId || isFriend(r.nick);
+  const list = rows.filter(r => view.includes(r, wk) && shown(r))
     .map(r => ({ ...r, value: view.value(r), sub: view.sub ? view.sub(r) : '' }))
     .sort(view.order || byValue)
     .slice(0, LIST_SIZE);
@@ -137,6 +157,10 @@ function renderBoard() {
     ? list.map((r, i) => rowHtml(r, i + 1, view.format)).join('')
     : `<div class="card note" style="margin:0">${emptyText(view)}</div>`;
   $('#babout').textContent = view.about(wk);
+  $('#friendsOnly').classList.toggle('on', friendsOnly);
+  $('#friendsOnly').setAttribute('aria-pressed', friendsOnly);
+  $('#friendAdd').hidden = !friendsOnly;
+  $('#avBtn').innerHTML = avatarHtml(myAvatar());
   $('#bnote').textContent = noteText();
 }
 
@@ -153,6 +177,62 @@ function openBoard() {
   renderBoard();
 }
 
+// ---------- avatar and friends ----------
+
+/** The player's avatar: their choice, or the one derived from their id until they choose. */
+export const myAvatar = () => avatarOf(player.av, playerId);
+
+function pickAvatar() {
+  openAvatarPicker(myAvatar(), code => {
+    player.av = code;
+    persist();
+    sync();
+    renderBoard();
+  });
+}
+
+/** Looks a player up by name on the server. Resolves to their row, or null. */
+async function findPlayer(name) {
+  const wanted = name.trim().toLowerCase();
+  if (!wanted) return null;
+  try {
+    const res = await fetch('/api/scores?' + new URLSearchParams({ f: name.trim() }), { cache: 'no-store' });
+    const data = await res.json();
+    return data.rows.find(r => r.nick && r.nick.toLowerCase() === wanted) || null;
+  } catch { return null; }
+}
+
+/** Adds a friend by name if such a player exists. Resolves to the name as they spell it, or null. */
+async function befriend(name) {
+  const found = await findPlayer(name);
+  if (!found || found.id === playerId || !addFriend(found.nick)) return null;
+  track('friend_added');
+  return found.nick;
+}
+
+async function addFriendFromForm() {
+  const input = $('#friendName'), name = await befriend(input.value);
+  $('#bnote').textContent = name ? t('friend.added', { name }) : t('friend.missing');
+  if (!name) return;
+  input.value = '';
+  fetchBoard();
+}
+
+function toggleFriend(name) {
+  if (isFriend(name)) removeFriend(name);
+  else if (addFriend(name)) track('friend_added');
+  renderBoard();
+}
+
+/** A link shared by another player (?friend=Name) makes them a friend when the game opens. */
+async function acceptInvite() {
+  const name = new URLSearchParams(location.search).get('friend');
+  if (!name) return;
+  history.replaceState(null, '', location.pathname);
+  const added = await befriend(name);
+  if (added) modal(`<h2>${t('friends')}</h2><p>${esc(t('friend.added', { name: added }))}</p><div class="acts"><button class="btn main" data-act="close">${t('ok')}</button></div>`);
+}
+
 // Counted in characters, not UTF-16 units, so an emoji at the limit is never cut in half.
 export const cleanNick = name => [...String(name).trim()].slice(0, NICK_MAX_LENGTH).join('').trim();
 
@@ -163,6 +243,7 @@ export const cleanNick = name => [...String(name).trim()].slice(0, NICK_MAX_LENG
 export async function claimNick(name) {
   const nick = cleanNick(name);
   if (playerId && token && canWrite && await postScores(nick) === HTTP_NAME_TAKEN) return false;
+  if (nick && !player.nick) track('name_set');
   player.nick = nick;
   persist();
   if (currentScreen() === 'board') fetchBoard();
@@ -182,6 +263,11 @@ export function initLeaderboard() {
     renderBoard();
   });
   $('#nickSave').onclick = saveNick;
+  $('#avBtn').onclick = pickAvatar;
+  $('#friendsOnly').onclick = () => { friendsOnly = !friendsOnly; renderBoard(); };
+  $('#friendAddBtn').onclick = addFriendFromForm;
+  onDataClick('#rows', 'friend', toggleFriend);
+  acceptInvite();
   // Returning players: make sure the server has their latest scores.
   if (totalScore() > 0 || player.daily.d || eventScore(weekInfo().key)) sync();
 }

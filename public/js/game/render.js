@@ -7,6 +7,7 @@ import { view, toScreen, resize, fit } from './view.js';
 import { pointAt, canLeave } from './arrows.js';
 import { requestFrame } from './frame.js';
 import { cursorArrow } from './keyboard.js';
+import { activeSkin } from '../skins.js';
 
 const canvas = $('#cv'), ctx = canvas.getContext('2d');
 const FULL_CIRCLE = Math.PI * 2;
@@ -23,6 +24,9 @@ function readTheme() {
     probe.style.color = 'var(--' + name + ')';
     theme[name] = getComputedStyle(probe).color;
   }
+  // A dark page has dark paper: add up its red, green and blue.
+  const [r, g, b] = (theme.paper.match(/[\d.]+/g) || [255, 255, 255]).map(Number);
+  theme.dark = r + g + b < 380;
   probe.remove();
   requestFrame();
 }
@@ -93,10 +97,11 @@ function drawCursor(lineWidth) {
 
 /** Arrows are batched by look, so each look is stroked once. Returns true if still animating. */
 function drawArrows(colours, now) {
-  const lineWidth = Math.max(1.4, view.scale * .14);
+  const skin = activeSkin(), onDark = (game.cfg && game.cfg.dark) || theme.dark;
+  const lineWidth = Math.max(1.4, view.scale * .14) * (skin.width || 1);
   const radar = now < game.radarUntil, blinkOn = Math.floor(now / 240) % 2;
   const looks = {
-    ink: { colour: colours.ink },
+    ink: { colour: skin.ink ? skin.ink[onDark ? 1 : 0] : colours.ink }, // only plain arrows wear the skin
     red: { colour: RED },
     radar: { colour: HIGHLIGHT },
     ice: { colour: ICE, bold: true, core: colours.paper },

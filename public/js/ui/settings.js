@@ -10,7 +10,7 @@ import { openHelp } from './help.js';
 import { modal, closeModal } from './modal.js';
 
 // Each switch flips a boolean of the same name in the save data.
-const SWITCHES = [['snd', 'sound'], ['hap', 'vibration'], ['rm', 'motion']];
+const SWITCHES = [['snd', 'sound'], ['hap', 'vibration'], ['rm', 'motion'], ['stats', 'usage.stats']];
 
 const switchHtml = ([key, label]) =>
   `<div class="set"><span>${t(label)}</span><button class="sw ${player[key] ? 'on' : ''}" data-switch="${key}" aria-label="${t(label)}"></button></div>`;

@@ -67,3 +67,5 @@ export const CONTINUE_COST=50;
 export const BOSS_REWARD=150;
 export const BADGE_REWARD=25;
 export const GIFT_COINS=30;
+export const STREAK_COINS=10;        // per day of daily streak, from the second day on
+export const STREAK_COINS_DAYS=7;    // the streak bonus stops growing after this many days

@@ -2,7 +2,7 @@
 
 import { CONTINUE_COST, RUSH_BOARD_BONUS } from '../content.js';
 import { esc } from '../dom.js';
-import { player, persist } from '../player.js';
+import { player, persist, totalStars } from '../player.js';
 import { addCoins, spendCoins } from '../economy.js';
 import { awardNewBadges, badgeName } from '../badges.js';
 import { recordWin, recordRush } from '../progress.js';
@@ -17,12 +17,16 @@ import { modal } from '../ui/modal.js';
 import { previewLevel, goalsHtml } from '../ui/preview.js';
 import { sync } from '../ui/leaderboard.js';
 import { nickFieldHtml, armNickField } from '../ui/nickname.js';
+import { shareButtonHtml, armShareButton } from '../ui/share.js';
+import { trackWeek } from '../weekly.js';
+import { track } from '../analytics.js';
 import { game } from './state.js';
 import { loadBoard, restartGame, startRush, exitGame } from './session.js';
 import { renderHud, toast } from './hud.js';
 
 const CONTINUE_SECONDS = 30;
 const WIN_TITLES = ['', 'win.1', 'win.2', 'win.3']; // text keys, by stars earned
+const WIN_EVENTS = { level: 'win', daily: 'daily_win', event: 'event_win' }; // usage counts
 // Short pauses so the last arrow is seen leaving before the dialog covers it.
 const LOSE_DELAY_MS = 300, NEXT_BOARD_DELAY_MS = 350, WIN_DELAY_MS = 250;
 
@@ -80,8 +84,11 @@ function win() {
   const timeBonus = Math.floor(timeLeft) * 5, heartBonus = hearts * 50, flawlessBonus = flawless ? 200 : 0, bossBonus = boss ? 500 : 0;
   const final = score + timeBonus + heartBonus + flawlessBonus + bossBonus;
 
+  const starsBefore = totalStars(), firstWin = player.st.cleared === 0 && cfg.kind === 'level';
   const { coins, isNew, extra } = recordWin(cfg, { final, stars: earned, used, timeLeft, heartsLost, bestCombo, goldCleared });
+  trackWeek({ stars: totalStars() - starsBefore, coins, score: final, daily: cfg.kind === 'daily' });
   const badges = payOut(coins), next = nextCfg(cfg);
+  track(firstWin ? 'first_win' : WIN_EVENTS[cfg.kind]);
 
   const rows = [
     [t('row.arrows', { n: bestCombo }), num(score)],
@@ -95,23 +102,27 @@ function win() {
   ${goalsHtml(cfg, [true, flawless, used <= cfg.par])}
   <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`${t('total')} ${newBest(isNew)}`, num(final)], 'tot')}</table>
   <div class="gain"><span>${COIN}+${coins}${coinMultiplier() > 1 ? ' ' + t('weekend.x2') : ''}</span>${[...extra, ...badges.map(badgeName)].map(rewardLine).join('')}</div>
-  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn" data-act="again">${t('replay')}</button>${next ? `<button class="btn main" data-act="next">${t('next')}</button>` : ''}</div>`,
+  ${shareButtonHtml()}${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn" data-act="again">${t('replay')}</button>${next ? `<button class="btn main" data-act="next">${t('next')}</button>` : ''}</div>`,
   { back: exitGame, again: restartGame, next: () => previewLevel(next) });
   armNickField();
+  armShareButton(cfg.resultLabel, final);
 }
 
 function endRush() {
   const { cfg, score, rushBoards, rushArrows, bestCombo } = game;
   game.over = true;
   const { coins, isNew } = recordRush(cfg, { score, boards: rushBoards, bestCombo });
+  trackWeek({ coins, score });
+  track('rush_end');
   const badges = payOut(coins);
   const rows = [[t('rush.row.boards'), rushBoards], [t('rush.row.arrows'), rushArrows], [t('rush.row.combo'), '×' + bestCombo]];
   modal(`<span class="kick" style="--c:${cfg.col}">${cfg.title}</span><h2>${t('rush.over')}</h2>
   <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`${t('score')} ${newBest(isNew)}`, num(score)], 'tot')}</table>
   <div class="gain"><span>${COIN}+${coins}</span>${badges.map(b => rewardLine(badgeName(b))).join('')}</div>
-  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn main" data-act="again">${t('run.again')}</button></div>`,
+  ${shareButtonHtml()}${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn main" data-act="again">${t('run.again')}</button></div>`,
   { back: () => show('event'), again: () => startRush() });
   armNickField();
+  armShareButton(cfg.title, score);
 }
 
 /** Resumes a lost game: more time or one heart, once per game. */
@@ -125,6 +136,7 @@ function continueGame(why) {
 }
 
 function showLose(why) {
+  track('lose');
   const { boss, total, left, continued } = game, outOfTime = why === 'time';
   const picture = boss ? portrait(boss) : outOfTime ? ico(CLOCK, 'i big') : heart('big');
   const price = `<span class="price">${COIN}${CONTINUE_COST}</span>`;

@@ -7,6 +7,7 @@ import { build, rushCfg } from '../levels.js';
 import { weekInfo } from '../week.js';
 import { show } from '../router.js';
 import { t } from '../i18n.js';
+import { track } from '../analytics.js';
 import { game, resetRun } from './state.js';
 import { arrowWeight } from './arrows.js';
 import { resizeBoard, focusBoard } from './render.js';
@@ -54,6 +55,7 @@ export function startGame(cfg) {
   resetRun();
   player.st.plays++;
   persist();
+  track('game_start');
   show('game'); // before loading: the canvas can only be measured while visible
   loadBoard(cfg);
   focusBoard();

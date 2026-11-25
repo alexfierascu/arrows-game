@@ -5,6 +5,7 @@ import { MAX_COMBO, RUSH_BUMP_PENALTY } from '../content.js';
 import { player, persist } from '../player.js';
 import { sfx, vibrate } from '../feedback.js';
 import { t } from '../i18n.js';
+import { track } from '../analytics.js';
 import { game, comboActive } from './state.js';
 import { view } from './view.js';
 import { rayInfo, extendedPath, headOnScreen, arrowWeight } from './arrows.js';
@@ -35,7 +36,7 @@ export function launch(a) {
   const runway = Math.ceil(game.W + game.H + a.pts.length + (view.width + view.height) / view.scale + 4);
   a.state = 'exit';
   removeFromBoard(a);
-  if (game.tutorial) { game.tutorial = false; game.radarUntil = 0; } // lesson learned
+  if (game.tutorial) { game.tutorial = false; game.radarUntil = 0; track('first_move'); } // lesson learned
   a.ext = extendedPath(a, runway);
   a.slide = 0;
   game.combo = comboActive(now) ? Math.min(MAX_COMBO, game.combo + 1) : 1;

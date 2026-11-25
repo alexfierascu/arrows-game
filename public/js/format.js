@@ -20,3 +20,9 @@ export function duration(ms) {
 /** Local date as YYYY-MM-DD. */
 export const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 export const today = () => ymd(new Date());
+
+/** Yesterday's local date. Built from calendar fields, so clock changes cannot skip a day. */
+export function yesterday() {
+  const now = new Date();
+  return ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+}

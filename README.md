@@ -13,7 +13,7 @@ browser loads `public/js/main.js` and follows the imports.
 public/index.html          markup for every screen
 public/styles.css          all styling
 public/js/                 the game, as ES modules (see "Code map" below)
-src/worker.js              API: GET /api/scores, POST /api/score, DELETE /api/score/:id (admin)
+src/worker.js              API: scores, usage counts and admin routes (listed at the top of the file)
 migrations/                D1 schema, one numbered file per change
 wrangler.jsonc             Worker + D1 configuration
 ```
@@ -77,9 +77,11 @@ Each file in `public/js/` has one job, and there are no circular imports.
 | `i18n.js`, `lang/*.js` | Languages: one file of texts per language, and the `t()` lookup the rest of the code uses. |
 | `rng.js`, `grid.js`, `generator.js` | Seeded board generator. Every generated board is solvable. |
 | `levels.js` | Turns a level number, the date or an event stage into a board config. |
-| `player.js`, `progress.js`, `badges.js`, `economy.js` | Save data (localStorage), recording results, badges and coins. |
+| `player.js`, `progress.js`, `badges.js`, `economy.js` | Save data (localStorage), recording results (including the daily streak), badges and coins. |
+| `weekly.js`, `skins.js`, `avatars.js`, `friends.js` | This week's numbers for the recap, arrow skins, avatars and the friends list. |
+| `analytics.js` | Anonymous usage counts (see "Usage statistics"). |
 | `week.js`, `format.js`, `icons.js`, `dom.js`, `feedback.js` | Weekly calendar, formatting, SVG snippets, DOM helpers, sound and vibration. |
-| `router.js`, `ui/*.js` | Screen switching and one file per screen or dialog (home, map, event, shop, badges, settings, leaderboard, level preview, how to play, language menu, modal). |
+| `router.js`, `ui/*.js` | Screen switching and one file per screen or dialog (home, map, event, shop, badges, settings, leaderboard, level preview, how to play, language menu, avatar picker, weekly recap, sharing, modal). |
 | `game/*.js` | The game screen: shared state (`state.js`), tap rules, bosses, superpowers, clock, animations, canvas rendering, pointer and keyboard input, and win/lose handling (`outcome.js`). |
 | `main.js` | Entry point: starts every module. |
 
@@ -88,8 +90,33 @@ Common changes:
   starting count to `DEFAULTS.pw` in `player.js`, and its name and description to the language files.
 - New boss attack: add it to `ATTACKS` in `content.js` and to `EFFECTS` in `game/bosses.js`.
 - New weekly event: add it to `EVENTS` in `content.js`. Its `mod` values feed `stageCfg` in `levels.js`.
+- New skin: add an entry to `SKINS` in `skins.js` and its name (`skin.<id>`) to the language files.
 - New badge: add an entry to `BADGES` in `badges.js` and `badge.<id>.name` / `badge.<id>.desc` to the
   language files.
+
+## Friends, sharing and avatars
+- Friends are a list of player names kept in the player's browser. Names are unique, so a name is
+  enough; friendship is one-sided, like following. The leaderboard has a Friends filter, a star on
+  each row and an add-by-name field. Friends are fetched by name, so they show even outside the top 100.
+- The Share button on a result uses the phone's share sheet, or copies the text where there is none.
+  The shared link is `https://<your-url>/?friend=<name>`: opening it adds that player as a friend.
+- An avatar is an icon on a coloured disc, stored as one number in the `avatar` column. Players who
+  never picked one get a stable avatar derived from their id.
+
+## Usage statistics
+The game counts how often a few things happen (visits, games started, first move, wins, losses,
+shares and so on). Each count is one row per day and event name in the `events` table: no player id,
+no cookie, no name. Players can switch it off in Settings, and nothing is sent when the browser asks
+not to be tracked. The event names are listed in `EVENT_NAMES` in `src/worker.js`.
+
+```bash
+# the last 30 days, straight from the database
+npx wrangler d1 execute arrows-game --remote --command "SELECT day, name, count FROM events ORDER BY day DESC, name LIMIT 300"
+# or through the API, with the admin key
+curl "https://<your-url>/api/stats?days=30" -H "Authorization: Bearer <ADMIN_KEY>"
+```
+Useful ratios: `first_move / new_player` (did new players understand what to do), `first_win /
+new_player` (did they finish level 1), `daily_win / visit` (is the daily challenge found).
 
 ## Accessibility
 - Keyboard: every menu is reachable with Tab. On the board, the arrow keys move a highlight between
@@ -97,6 +124,8 @@ Common changes:
 - Dialogs take the keyboard focus when they open and give it back when they close.
 - Settings has a "Reduce motion" switch; the system-wide reduced-motion preference is also respected
   (`motion.js`).
+- Phones held sideways get their own layout: the board fills the height, with the clock and
+  superpowers beside it.
 - In-game messages are announced to screen readers. The board itself is drawn on a canvas, so its
   arrows are not individually described.
 

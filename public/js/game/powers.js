@@ -8,6 +8,7 @@ import { sample } from '../rng.js';
 import { sfx } from '../feedback.js';
 import { ico, COIN } from '../icons.js';
 import { t } from '../i18n.js';
+import { track } from '../analytics.js';
 import { modal } from '../ui/modal.js';
 import { game } from './state.js';
 import { canLeave } from './arrows.js';
@@ -78,6 +79,7 @@ function usePower(id) {
   if (!EFFECTS[id]()) return;
   player.pw[id]--;
   player.st.powers++;
+  track('power_used');
   persist();
   sfx('power');
   renderPowers();

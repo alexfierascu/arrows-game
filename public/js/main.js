@@ -3,6 +3,9 @@
 
 import { initLanguage } from './i18n.js';
 import { applyMotionSetting } from './motion.js';
+import { trackVisit } from './analytics.js';
+import { rollWeek } from './weekly.js';
+import { showLastWeekRecap } from './ui/recap.js';
 import { initNavigation, show } from './router.js';
 import { initModal } from './ui/modal.js';
 import { initLanguageMenu } from './ui/language-menu.js';
@@ -27,3 +30,6 @@ initBadges();
 initLeaderboard();
 initGame();
 show('home');
+rollWeek();
+showLastWeekRecap();
+trackVisit();

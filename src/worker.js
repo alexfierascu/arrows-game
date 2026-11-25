@@ -3,6 +3,8 @@
 //   POST   /api/score                              create/update your own row (id + secret token);
 //                                                  409 when the name belongs to another player
 //   DELETE /api/score/<id>                         admin only: header "Authorization: Bearer <ADMIN_KEY>"
+//   POST   /api/event                              count one anonymous usage event: { name }
+//   GET    /api/stats?days=30                      admin only: the usage counts per day
 
 const LEADERBOARD_SIZE = 100;
 const NICK_MAX_LENGTH = 16;
@@ -12,10 +14,20 @@ const NICK_HOLD_MS = 90 * 24 * 60 * 60 * 1000;
 // Score fields a player can post: the name used in JSON -> the column in the `scores` table.
 const FIELDS = {
   nick: "nick", total: "total", stars: "stars", cleared: "cleared", bosses: "bosses",
-  dDate: "d_date", dScore: "d_score", dTime: "d_time", eKey: "e_key", eScore: "e_score",
+  dDate: "d_date", dScore: "d_score", dTime: "d_time", eKey: "e_key", eScore: "e_score", avatar: "avatar",
 };
 // Upper bounds a real game can reach; anything above is rejected.
-const LIMITS = { total: 2_000_000, stars: 180, cleared: 60, bosses: 5, dScore: 100_000, dTime: 3_600, eScore: 500_000 };
+const LIMITS = { total: 2_000_000, stars: 180, cleared: 60, bosses: 5, dScore: 100_000, dTime: 3_600, eScore: 500_000, avatar: 63 };
+// Fields that older copies of the game do not send yet.
+const OPTIONAL = { avatar: 0 };
+
+const MAX_FRIENDS = 50;
+// Usage events the game may report (see public/js/analytics.js). Anything else is ignored.
+const EVENT_NAMES = new Set([
+  "visit", "new_player", "game_start", "first_move", "first_win", "win", "lose", "daily_win", "event_win",
+  "rush_end", "power_used", "share", "friend_added", "skin_bought", "name_set",
+]);
+const MAX_STATS_DAYS = 365;
 
 const ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -66,7 +78,7 @@ function parseScore(body) {
     eKey: EVENT_RE.test(body.eKey || "") ? body.eKey : "",
   };
   for (const [key, max] of Object.entries(LIMITS)) {
-    const value = body[key];
+    const value = body[key] ?? OPTIONAL[key];
     if (!Number.isInteger(value) || value < 0 || value > max) return { error: "value out of range" };
     values[key] = value;
   }
@@ -80,10 +92,20 @@ async function top(db, column, filter = "", ...args) {
   return results;
 }
 
-/** One list per leaderboard tab, merged: a player in several lists appears once. */
+/** The rows of the named players (the caller's friends), whatever their rank. */
+async function byName(db, names) {
+  if (!names.length) return [];
+  const marks = names.map(() => "?").join(", ");
+  const { results } = await db.prepare(`${SELECT_ROWS} WHERE nick COLLATE NOCASE IN (${marks})`).bind(...names).all();
+  return results;
+}
+
+/** One list per leaderboard tab plus friends (`f=name`, repeatable), merged: nobody appears twice. */
 async function getScores(request, env) {
   const params = new URL(request.url).searchParams, day = params.get("d") || "", event = params.get("e") || "";
+  const friends = params.getAll("f").map((name) => name.trim()).filter(Boolean).slice(0, MAX_FRIENDS);
   const lists = await Promise.all([
+    byName(env.DB, friends),
     top(env.DB, "total"),
     top(env.DB, "stars"),
     DATE_RE.test(day) ? top(env.DB, "d_score", "d_date = ?", day) : [],
@@ -114,9 +136,28 @@ async function postScore(request, env) {
   return json({ ok: true });
 }
 
+const isAdmin = (request, env) => !!env.ADMIN_KEY && request.headers.get("authorization") === `Bearer ${env.ADMIN_KEY}`;
+const utcDay = (ms = Date.now()) => new Date(ms).toISOString().slice(0, 10);
+
+/** Adds one to today's count for an event. Unknown names are accepted and dropped. */
+async function postEvent(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return error("bad json", 400); }
+  if (body && EVENT_NAMES.has(body.name))
+    await env.DB.prepare("INSERT INTO events (day, name, count) VALUES (?, ?, 1) ON CONFLICT(day, name) DO UPDATE SET count = count + 1").bind(utcDay(), body.name).run();
+  return json({ ok: true });
+}
+
+async function getStats(request, env) {
+  if (!isAdmin(request, env)) return error("forbidden", 403);
+  const days = Math.min(MAX_STATS_DAYS, Math.max(1, Number(new URL(request.url).searchParams.get("days")) || 30));
+  const since = utcDay(Date.now() - (days - 1) * 86_400_000);
+  const { results } = await env.DB.prepare("SELECT day, name, count FROM events WHERE day >= ? ORDER BY day DESC, name").bind(since).all();
+  return json({ since, events: results });
+}
+
 async function deleteScore(request, env, id) {
-  const auth = request.headers.get("authorization") || "";
-  if (!env.ADMIN_KEY || auth !== `Bearer ${env.ADMIN_KEY}`) return error("forbidden", 403);
+  if (!isAdmin(request, env)) return error("forbidden", 403);
   await env.DB.prepare("DELETE FROM scores WHERE id = ?").bind(decodeURIComponent(id)).run();
   return json({ ok: true });
 }
@@ -126,6 +167,8 @@ const ROUTES = [
   { method: "GET", path: /^\/api\/scores$/, handler: getScores },
   { method: "POST", path: /^\/api\/score$/, handler: postScore },
   { method: "DELETE", path: /^\/api\/score\/([^/]+)$/, handler: deleteScore },
+  { method: "POST", path: /^\/api\/event$/, handler: postEvent },
+  { method: "GET", path: /^\/api\/stats$/, handler: getStats },
 ];
 
 export default {

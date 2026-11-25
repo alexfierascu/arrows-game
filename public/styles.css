@@ -206,6 +206,42 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 .stg .tx{flex:1}.stg .tx b{display:block;line-height:1.1}.stg .tx small{color:var(--mute);font-size:14px}
 .stg .st{display:flex}.stg .st svg{width:16px;height:16px}.stg>svg.i{width:22px;height:22px;color:var(--mute)}
 #rushGo{background:var(--c);border-color:var(--c);margin-top:4px}
+.nick[hidden]{display:none}
+.sect{font:800 18px/1.1 "Baloo 2",sans-serif;margin:14px 2px 2px}
+/* avatars */
+.av{width:30px;height:30px;flex:none;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center}
+.av svg{width:18px;height:18px;stroke-width:2.4}
+.av.big{width:84px;height:84px;margin:4px auto 12px}.av.big svg{width:46px;height:46px}
+.avbtn{flex:none;border:0;background:none;padding:0;cursor:pointer;border-radius:50%;display:grid;place-items:center}
+.avbtn .av{width:46px;height:46px}.avbtn .av svg{width:26px;height:26px}
+.opts{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-bottom:10px}
+.opt{aspect-ratio:1;border-radius:12px;border:2px solid var(--line);background:var(--paper);display:grid;place-items:center;padding:0;cursor:pointer}
+.opt svg{width:60%;height:60%}
+.opt.dot{background:var(--c);border-color:var(--paper);border-radius:50%}
+.opt.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+/* friends */
+.frbar{display:flex;margin:0 0 8px}
+.frbar .chip{min-height:38px;padding:6px 14px 4px}.frbar .chip svg{width:16px;height:16px}
+.row{gap:8px}
+.row .fr{border:0;background:none;color:var(--line);cursor:pointer;width:28px;height:32px;margin-right:-4px;padding:0;flex:none;display:grid;place-items:center;border-radius:8px}
+.row .fr svg{width:20px;height:20px}
+.row .fr.on{color:var(--gold)}.row .fr.on svg{fill:currentColor}
+/* share */
+.btn.share{width:100%;margin-top:12px;min-height:44px;font-size:16px}.btn.share svg{width:20px;height:20px}
+/* phones held sideways: the board takes the full height, everything else sits beside it */
+@media (orientation:landscape) and (max-height:520px){
+ #s-game:not([hidden]){display:grid;max-width:none;grid-template-columns:minmax(0,1fr) minmax(210px,30vw);grid-template-rows:auto auto auto auto minmax(0,1fr);column-gap:4px;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+ #s-game #stage{grid-column:1;grid-row:1/-1;margin:8px 0 8px 8px}
+ #s-game .ghud,#s-game .boss,#s-game .timer,#s-game .srow,#s-game .powers{grid-column:2}
+ #s-game .ghud{padding:8px 10px 2px}
+ #s-game .boss{margin:2px 8px}
+ #s-game .boss .bn{flex-wrap:wrap;gap:0 8px}
+ #s-game .powers{grid-template-columns:repeat(3,minmax(0,1fr));align-content:end;padding:6px 8px 8px}
+ #s-game .pw{min-height:46px}
+ .hero{padding-bottom:10px}.hero svg{width:72px;height:72px}.hero h1{font-size:34px}
+ .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.tile.ev{grid-column:1/-1}
+ .mcard{padding:16px 16px 14px}.portrait{width:64px;height:64px}.bigstars svg{width:40px;height:40px}
+}
 @media(max-width:360px){.pw{font-size:0}.pw svg.i{width:22px;height:22px}.levels{gap:8px}.hero svg{width:92px;height:92px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :root[data-reduce-motion] *{animation:none!important;transition:none!important}

@@ -2,7 +2,7 @@
 
 import { $ } from '../dom.js';
 import { POWERS, BOSSES, MAX_STARS, EVENT_STAGES, GIFT_COINS } from '../content.js';
-import { player, nextLevel, eventState, totalStars, bossesBeaten, powersOwned } from '../player.js';
+import { player, nextLevel, eventState, totalStars, bossesBeaten, powersOwned, currentStreak } from '../player.js';
 import { BADGES, badgeCount } from '../badges.js';
 import { addCoins } from '../economy.js';
 import { weekInfo, coinMultiplier } from '../week.js';
@@ -31,11 +31,12 @@ function renderEventTile(wk) {
 }
 
 function renderHome() {
-  const g = nextLevel(), wk = weekInfo();
+  const g = nextLevel(), wk = weekInfo(), streak = currentStreak();
   $('#playLbl').textContent = g ? levelCfg(g).title : t('daily.short');
   $('#wkBanner').hidden = !wk.weekend;
   renderEventTile(wk);
-  $('#dailySub').textContent = player.daily.d === today() ? t('home.daily.best', { n: num(player.daily.score) }) : t('home.daily.new');
+  const daily = player.daily.d === today() ? t('home.daily.best', { n: num(player.daily.score) }) : t('home.daily.new');
+  $('#dailySub').textContent = daily + (streak ? ' · ' + t('streak.short', { n: streak }) : '');
   $('#worldsSub').textContent = t('home.worlds', { stars: totalStars(), max: MAX_STARS, bosses: bossesBeaten(), total: BOSSES.length });
   $('#shopSub').textContent = t('home.bag', { n: powersOwned() });
   $('#badgeSub').textContent = t('home.badges', { n: badgeCount(), total: BADGES.length });

@@ -1,9 +1,9 @@
 // Records finished games in the save data and works out the coin rewards. No UI in here.
 
-import { POWERS, STAGE_REWARDS, RUSH_TIERS, EVENT_STAGES, BOSS_REWARD } from './content.js';
+import { POWERS, STAGE_REWARDS, RUSH_TIERS, EVENT_STAGES, BOSS_REWARD, STREAK_COINS, STREAK_COINS_DAYS } from './content.js';
 import { player, eventState, clearedCount } from './player.js';
 import { coinMultiplier } from './week.js';
-import { today } from './format.js';
+import { today, yesterday } from './format.js';
 import { t } from './i18n.js';
 
 const REPLAY_COINS = 5;
@@ -30,11 +30,25 @@ function recordLevel(cfg, { final, stars, used }) {
   return { coins, isNew: !old || final > old.b, extra };
 }
 
+/** Counts today towards the daily streak. Returns the bonus coins and notes them in `extra`. */
+function extendStreak(extra) {
+  const streak = player.streak;
+  streak.n = streak.last === yesterday() ? streak.n + 1 : 1;
+  streak.last = today();
+  streak.best = Math.max(streak.best, streak.n);
+  if (streak.n < 2) return 0;
+  extra.push(t('streak.bonus') + ' · ' + t('streak.short', { n: streak.n }));
+  return STREAK_COINS * Math.min(streak.n, STREAK_COINS_DAYS);
+}
+
 function recordDaily(cfg, { final, used }) {
   const firstToday = player.daily.d !== today(), isNew = firstToday || final > player.daily.score;
   if (isNew) player.daily = { d: today(), score: final, time: Math.round(used) };
   player.st.dailies++;
-  return { coins: firstToday ? 50 : REPLAY_COINS, isNew, extra: [] };
+  const extra = [];
+  let coins = firstToday ? 50 : REPLAY_COINS;
+  if (firstToday) coins += extendStreak(extra);
+  return { coins, isNew, extra };
 }
 
 function recordStage(cfg, { final, stars, goldCleared }) {

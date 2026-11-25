@@ -8,9 +8,14 @@
 //   ev      { weekKey: { stages: { n: { s, b } }, best, boards, claimed: [rush tier index] } }
 //   bosses  { worldNumber: date beaten }
 //   st      lifetime counters, ach { badgeId: date earned }
+//   streak  { n: days in a row with a daily win, last: date of the latest one, best }
+//   wk      this week's play (see weekly.js), prevWk the finished week awaiting its recap
+//   friends [player names], skin (active skin id), skins [owned ids], av (avatar number)
+//   stats   whether anonymous usage counts may be sent
 // The keys are part of the stored format: renaming one loses existing players' progress.
 
 import { TOTAL_LEVELS, LEVELS_PER_WORLD } from './content.js';
+import { today, yesterday } from './format.js';
 
 const STORAGE_KEY = 'arrows-escape-v2';
 const DEFAULTS = {
@@ -18,7 +23,10 @@ const DEFAULTS = {
   pw: { smash: 1, radar: 3, freeze: 1, shield: 2, magnet: 1, heart: 1 },
   lv: {}, daily: { d: '', score: 0, time: 0 }, gift: '', ev: {}, bosses: {},
   st: { cleared: 0, flawless: 0, bestCombo: 0, speed: 0, dailies: 0, powers: 0, arrows: 0, bumps: 0, plays: 0, events: 0, rushBest: 0 },
-  ach: {}, snd: true, hap: true, rm: false,
+  ach: {}, snd: true, hap: true, rm: false, stats: true,
+  streak: { n: 0, last: '', best: 0 },
+  wk: { id: 0, wins: 0, stars: 0, coins: 0, best: 0, dailies: 0 }, prevWk: null,
+  friends: [], skin: 'classic', skins: ['classic'], av: 0,
 };
 const fresh = () => JSON.parse(JSON.stringify(DEFAULTS));
 
@@ -43,11 +51,11 @@ export function persist() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(player)); } catch { /* storage blocked */ }
 }
 
-/** Wipes all progress but keeps the player name. */
+/** Wipes all progress but keeps who the player is: name, avatar and friends. */
 export function resetProgress() {
-  const { nick } = player;
+  const { nick, av, friends } = player;
   for (const key of Object.keys(player)) delete player[key];
-  Object.assign(player, fresh(), { nick });
+  Object.assign(player, fresh(), { nick, av, friends });
   persist();
 }
 
@@ -60,6 +68,12 @@ export const bossesBeaten = () => Object.keys(player.bosses).length;
 export const powersOwned = () => sum(Object.values(player.pw), x => x);
 export const isLevelUnlocked = g => g === 1 || !!player.lv[g - 1];
 export const isWorldOpen = w => w === 1 || !!player.lv[(w - 1) * LEVELS_PER_WORLD];
+
+/** Days in a row with a daily win. Zero once a day has been missed. */
+export function currentStreak() {
+  const { n, last } = player.streak;
+  return last === today() || last === yesterday() ? n : 0;
+}
 
 /** First level not cleared yet, or 0 when the whole game is done. */
 export function nextLevel() {

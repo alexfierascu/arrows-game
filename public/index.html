@@ -57,9 +57,12 @@
  <div class="top"><button class="ib" data-go="home" data-i18n-label="back" aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2 data-i18n="tile.board">Leaderboard</h2></div>
  <div class="tabs" id="btabs"><button class="tab on" data-t="daily" data-i18n="tab.today">Today</button><button class="tab" data-t="event" id="evTab">Event</button><button class="tab" data-t="total" data-i18n="tab.alltime">All-time</button><button class="tab" data-t="stars" data-i18n="tab.stars">Stars</button></div>
  <div class="body">
-  <div class="nick"><input id="nick" maxlength="16" data-i18n-placeholder="nick.placeholder" placeholder="Your player name" data-i18n-label="nick.aria" aria-label="Player name"><button class="btn" id="nickSave" data-i18n="save">Save</button></div>
+  <div class="nick"><button class="avbtn" id="avBtn" type="button" data-i18n-label="avatar.pick" aria-label="Choose your avatar"></button><input id="nick" maxlength="16" data-i18n-placeholder="nick.placeholder" placeholder="Your player name" data-i18n-label="nick.aria" aria-label="Player name"><button class="btn" id="nickSave" data-i18n="save">Save</button></div>
   <p class="note nickpub" data-i18n="nick.public">Your name is shown to other players.</p>
-  <p class="note" id="babout"></p><div class="rows" id="rows"></div><p class="note" id="bnote"></p>
+  <p class="note" id="babout"></p>
+  <div class="frbar"><button class="chip" id="friendsOnly" type="button" style="--c:var(--ink)" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.7 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17.2l-5.6 3.1 1.2-6.3L3 9.6l6.3-.8z"/></svg><span data-i18n="friends">Friends</span></button></div>
+  <div class="nick" id="friendAdd" hidden><input id="friendName" maxlength="16" data-i18n-placeholder="friend.placeholder" placeholder="Friend’s player name" data-i18n-label="friend.placeholder" aria-label="Friend’s player name"><button class="btn" id="friendAddBtn" type="button" data-i18n="add">Add</button></div>
+  <div class="rows" id="rows"></div><p class="note" id="bnote"></p>
  </div>
 </section>
 
@@ -75,7 +78,7 @@
 
 <section class="scr" id="s-badges" hidden>
  <div class="top"><button class="ib" data-go="home" data-i18n-label="back" aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2 data-i18n="tile.badges">Badges and stats</h2></div>
- <div class="body"><div class="stats" id="stats"></div><div class="badges" id="badges"></div></div>
+ <div class="body"><div class="stats" id="stats"></div><div id="week"></div><h3 class="sect" data-i18n="tile.badges">Badges and stats</h3><div class="badges" id="badges"></div></div>
 </section>
 
 <div class="modal" id="modal"><div class="mcard" id="mcard" role="dialog" aria-modal="true" tabindex="-1"></div></div>
