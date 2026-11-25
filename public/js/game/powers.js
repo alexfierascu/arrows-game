@@ -7,6 +7,7 @@ import { buyPower } from '../economy.js';
 import { sample } from '../rng.js';
 import { sfx } from '../feedback.js';
 import { ico, COIN } from '../icons.js';
+import { t } from '../i18n.js';
 import { modal } from '../ui/modal.js';
 import { game } from './state.js';
 import { canLeave } from './arrows.js';
@@ -22,40 +23,40 @@ const MAGNET_ARROWS = 6, MAGNET_STAGGER_MS = 120;
 const EFFECTS = {
   smash() {
     game.smash = !game.smash;
-    toast(game.smash ? 'Tap any arrow to smash it' : 'Smash cancelled');
+    toast(game.smash ? t('toast.smash.on') : t('toast.smash.off'));
     renderPowers();
     return false;
   },
   radar() {
     game.radarUntil = performance.now() + RADAR_MS;
-    toast('Radar: blinking arrows can leave');
+    toast(t('toast.radar'));
     return true;
   },
   freeze() {
     game.frozen += FREEZE_SECONDS;
-    toast((game.boss ? 'Clock and boss' : 'Clock') + ' frozen for ' + FREEZE_SECONDS + ' seconds');
+    toast(t(game.boss ? 'toast.freeze.boss' : 'toast.freeze.clock', { n: FREEZE_SECONDS }));
     return true;
   },
   shield() {
-    if (game.shield) { toast('Shield is already up'); return false; }
+    if (game.shield) { toast(t('toast.shield.already')); return false; }
     game.shield = true;
-    toast('Shield up');
+    toast(t('toast.shield'));
     return true;
   },
   // Time Attack has no hearts, so a Heart buys time there.
   heart() {
     if (game.cfg.kind === 'rush') {
       game.timeLeft += RUSH_BOARD_BONUS;
-      toast('+' + RUSH_BOARD_BONUS + ' seconds');
+      toast(t('seconds.plus', { n: RUSH_BOARD_BONUS }));
       return true;
     }
-    if (game.hearts >= MAX_HEARTS) { toast('Hearts are full'); return false; }
+    if (game.hearts >= MAX_HEARTS) { toast(t('toast.hearts.full')); return false; }
     game.hearts++;
     return true;
   },
   magnet() {
     const free = game.arrows.filter(canLeave);
-    if (!free.length) { toast('Nothing can leave right now'); return false; }
+    if (!free.length) { toast(t('toast.magnet.none')); return false; }
     // One after another; an arrow that got blocked or cleared in the meantime is skipped.
     sample(free, MAGNET_ARROWS).forEach((a, i) =>
       setTimeout(() => { if (!game.over && canLeave(a)) launch(a); }, i * MAGNET_STAGGER_MS));
@@ -65,9 +66,9 @@ const EFFECTS = {
 
 function offerToBuy(power) {
   const affordable = player.coins >= power.price;
-  modal(`<div class="item" style="text-align:left"><div class="ic">${ico(power.d)}</div><div class="tx"><b>Out of ${power.name}</b><small>${power.desc}</small></div></div>
-  <p style="margin:14px 0 0">${affordable ? `Buy one for <b class="price">${COIN}${power.price}</b>?` : `You need ${power.price} coins and have ${player.coins}.`}</p>
-  <div class="acts"><button class="btn" data-act="close">${affordable ? 'Not now' : 'OK'}</button>${affordable ? '<button class="btn gold" data-act="buy">Buy</button>' : ''}</div>`,
+  modal(`<div class="item" style="text-align:left"><div class="ic">${ico(power.d)}</div><div class="tx"><b>${t('buy.out', { name: power.name })}</b><small>${power.desc}</small></div></div>
+  <p style="margin:14px 0 0">${affordable ? t('buy.ask', { price: `<b class="price">${COIN}${power.price}</b>` }) : t('buy.need', { price: power.price, coins: player.coins })}</p>
+  <div class="acts"><button class="btn" data-act="close">${affordable ? t('not.now') : t('ok')}</button>${affordable ? `<button class="btn gold" data-act="buy">${t('buy')}</button>` : ''}</div>`,
   { buy: () => { if (buyPower(power)) renderPowers(); } });
 }
 

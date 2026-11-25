@@ -4,13 +4,12 @@
 
 import { $, $$ } from '../dom.js';
 import { player } from '../player.js';
-import { NICK_MAX_LENGTH, NAME_TAKEN_TEXT, cleanNick, claimNick } from './leaderboard.js';
-
-const LABEL = 'Choose a name for the leaderboard';
+import { t } from '../i18n.js';
+import { NICK_MAX_LENGTH, cleanNick, claimNick } from './leaderboard.js';
 
 /** The name field for a dialog, or nothing when the player already has a name. */
 export const nickFieldHtml = () => (player.nick ? '' :
-  `<div class="nickask"><label for="askNick" id="askNickLabel">${LABEL}</label><input id="askNick" maxlength="${NICK_MAX_LENGTH}" placeholder="Your player name" autocomplete="off" autocapitalize="words" enterkeyhint="done"></div>`);
+  `<div class="nickask"><label for="askNick" id="askNickLabel">${t('nick.ask')}</label><input id="askNick" maxlength="${NICK_MAX_LENGTH}" placeholder="${t('nick.placeholder')}" autocomplete="off" autocapitalize="words" enterkeyhint="done"></div>`);
 
 /** Call right after opening a dialog that contains nickFieldHtml(). */
 export function armNickField() {
@@ -36,16 +35,16 @@ export function armNickField() {
     e.stopPropagation();
     checking = true;
     update();
-    setMessage('Checking the name…', false);
+    setMessage(t('nick.checking'), false);
     confirmed = await claimNick(input.value);
     checking = false;
     if (confirmed) { button.disabled = false; button.click(); return; }
-    setMessage(NAME_TAKEN_TEXT, true);
+    setMessage(t('nick.taken'), true);
     for (const b of buttons) b.disabled = true; // until the name is edited
   }
 
   for (const b of buttons) b.addEventListener('click', onButton);
-  input.addEventListener('input', () => { setMessage(LABEL, false); update(); });
+  input.addEventListener('input', () => { setMessage(t('nick.ask'), false); update(); });
   input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
   update();
 }

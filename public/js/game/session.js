@@ -6,6 +6,7 @@ import { player, persist } from '../player.js';
 import { build, rushCfg } from '../levels.js';
 import { weekInfo } from '../week.js';
 import { show } from '../router.js';
+import { t } from '../i18n.js';
 import { game, resetRun } from './state.js';
 import { arrowWeight } from './arrows.js';
 import { resizeBoard } from './render.js';
@@ -16,11 +17,11 @@ const BOSS_FIRST_ATTACK_DELAY = 2; // extra seconds before a boss's first attack
 
 /** A hint shown as the board opens, as [message, milliseconds], or null. */
 function openingTip(cfg) {
-  if (cfg.kind === 'level' && cfg.g === 1) return ['Tap an arrow to slide it out. Don’t let it hit another one!', 4200];
-  if (cfg.boss) return [cfg.boss.name + ' attacks every few seconds. Watch the bar up top.', 3800];
-  if (cfg.blackout) return ['Tap empty space to move your lamp.', 3500];
+  if (cfg.kind === 'level' && cfg.g === 1) return [t('tip.first'), 4200];
+  if (cfg.boss) return [t('tip.boss', { name: cfg.boss.name }), 3800];
+  if (cfg.blackout) return [t('tip.lamp'), 3500];
   const introducesIce = (cfg.kind === 'level' && cfg.g === FIRST_ICE_LEVEL) || cfg.kind === 'event';
-  if (introducesIce && build(cfg).iceCount) return ['Ice arrows need one tap to crack first.', 3500];
+  if (introducesIce && build(cfg).iceCount) return [t('tip.ice'), 3500];
   return null;
 }
 

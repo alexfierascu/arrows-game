@@ -4,6 +4,7 @@ import { POWERS, STAGE_REWARDS, RUSH_TIERS, EVENT_STAGES, BOSS_REWARD } from './
 import { player, eventState, clearedCount } from './player.js';
 import { coinMultiplier } from './week.js';
 import { today } from './format.js';
+import { t } from './i18n.js';
 
 const REPLAY_COINS = 5;
 
@@ -24,7 +25,7 @@ function recordLevel(cfg, { final, stars, used }) {
   if (cfg.boss && !player.bosses[cfg.w]) {
     player.bosses[cfg.w] = today();
     coins += BOSS_REWARD;
-    extra.push(cfg.boss.name + ' defeated');
+    extra.push(t('extra.defeated', { name: cfg.boss.name }));
   }
   return { coins, isNew: !old || final > old.b, extra };
 }
@@ -45,11 +46,11 @@ function recordStage(cfg, { final, stars, goldCleared }) {
     coins = reward.coins;
     if (reward.power) {
       player.pw[reward.power]++;
-      extra.push('+1 ' + POWERS.find(p => p.id === reward.power).name);
+      extra.push(t('extra.power', { name: POWERS.find(p => p.id === reward.power).name }));
     }
-    if (cfg.stage === EVENT_STAGES) { player.st.events++; extra.push('Event complete'); }
+    if (cfg.stage === EVENT_STAGES) { player.st.events++; extra.push(t('extra.event')); }
   }
-  if (cfg.ev.id === 'gold' && goldCleared) { coins += goldCleared * 2; extra.push(goldCleared + ' gold arrows'); }
+  if (cfg.ev.id === 'gold' && goldCleared) { coins += goldCleared * 2; extra.push(t('extra.gold', { n: goldCleared })); }
   return { coins, isNew: !old || final > old.b, extra };
 }
 

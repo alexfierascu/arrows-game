@@ -102,6 +102,9 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 .price{display:inline-flex;align-items:center;gap:4px}.price svg{width:18px;height:18px}
 .tabs{display:flex;gap:6px;padding:0 14px 10px}
 .tab{flex:1;min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--paper);font-weight:800;cursor:pointer;padding:6px 4px 3px}
+/* long words in some languages: shrink a little, then break rather than overflow */
+.tab{font-size:14px;line-height:1.1;overflow-wrap:anywhere;hyphens:auto}
+.badge b,.badge small,.stat small,.tile b,.pw{overflow-wrap:anywhere;hyphens:auto}
 .tab.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .rows{display:flex;flex-direction:column;gap:6px}
 .row{display:flex;align-items:center;gap:10px;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:8px 12px 6px}
@@ -156,6 +159,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 .set{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);text-align:left}
 .sw{width:56px;height:32px;border-radius:16px;border:0;background:var(--line);position:relative;cursor:pointer}
 .sw::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
+.sel{font:700 16px "Baloo 2",system-ui,sans-serif;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:6px 10px 4px;min-height:40px;max-width:60%}
 .sw.on{background:var(--ink)}.sw.on::after{left:28px}
 .banner{background:var(--gold);color:#161b3d;border-radius:14px;padding:9px 14px 6px;font-weight:800;margin-bottom:12px;display:flex;gap:8px;align-items:center}
 .banner[hidden]{display:none}.banner svg{width:22px;height:22px;flex:none}

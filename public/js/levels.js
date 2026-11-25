@@ -5,10 +5,11 @@
 // arrow), bias (how often arrows point at the near edge), ice / gold (share of special arrows),
 // sec (clock seconds per arrow), dark, and optionally boss and blackout.
 
-import { WORLDS, BOSSES, EVENTS, LEVELS_PER_WORLD, TOTAL_LEVELS, EVENT_STAGES } from './content.js';
+import { WORLDS, BOSSES, EVENTS, POWERS, LEVELS_PER_WORLD, TOTAL_LEVELS, EVENT_STAGES } from './content.js';
 import { generate } from './generator.js';
 import { mulberry32 } from './rng.js';
 import { today } from './format.js';
+import { t } from './i18n.js';
 
 const boardHeight = width => Math.round(width * 1.42);
 const count = flags => flags.filter(Boolean).length;
@@ -22,7 +23,7 @@ export function levelCfg(g) {
   const title = w + '-' + l;
   return {
     kind: 'level', g, w, world, boss, title, subtitle: world.name,
-    resultLabel: boss ? 'World ' + w + ' boss' : 'Level ' + title,
+    resultLabel: boss ? t('world.boss', { n: w }) : t('level.title', { id: title }),
     col: world.col, W, H: boardHeight(W), seed: g * 101 + 7,
     maxL: Math.min(14, 3 + Math.floor(g / 4)), bias: g < 6 ? .97 : g < 20 ? .9 : .82,
     ice: world.ice || 0, gold: boss ? .1 : 0, sec: world.sec + (boss ? .45 : 0), dark: !!world.dark,
@@ -35,7 +36,7 @@ export function dailyCfg() {
   let hash = 7;
   for (const ch of date) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
   return {
-    kind: 'daily', date, title: 'Daily', subtitle: 'Daily challenge', resultLabel: 'Daily challenge',
+    kind: 'daily', date, title: t('daily.short'), subtitle: t('tile.daily'), resultLabel: t('tile.daily'),
     col: '#d99a00', W: 20, H: boardHeight(20), seed: Math.abs(hash) % 100000 + 5000,
     maxL: 12, bias: .85, ice: .1, gold: .05, sec: 1.55, dark: false,
   };
@@ -45,8 +46,8 @@ export function dailyCfg() {
 export function stageCfg(wk, n) {
   const ev = wk.ev, W = 10 + n * 3, mod = ev.mod || {};
   return {
-    kind: 'event', ev, wk, stage: n, title: ev.name, subtitle: 'Stage ' + n + ' of ' + EVENT_STAGES,
-    resultLabel: ev.name + ' · stage ' + n,
+    kind: 'event', ev, wk, stage: n, title: ev.name, subtitle: t('stage.of', { n, total: EVENT_STAGES }),
+    resultLabel: t('event.stage', { event: ev.name, n }),
     col: ev.col, W, H: boardHeight(W), seed: wk.id * 1000 + EVENTS.indexOf(ev) * 50 + n,
     maxL: Math.min(13, 5 + n * 2), bias: .86,
     ice: mod.ice || 0, gold: mod.gold || 0, sec: mod.sec || 1.8, dark: !!mod.dark, blackout: !!mod.blackout,
@@ -57,10 +58,16 @@ export function stageCfg(wk, n) {
 export function rushCfg(wk, n) {
   const W = Math.min(18, 7 + Math.floor(n * 1.5));
   return {
-    kind: 'rush', ev: wk.ev, wk, stage: n, title: 'Time Attack', subtitle: 'Weekly event',
+    kind: 'rush', ev: wk.ev, wk, stage: n, title: wk.ev.name, subtitle: t('title.event'),
     col: wk.ev.col, W, H: boardHeight(W), seed: wk.id * 777 + n * 13,
     maxL: Math.min(10, 4 + n), bias: .9, ice: n > 4 ? .08 : 0, gold: .06, sec: 1, dark: false,
   };
+}
+
+/** An event stage reward ({ coins, power }) in words, e.g. "20 coins + Radar". */
+export function rewardLabel(reward) {
+  const power = POWERS.find(p => p.id === reward.power);
+  return t('coins', { n: reward.coins }) + (power ? ' + ' + power.name : '');
 }
 
 /** The board that follows `cfg` in its world or event, or null at the end (and for one-offs). */

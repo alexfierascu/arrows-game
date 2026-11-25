@@ -4,6 +4,7 @@
 import { MAX_COMBO, RUSH_BUMP_PENALTY } from '../content.js';
 import { player, persist } from '../player.js';
 import { sfx, vibrate } from '../feedback.js';
+import { t } from '../i18n.js';
 import { game, comboActive } from './state.js';
 import { view } from './view.js';
 import { rayInfo, extendedPath, headOnScreen, arrowWeight } from './arrows.js';
@@ -59,7 +60,7 @@ function bounce(a, { d, blocker }) {
 function crackIce(a) {
   a.ice = false;
   sfx('crack');
-  pop('Crack!', headOnScreen(a), '#1fb5d0');
+  pop(t('pop.crack'), headOnScreen(a), '#1fb5d0');
   requestFrame();
 }
 
@@ -72,7 +73,7 @@ function smashArrow(a) {
   a.ice = false;
   removeFromBoard(a);
   game.score += BASE_POINTS;
-  pop('Smash!', headOnScreen(a), '#d99a00');
+  pop(t('pop.smash'), headOnScreen(a), '#d99a00');
   animate({ kind: 'poof', a });
   sfx('power');
   renderPowers();
@@ -99,13 +100,13 @@ export function bump(anim) {
   if (game.shield) {
     game.shield = false;
     sfx('power');
-    toast('Shield took the hit');
+    toast(t('toast.shield.hit'));
   } else {
     player.st.bumps++;
     sfx('bump');
     if (game.cfg.kind === 'rush') {
       game.timeLeft = Math.max(0, game.timeLeft - RUSH_BUMP_PENALTY);
-      toast('−' + RUSH_BUMP_PENALTY + ' seconds');
+      toast(t('seconds.minus', { n: RUSH_BUMP_PENALTY }));
     } else {
       game.hearts--;
       game.heartsLost++;

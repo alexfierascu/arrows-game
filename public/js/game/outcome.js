@@ -4,7 +4,7 @@ import { CONTINUE_COST, RUSH_BOARD_BONUS } from '../content.js';
 import { esc } from '../dom.js';
 import { player, persist } from '../player.js';
 import { addCoins, spendCoins } from '../economy.js';
-import { awardNewBadges } from '../badges.js';
+import { awardNewBadges, badgeName } from '../badges.js';
 import { recordWin, recordRush } from '../progress.js';
 import { coinMultiplier } from '../week.js';
 import { rushCfg, nextCfg } from '../levels.js';
@@ -12,6 +12,7 @@ import { clock, num } from '../format.js';
 import { ico, heart, portrait, stars, COIN, CHECK, CLOCK } from '../icons.js';
 import { sfx } from '../feedback.js';
 import { show } from '../router.js';
+import { t } from '../i18n.js';
 import { modal } from '../ui/modal.js';
 import { previewLevel } from '../ui/preview.js';
 import { sync } from '../ui/leaderboard.js';
@@ -21,7 +22,7 @@ import { loadBoard, restartGame, startRush, exitGame } from './session.js';
 import { renderHud, toast } from './hud.js';
 
 const CONTINUE_SECONDS = 30;
-const WIN_TITLES = ['', 'Cleared!', 'Great run!', 'Perfect!']; // by stars earned
+const WIN_TITLES = ['', 'win.1', 'win.2', 'win.3']; // text keys, by stars earned
 // Short pauses so the last arrow is seen leaving before the dialog covers it.
 const LOSE_DELAY_MS = 300, NEXT_BOARD_DELAY_MS = 350, WIN_DELAY_MS = 250;
 
@@ -54,7 +55,7 @@ function nextRushBoard() {
   setTimeout(() => {
     if (game.over) return;
     loadBoard(next);
-    toast('+' + RUSH_BOARD_BONUS + ' seconds · board ' + (game.rushBoards + 1));
+    toast(t('toast.next.board', { n: RUSH_BOARD_BONUS, board: game.rushBoards + 1 }));
   }, NEXT_BOARD_DELAY_MS);
 }
 
@@ -69,7 +70,7 @@ function payOut(coins) {
 }
 
 const tableRow = ([label, value], cls = '') => `<tr${cls && ` class="${cls}"`}><td>${label}</td><td>${value}</td></tr>`;
-const newBest = isNew => (isNew ? '<span class="new">New best</span>' : '');
+const newBest = isNew => (isNew ? `<span class="new">${t('new.best')}</span>` : '');
 const rewardLine = text => `<span>${ico(CHECK)}${esc(text)}</span>`;
 
 function win() {
@@ -83,17 +84,17 @@ function win() {
   const badges = payOut(coins), next = nextCfg(cfg);
 
   const rows = [
-    [`Arrows and combos (best ×${bestCombo})`, num(score)],
-    [`Time left ${clock(timeLeft)}`, '+' + timeBonus],
-    [`Hearts left ${hearts}`, '+' + heartBonus],
-    flawlessBonus && ['Flawless', '+' + flawlessBonus],
-    bossBonus && ['Boss bonus', '+' + bossBonus],
+    [t('row.arrows', { n: bestCombo }), num(score)],
+    [t('row.time', { time: clock(timeLeft) }), '+' + timeBonus],
+    [t('row.hearts', { n: hearts }), '+' + heartBonus],
+    flawlessBonus && [t('row.flawless'), '+' + flawlessBonus],
+    bossBonus && [t('row.boss'), '+' + bossBonus],
   ].filter(Boolean);
   modal(`${boss ? portrait(boss) : ''}<span class="kick" style="--c:${cfg.col}">${cfg.resultLabel}</span>
-  <div class="bigstars">${stars(earned)}</div><h2>${boss ? 'Boss defeated!' : WIN_TITLES[earned]}</h2>
-  <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`Total ${newBest(isNew)}`, num(final)], 'tot')}</table>
-  <div class="gain"><span>${COIN}+${coins}${coinMultiplier() > 1 ? ' (weekend ×2)' : ''}</span>${[...extra, ...badges.map(b => b.name)].map(rewardLine).join('')}</div>
-  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">Back</button><button class="btn" data-act="again">Replay</button>${next ? '<button class="btn main" data-act="next">Next</button>' : ''}</div>`,
+  <div class="bigstars">${stars(earned)}</div><h2>${t(boss ? 'win.boss' : WIN_TITLES[earned])}</h2>
+  <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`${t('total')} ${newBest(isNew)}`, num(final)], 'tot')}</table>
+  <div class="gain"><span>${COIN}+${coins}${coinMultiplier() > 1 ? ' ' + t('weekend.x2') : ''}</span>${[...extra, ...badges.map(badgeName)].map(rewardLine).join('')}</div>
+  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn" data-act="again">${t('replay')}</button>${next ? `<button class="btn main" data-act="next">${t('next')}</button>` : ''}</div>`,
   { back: exitGame, again: restartGame, next: () => previewLevel(next) });
   armNickField();
 }
@@ -103,11 +104,11 @@ function endRush() {
   game.over = true;
   const { coins, isNew } = recordRush(cfg, { score, boards: rushBoards, bestCombo });
   const badges = payOut(coins);
-  const rows = [['Boards cleared', rushBoards], ['Arrows out', rushArrows], ['Best combo', '×' + bestCombo]];
-  modal(`<span class="kick" style="--c:${cfg.col}">Time Attack</span><h2>Time’s up!</h2>
-  <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`Score ${newBest(isNew)}`, num(score)], 'tot')}</table>
-  <div class="gain"><span>${COIN}+${coins}</span>${badges.map(b => rewardLine(b.name)).join('')}</div>
-  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">Back</button><button class="btn main" data-act="again">Run again</button></div>`,
+  const rows = [[t('rush.row.boards'), rushBoards], [t('rush.row.arrows'), rushArrows], [t('rush.row.combo'), '×' + bestCombo]];
+  modal(`<span class="kick" style="--c:${cfg.col}">${cfg.title}</span><h2>${t('rush.over')}</h2>
+  <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`${t('score')} ${newBest(isNew)}`, num(score)], 'tot')}</table>
+  <div class="gain"><span>${COIN}+${coins}</span>${badges.map(b => rewardLine(badgeName(b))).join('')}</div>
+  ${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn main" data-act="again">${t('run.again')}</button></div>`,
   { back: () => show('event'), again: () => startRush() });
   armNickField();
 }
@@ -125,11 +126,12 @@ function continueGame(why) {
 function showLose(why) {
   const { boss, total, left, continued } = game, outOfTime = why === 'time';
   const picture = boss ? portrait(boss) : outOfTime ? ico(CLOCK, 'i big') : heart('big');
+  const price = `<span class="price">${COIN}${CONTINUE_COST}</span>`;
   const offer = continued ? '' :
-    `<button class="btn gold" style="width:100%" data-act="continue" ${player.coins >= CONTINUE_COST ? '' : 'disabled'}>Keep going: ${outOfTime ? '+' + CONTINUE_SECONDS + ' seconds' : '+1 heart'} for <span class="price">${COIN}${CONTINUE_COST}</span></button>`;
+    `<button class="btn gold" style="width:100%" data-act="continue" ${player.coins >= CONTINUE_COST ? '' : 'disabled'}>${outOfTime ? t('continue.time', { n: CONTINUE_SECONDS, price }) : t('continue.heart', { price })}</button>`;
   modal(`${picture}
-  <h2>${outOfTime ? 'Out of time' : 'Out of hearts'}</h2><p>${boss ? boss.name + ' had ' + game.bossHP + ' health left. ' : ''}${total - left} of ${total} arrows cleared. Every board can be solved, so look for arrows with a clear runway.</p>
+  <h2>${t(outOfTime ? 'lose.time' : 'lose.hearts')}</h2><p>${boss ? t('lose.boss', { name: boss.name, n: game.bossHP }) + ' ' : ''}${t('lose.text', { done: total - left, total })}</p>
   ${offer}
-  <div class="acts"><button class="btn" data-act="quit">Quit</button><button class="btn main" data-act="retry">Retry</button></div>`,
+  <div class="acts"><button class="btn" data-act="quit">${t('quit')}</button><button class="btn main" data-act="retry">${t('retry')}</button></div>`,
   { continue: () => continueGame(why), quit: exitGame, retry: restartGame });
 }

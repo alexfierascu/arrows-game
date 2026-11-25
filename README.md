@@ -74,6 +74,7 @@ Each file in `public/js/` has one job, and there are no circular imports.
 | Files | What they do |
 | --- | --- |
 | `content.js` | Game data: worlds, bosses, superpowers, events, rewards and tuning numbers. Start here to rebalance or add content. |
+| `i18n.js`, `lang/*.js` | Languages: one file of texts per language, and the `t()` lookup the rest of the code uses. |
 | `rng.js`, `grid.js`, `generator.js` | Seeded board generator. Every generated board is solvable. |
 | `levels.js` | Turns a level number, the date or an event stage into a board config. |
 | `player.js`, `progress.js`, `badges.js`, `economy.js` | Save data (localStorage), recording results, badges and coins. |
@@ -83,11 +84,29 @@ Each file in `public/js/` has one job, and there are no circular imports.
 | `main.js` | Entry point: starts every module. |
 
 Common changes:
-- New superpower: add it to `POWERS` in `content.js`, its effect to `EFFECTS` in `game/powers.js`, and
-  a starting count to `DEFAULTS.pw` in `player.js`.
+- New superpower: add it to `POWERS` in `content.js`, its effect to `EFFECTS` in `game/powers.js`, a
+  starting count to `DEFAULTS.pw` in `player.js`, and its name and description to the language files.
 - New boss attack: add it to `ATTACKS` in `content.js` and to `EFFECTS` in `game/bosses.js`.
 - New weekly event: add it to `EVENTS` in `content.js`. Its `mod` values feed `stageCfg` in `levels.js`.
-- New badge: add an entry to `BADGES` in `badges.js`.
+- New badge: add an entry to `BADGES` in `badges.js` and `badge.<id>.name` / `badge.<id>.desc` to the
+  language files.
+
+## Languages
+The game speaks English, Spanish, French, Italian, German, Romanian, Greek and Polish. It starts in
+the browser's language when that is one of these, otherwise in English, and the player can switch in
+Settings. The choice is remembered in that browser.
+
+- Every text the player sees lives in `public/js/lang/<code>.js`. `en.js` is the reference: the other
+  files have the same keys and the same `{placeholders}`. Anything missing falls back to English.
+- Code never contains display text. It calls `t('key', { n: 3 })`; markup in `index.html` uses
+  `data-i18n="key"`.
+- Names and descriptions of worlds, bosses, attacks, superpowers and events are in the same files, so
+  a new piece of content needs its texts added to each language (or at least to `en.js`).
+- A text can be a set of plural forms, for example `{ "one": "{n} boss", "other": "{n} bosses" }`,
+  picked by `{n}` using the language's own plural rules.
+- To add a language: copy `lang/en.js`, translate the values, and add its code and name to
+  `LANGUAGES` in `i18n.js`.
+- To fix a translation: edit the value in that language's file. Nothing else needs to change.
 
 Two things must stay stable, because players' browsers and the leaderboard depend on them:
 - The board generator's output. Levels, the daily board and event boards are generated from seeds,

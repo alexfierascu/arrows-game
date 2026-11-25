@@ -1,5 +1,7 @@
 // Arrows Escape: entry point. Each module sets up its own screen; this file only starts them.
+// The language loads first, because every screen draws its texts from it.
 
+import { initLanguage } from './i18n.js';
 import { initNavigation, show } from './router.js';
 import { initModal } from './ui/modal.js';
 import { initHome } from './ui/home.js';
@@ -10,6 +12,7 @@ import { initBadges } from './ui/badges.js';
 import { initLeaderboard } from './ui/leaderboard.js';
 import { initGame } from './game/index.js';
 
+await initLanguage();
 initModal();
 initNavigation();
 initHome();

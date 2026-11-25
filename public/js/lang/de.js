@@ -1,0 +1,328 @@
+// German texts. Same keys and {placeholders} as en.js.
+export default {
+  "ui": {
+    "tagline": "Schieb alle Pfeile vom Brett.",
+    "weekend": "Münz-Wochenende: jede Belohnung ×2 bis Sonntagnacht.",
+    "play": "Spielen",
+    "tile.daily": "Tagesrätsel",
+    "tile.worlds": "Welten",
+    "tile.board": "Bestenliste",
+    "tile.board.sub": "Heute und gesamt",
+    "tile.shop": "Superkräfte",
+    "tile.badges": "Abzeichen und Statistik",
+    "tile.gift": "Tagesgeschenk",
+    "title.event": "Wochen-Event",
+    "settings": "Einstellungen",
+    "back": "Zurück",
+    "pause": "Pause",
+    "zoom.in": "Vergrößern",
+    "zoom.out": "Verkleinern",
+    "zoom.fit": "Brett einpassen",
+    "shield.up": "Schild aktiv",
+    "score": "Punkte",
+    "tab.today": "Heute",
+    "tab.alltime": "Gesamt",
+    "tab.stars": "Sterne",
+    "nick.placeholder": "Dein Spielername",
+    "nick.aria": "Spielername",
+    "save": "Speichern",
+    "shop.note": "Münzen gibt es für Sterne, Tagesgeschenke, Tagesrätsel und Abzeichen.",
+    "ok": "OK",
+    "close": "Schließen",
+    "fight": "Kämpfen",
+    "replay": "Nochmal",
+    "next": "Weiter",
+    "quit": "Beenden",
+    "retry": "Neu versuchen",
+    "done": "Fertig",
+    "buy": "Kaufen",
+    "not.now": "Nicht jetzt",
+    "collect": "Einsammeln",
+    "level.title": "Level {id}",
+    "world.boss": "Boss von Welt {n}",
+    "daily.short": "Tagesrätsel",
+    "stage.of": "Stufe {n} von {total}",
+    "event.stage": "{event} · Stufe {n}",
+    "dur.d": " T",
+    "dur.h": " Std",
+    "dur.m": " Min",
+    "home.event.kicker": "Event der Woche",
+    "home.best.run": "Bester Lauf: {n}",
+    "home.stages": "{n} von {total} Stufen geschafft",
+    "ends.in": "Endet in {time}",
+    "home.daily.best": "Bestwert heute: {n}",
+    "home.daily.new": "Jeden Tag ein neues Brett",
+    "home.worlds": "{stars} von {max} Sternen · {bosses}/{total} Bosse",
+    "home.bag": "{n} im Gepäck",
+    "home.badges": "{n} von {total} Abzeichen",
+    "gift.ready": "Bereit zum Öffnen",
+    "gift.wait": "Komm morgen wieder",
+    "gift.opened.title": "Schon geöffnet",
+    "gift.opened.text": "Morgen wartet ein neues Geschenk.",
+    "gift.title": "Super!",
+    "map.boss": "Boss: {name}.",
+    "map.locked": "Besiege {boss} in Level {level}, um diese Welt freizuschalten.",
+    "map.boss.locked": "Boss, gesperrt",
+    "locked": "Gesperrt",
+    "boss": "Boss",
+    "defeated": "Besiegt",
+    "weak.title": "Schwachstellen",
+    "weak.text": "Goldpfeile machen dreifachen Schaden. Sind alle Pfeile weg, ist der Boss besiegt.",
+    "first.win": "Erster Sieg:",
+    "preview.world": "Welt {n} · {name}",
+    "preview.daily.text": "Jeden Tag ein neues Brett. Dein bester Wert von heute kommt in die Bestenliste.",
+    "preview.event": "Event: {event}",
+    "preview.reward": "Belohnung fürs erste Schaffen: {reward}",
+    "fact.board": "Brett {w}×{h}",
+    "fact.arrows": "Pfeile: {n}",
+    "fact.clock": "Uhr {time}",
+    "fact.ice": "Eis: {n}",
+    "fact.gold": "Gold: {n}",
+    "fact.dark": "Dunkles Brett",
+    "goal.boss": "Besiege den Boss",
+    "goal.clear": "Räum das Brett leer",
+    "goal.hearts": "Verliere kein Herz",
+    "goal.time": "Schaff es in {time}",
+    "preview.best": "Rekord: {score} Punkte in {time}",
+    "coins": "{n} Münzen",
+    "reward": "Belohnung: {reward}",
+    "tier.score": "Punktzahl {n}",
+    "tier.done": "Belohnung abgeholt",
+    "rush.best": "Dein bester Lauf diese Woche",
+    "rush.boards": "Bretter: {n}",
+    "rush.start": "Lauf starten",
+    "stage.n": "Stufe {n}",
+    "stage.cleared": "Geschafft, Bestwert {n}",
+    "event.next": "Nächste Woche: {name}. Event-Punkte haben einen eigenen Tab in der Bestenliste.",
+    "shop.own": "Du hast {n}",
+    "stat.levels": "Level geschafft",
+    "stat.stars": "Sterne",
+    "stat.bosses": "Bosse besiegt",
+    "stat.score": "Punkte gesamt",
+    "stat.arrows": "Pfeile befreit",
+    "stat.combo": "Beste Combo",
+    "sound": "Ton",
+    "vibration": "Vibration",
+    "language": "Sprache",
+    "reset.label": "Gesamten Fortschritt löschen",
+    "reset": "Zurücksetzen",
+    "reset.confirm": "Zum Bestätigen nochmal tippen",
+    "board.empty.daily": "Noch hat niemand das heutige Tagesrätsel geschafft. Sei die Nummer eins.",
+    "board.empty.event": "Diese Woche gibt es noch keine Event-Punkte.",
+    "board.empty": "Noch keine Punkte. Schaff ein Level und du stehst auf der Liste.",
+    "board.bosses": {
+      "one": "{n} Boss",
+      "other": "{n} Bosse"
+    },
+    "board.player": "Spieler {id}",
+    "you": "(du)",
+    "board.loading": "Punkte werden geladen…",
+    "board.error": "Die Bestenliste ist gerade nicht erreichbar.",
+    "board.stale": "Aktualisieren ging nicht. Du siehst die zuletzt geladenen Punkte.",
+    "board.readonly": "Aus diesem Browser können deine Punkte nicht gesendet werden.",
+    "board.auto": "Punkte werden nach jedem Sieg automatisch abgeglichen.",
+    "saved": "Gespeichert",
+    "nick.ask": "Wähl einen Namen für die Bestenliste",
+    "nick.checking": "Name wird geprüft…",
+    "nick.taken": "Der Name ist vergeben. Probier einen anderen.",
+    "hud.left": "Noch {n}",
+    "hud.board": "Brett {n}",
+    "hud.frozen": "Eingefroren",
+    "hud.attack": "{name} in {n} s",
+    "hud.combo": "Combo ×{n}",
+    "hud.power.aria": "{name}, noch {n}",
+    "tip.first": "Tippe einen Pfeil an, damit er rausgleitet. Er darf keinen anderen rammen!",
+    "tip.boss": "{name} greift alle paar Sekunden an. Achte auf die Leiste oben.",
+    "tip.lamp": "Tippe auf eine freie Stelle, um deine Lampe zu bewegen.",
+    "tip.ice": "Eispfeile musst du erst mit einem Tipp aufknacken.",
+    "pop.crack": "Knack!",
+    "pop.smash": "Wumm!",
+    "seconds.plus": "+{n} Sekunden",
+    "seconds.minus": "−{n} Sekunden",
+    "toast.shield.hit": "Dein Schild hat den Stoß abgefangen",
+    "toast.shield.blocked": "Dein Schild hat {name} abgewehrt",
+    "toast.fog": "Papiersturm!",
+    "toast.drain.blocked": "Deine Combo hat den Zeitdieb gestoppt!",
+    "toast.drain": "{boss} klaut dir {n} Sekunden",
+    "toast.blackout": "Licht aus! Tippe auf eine freie Stelle, um deine Lampe zu bewegen",
+    "toast.freeze": "Frost! Eingefrorene Pfeile: {n}",
+    "toast.smash.on": "Tippe einen Pfeil an, um ihn zu zertrümmern",
+    "toast.smash.off": "Hammer abgebrochen",
+    "toast.radar": "Radar: Blinkende Pfeile können raus",
+    "toast.freeze.boss": "Uhr und Boss für {n} Sekunden eingefroren",
+    "toast.freeze.clock": "Uhr für {n} Sekunden eingefroren",
+    "toast.shield.already": "Dein Schild ist schon aktiv",
+    "toast.shield": "Schild aktiv",
+    "toast.hearts.full": "Deine Herzen sind voll",
+    "toast.magnet.none": "Gerade kann kein Pfeil raus",
+    "toast.next.board": "+{n} Sek. · Brett {board}",
+    "buy.out": "{name} aufgebraucht",
+    "buy.ask": "1× für {price} kaufen?",
+    "buy.need": "Du brauchst {price} Münzen, hast aber nur {coins}.",
+    "paused": "Pausiert",
+    "pause.progress": "{title} · {done} von {total} geschafft",
+    "resume": "Fortsetzen",
+    "restart": "Neustart",
+    "win.1": "Geschafft!",
+    "win.2": "Starker Lauf!",
+    "win.3": "Perfekt!",
+    "win.boss": "Boss besiegt!",
+    "row.arrows": "Pfeile und Combos (beste ×{n})",
+    "row.time": "Restzeit {time}",
+    "row.hearts": "Herzen übrig: {n}",
+    "row.flawless": "Fehlerfrei",
+    "row.boss": "Boss-Bonus",
+    "total": "Gesamt",
+    "new.best": "Neuer Rekord",
+    "weekend.x2": "(Wochenende ×2)",
+    "rush.over": "Zeit um!",
+    "rush.row.boards": "Bretter geschafft",
+    "rush.row.arrows": "Pfeile befreit",
+    "rush.row.combo": "Beste Combo",
+    "run.again": "Neuer Lauf",
+    "continue.time": "Weitermachen: +{n} Sekunden für {price}",
+    "continue.heart": "Weitermachen: +1 Herz für {price}",
+    "lose.time": "Zeit abgelaufen",
+    "lose.hearts": "Keine Herzen mehr",
+    "lose.boss": "{name} hatte noch {n} Leben.",
+    "lose.text": "{done} von {total} Pfeilen befreit. Jedes Brett ist lösbar, also such nach Pfeilen mit freier Bahn.",
+    "extra.defeated": "{name} besiegt",
+    "extra.power": "+1 {name}",
+    "extra.event": "Event geschafft",
+    "extra.gold": "Goldpfeile: {n}",
+    "badge.first.name": "Erste Flucht",
+    "badge.first.desc": "Schaff dein erstes Level",
+    "badge.flawless.name": "Fehlerfrei",
+    "badge.flawless.desc": "Schaff ein Level, ohne ein Herz zu verlieren",
+    "badge.combo5.name": "Heiß gelaufen",
+    "badge.combo5.desc": "Erreiche eine ×5-Combo",
+    "badge.speed.name": "Flitzer",
+    "badge.speed.desc": "Werde fertig, wenn noch die halbe Zeit übrig ist",
+    "badge.boss1.name": "Bossbezwinger",
+    "badge.boss1.desc": "Besiege deinen ersten Boss",
+    "badge.bossall.name": "Nemesis",
+    "badge.bossall.desc": "Besiege alle 5 Bosse",
+    "badge.daily.name": "Tagesgast",
+    "badge.daily.desc": "Schaff ein Tagesrätsel",
+    "badge.event.name": "Event-Champion",
+    "badge.event.desc": "Schaff alle 5 Stufen eines Events",
+    "badge.rush5.name": "Tempoteufel",
+    "badge.rush5.desc": "Schaff 5 Bretter in einem Zeitjagd-Lauf",
+    "badge.power10.name": "Kraftprotz",
+    "badge.power10.desc": "Setze 10 Superkräfte ein",
+    "badge.w3.name": "Nachteule",
+    "badge.w3.desc": "Schließe Welt 3 ab",
+    "badge.w5.name": "Großmeister",
+    "badge.w5.desc": "Schließe alle 5 Welten ab",
+    "badge.arrows.name": "Pfeilbändiger",
+    "badge.arrows.desc": "Schick 1.000 Pfeile vom Brett",
+    "badge.stars.name": "Sternensammler",
+    "badge.stars.desc": "Sammle 90 Sterne"
+  },
+  "worlds": [
+    {
+      "name": "Papierspur",
+      "desc": "Zum Warmwerden: kleine Bretter und reichlich Zeit."
+    },
+    {
+      "name": "Stoßzeit",
+      "desc": "Gleiche Regeln, viel weniger Zeit. Tippe schnell hintereinander für Combos."
+    },
+    {
+      "name": "Nachtschicht",
+      "desc": "Größere Bretter, gespielt im Dunkeln."
+    },
+    {
+      "name": "Eiskalt",
+      "desc": "Eispfeile musst du erst mit einem Tipp aufknacken, bevor sie sich bewegen."
+    },
+    {
+      "name": "Großmeister",
+      "desc": "Riesige Bretter, Eis und knappe Zeit. Viel Glück."
+    }
+  ],
+  "bosses": [
+    {
+      "name": "Käpt’n Knick",
+      "line": "Ein Origami-Pirat, der das Brett unter Papier begräbt."
+    },
+    {
+      "name": "Schaffner Pünktlich",
+      "line": "Bei ihm fährt jeder Zug pünktlich, meistens mit deiner Zeit."
+    },
+    {
+      "name": "Mutter Motte",
+      "line": "Sie liebt die Dunkelheit und hasst deine Lampe."
+    },
+    {
+      "name": "Königin Frostbyte",
+      "line": "Friert alles ein, was ihren Hof verlassen will."
+    },
+    {
+      "name": "Baumeister",
+      "line": "Hat jedes Brett entworfen, das du gespielt hast. Kennt jeden Trick."
+    }
+  ],
+  "attacks": {
+    "fog": {
+      "name": "Papiersturm",
+      "desc": "Papierfetzen verdecken 5 Sekunden lang Teile des Bretts."
+    },
+    "drain": {
+      "name": "Zeitdieb",
+      "desc": "Klaut 8 Sekunden. Eine Combo ab ×3 wehrt ihn ab."
+    },
+    "blackout": {
+      "name": "Licht aus",
+      "desc": "7 Sekunden lang bleibt nur ein kleiner Kreis hell. Tippe auf eine freie Stelle, um ihn zu bewegen."
+    },
+    "freeze": {
+      "name": "Frost",
+      "desc": "Friert 5 Pfeile ein. Jeden musst du mit einem Tipp aufknacken."
+    }
+  },
+  "powers": {
+    "smash": {
+      "name": "Hammer",
+      "desc": "Zertrümmert einen beliebigen Pfeil, auch einen blockierten."
+    },
+    "radar": {
+      "name": "Radar",
+      "desc": "Lässt alle Pfeile aufleuchten, die gerade raus können."
+    },
+    "freeze": {
+      "name": "Eiszeit",
+      "desc": "Hält die Uhr (und Boss-Angriffe) für 15 Sekunden an."
+    },
+    "shield": {
+      "name": "Schild",
+      "desc": "Fängt deinen nächsten Rempler oder den nächsten Boss-Angriff ab."
+    },
+    "magnet": {
+      "name": "Magnet",
+      "desc": "Zieht bis zu 6 freie Pfeile vom Brett."
+    },
+    "heart": {
+      "name": "Herz",
+      "desc": "Ein Extraherz, höchstens 5."
+    }
+  },
+  "events": {
+    "rush": {
+      "name": "Zeitjagd",
+      "desc": "Schaff so viele Bretter wie möglich, bevor die Zeit abläuft. Jedes Brett bringt 10 Sekunden, jeder Rempler kostet 5."
+    },
+    "blizzard": {
+      "name": "Schneesturm",
+      "desc": "Fünf Stufen tief im Eis. Fast die Hälfte der Pfeile ist anfangs eingefroren."
+    },
+    "blackout": {
+      "name": "Stromausfall",
+      "desc": "Fünf dunkle Stufen im Lampenschein. Tippe auf eine freie Stelle, um deine Lampe zu bewegen."
+    },
+    "gold": {
+      "name": "Goldrausch",
+      "desc": "Fünf Stufen voller Goldpfeile. Jeder Goldpfeil zählt dreifach und bringt 2 Münzen."
+    }
+  }
+};

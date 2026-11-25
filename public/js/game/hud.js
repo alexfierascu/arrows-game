@@ -6,6 +6,7 @@ import { ATTACKS, POWERS, START_HEARTS } from '../content.js';
 import { player } from '../player.js';
 import { clock, num } from '../format.js';
 import { heart, ico, portrait } from '../icons.js';
+import { t } from '../i18n.js';
 import { game, comboActive } from './state.js';
 
 const LOW_TIME = .2;  // the clock turns red below this share
@@ -25,7 +26,7 @@ export function renderBoardHeader() {
 }
 
 function heartsHtml() {
-  if (game.cfg.kind === 'rush') return `<b style="font-size:18px">Board ${game.rushBoards + 1}</b>`;
+  if (game.cfg.kind === 'rush') return `<b style="font-size:18px">${t('hud.board', { n: game.rushBoards + 1 })}</b>`;
   const slots = Math.max(START_HEARTS, game.hearts);
   return Array.from({ length: slots }, (_, i) => heart(i < game.hearts ? '' : 'lost')).join('');
 }
@@ -34,7 +35,7 @@ function renderBoss() {
   const { boss, frozen } = game, seconds = Math.ceil(game.bossNext), label = $('#bossAtk');
   const attack = ATTACKS[boss.atk[game.attackIndex % boss.atk.length]];
   $('#bossHp').style.width = (100 * game.bossHP / game.bossMax) + '%';
-  label.textContent = frozen > 0 ? 'Frozen' : attack.name + ' in ' + seconds + 's';
+  label.textContent = frozen > 0 ? t('hud.frozen') : t('hud.attack', { name: attack.name, n: seconds });
   label.classList.toggle('warn', seconds <= 3 && !frozen);
 }
 
@@ -51,8 +52,8 @@ export function renderHud() {
   $('#hearts').innerHTML = heartsHtml();
   $('#shieldI').hidden = !game.shield;
   $('#gScore').textContent = num(game.score);
-  $('#gLeft').textContent = game.left;
-  $('#gCombo').textContent = game.combo > 1 && comboActive(performance.now()) ? '×' + game.combo + ' combo' : '';
+  $('#gLeft').innerHTML = t('hud.left', { n: `<b>${game.left}</b>` });
+  $('#gCombo').textContent = game.combo > 1 && comboActive(performance.now()) ? t('hud.combo', { n: game.combo }) : '';
   if (game.boss) renderBoss();
   renderTimer();
 }
@@ -60,7 +61,7 @@ export function renderHud() {
 export function renderPowers() {
   $('#powers').innerHTML = POWERS.map(p => {
     const owned = player.pw[p.id], armed = p.id === 'smash' && game.smash;
-    return `<button class="pw ${armed ? 'on' : ''}" data-p="${p.id}" aria-label="${p.name}, ${owned} left">${ico(p.d)}${p.name}<span class="n ${owned ? '' : 'zero'}">${owned || '+'}</span></button>`;
+    return `<button class="pw ${armed ? 'on' : ''}" data-p="${p.id}" aria-label="${t('hud.power.aria', { name: p.name, n: owned })}">${ico(p.d)}${p.name}<span class="n ${owned ? '' : 'zero'}">${owned || '+'}</span></button>`;
   }).join('');
 }
 

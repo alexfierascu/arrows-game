@@ -4,6 +4,7 @@ import { $ } from '../dom.js';
 import { ATTACKS } from '../content.js';
 import { mulberry32, sample } from '../rng.js';
 import { sfx, vibrate } from '../feedback.js';
+import { t } from '../i18n.js';
 import { game, comboActive } from './state.js';
 import { arrowWeight } from './arrows.js';
 import { renderHud, shakeBoss, toast, pop } from './hud.js';
@@ -21,26 +22,26 @@ function fog(now) {
     for (let y = y0; y <= y0 + h; y += 1.3) for (let x = x0; x <= x0 + w; x += 1.3) puffs.push([x + rnd() * .8, y + rnd() * .8, 1.1 + rnd() * .7]);
     game.fogs.push({ t0: now, until: now + FOG_MS, puffs });
   }
-  toast('Paper storm!');
+  toast(t('toast.fog'));
 }
 
 function drain(now) {
-  if (game.combo >= DRAIN_BLOCK_COMBO && comboActive(now)) { toast('Your combo blocked the Time thief!'); return; }
+  if (game.combo >= DRAIN_BLOCK_COMBO && comboActive(now)) { toast(t('toast.drain.blocked')); return; }
   game.timeLeft = Math.max(1, game.timeLeft - DRAIN_SECONDS);
   const clockBox = $('#tTxt').getBoundingClientRect(), stageBox = $('#stage').getBoundingClientRect();
   pop('−' + DRAIN_SECONDS + 's', [clockBox.left - stageBox.left + 20, 10], '#e5484d');
-  toast('The Conductor stole ' + DRAIN_SECONDS + ' seconds');
+  toast(t('toast.drain', { boss: game.boss.name, n: DRAIN_SECONDS }));
 }
 
 function blackout(now) {
   game.blackoutUntil = now + BLACKOUT_MS;
-  toast('Lights out! Tap empty space to move your lamp');
+  toast(t('toast.blackout'));
 }
 
 function freeze() {
   const victims = sample(game.arrows.filter(a => a.state === 'idle' && !a.ice), FREEZE_COUNT);
   for (const a of victims) a.ice = true;
-  toast('Frost! ' + victims.length + ' arrows froze');
+  toast(t('toast.freeze', { n: victims.length }));
 }
 
 // Keyed like ATTACKS in content.js: a new attack needs an entry in both.
@@ -53,7 +54,7 @@ export function bossAttack() {
   if (game.shield) {
     game.shield = false;
     sfx('power');
-    toast('Your shield blocked ' + ATTACKS[type].name);
+    toast(t('toast.shield.blocked', { name: ATTACKS[type].name }));
     renderHud();
     return;
   }

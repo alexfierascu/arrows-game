@@ -1,0 +1,329 @@
+// Spanish texts. Same keys and {placeholders} as en.js.
+export default {
+  "ui": {
+    "tagline": "Saca todas las flechas del tablero.",
+    "weekend": "Finde de monedas dobles: todas las recompensas ×2 hasta el domingo por la noche.",
+    "play": "Jugar",
+    "tile.daily": "Reto diario",
+    "tile.worlds": "Mundos",
+    "tile.board": "Clasificación",
+    "tile.board.sub": "Diaria e histórica",
+    "tile.shop": "Superpoderes",
+    "tile.badges": "Insignias y datos",
+    "tile.gift": "Regalo diario",
+    "title.event": "Evento semanal",
+    "settings": "Ajustes",
+    "back": "Atrás",
+    "pause": "Pausa",
+    "zoom.in": "Acercar",
+    "zoom.out": "Alejar",
+    "zoom.fit": "Ajustar tablero",
+    "shield.up": "Escudo activo",
+    "score": "Puntos",
+    "tab.today": "Hoy",
+    "tab.alltime": "Histórico",
+    "tab.stars": "Estrellas",
+    "nick.placeholder": "Tu nombre de jugador",
+    "nick.aria": "Nombre de jugador",
+    "save": "Guardar",
+    "shop.note": "Gana monedas con estrellas, regalos diarios, retos diarios e insignias.",
+    "ok": "OK",
+    "close": "Cerrar",
+    "fight": "Luchar",
+    "replay": "Repetir",
+    "next": "Siguiente",
+    "quit": "Salir",
+    "retry": "Reintentar",
+    "done": "Listo",
+    "buy": "Comprar",
+    "not.now": "Ahora no",
+    "collect": "Recoger",
+    "level.title": "Nivel {id}",
+    "world.boss": "Jefe del mundo {n}",
+    "daily.short": "Diario",
+    "stage.of": "Fase {n} de {total}",
+    "event.stage": "{event} · fase {n}",
+    "dur.d": " d",
+    "dur.h": " h",
+    "dur.m": " min",
+    "home.event.kicker": "Evento de la semana",
+    "home.best.run": "Mejor partida: {n}",
+    "home.stages": "{n} de {total} fases superadas",
+    "ends.in": "Termina en {time}",
+    "home.daily.best": "Lo mejor de hoy: {n}",
+    "home.daily.new": "Tablero nuevo cada día",
+    "home.worlds": "{stars} de {max} estrellas · {bosses}/{total} jefes",
+    "home.bag": "{n} en tu bolsa",
+    "home.badges": "{n} de {total} insignias",
+    "gift.ready": "Listo para abrir",
+    "gift.wait": "Vuelve mañana",
+    "gift.opened.title": "Ya lo abriste",
+    "gift.opened.text": "Mañana llega un regalo nuevo.",
+    "gift.title": "¡Genial!",
+    "map.boss": "Jefe: {name}.",
+    "map.locked": "Vence a {boss} en el nivel {level} para desbloquear este mundo.",
+    "map.boss.locked": "Jefe, bloqueado",
+    "locked": "Bloqueado",
+    "boss": "Jefe",
+    "defeated": "Derrotado",
+    "weak.title": "Puntos débiles",
+    "weak.text": "Las flechas de oro hacen triple daño. Saca todas las flechas para vencer al jefe.",
+    "first.win": "Primera victoria:",
+    "preview.world": "Mundo {n} · {name}",
+    "preview.daily.text": "Un tablero nuevo cada día. Tu mejor puntuación de hoy entra en la clasificación.",
+    "preview.event": "Evento {event}",
+    "preview.reward": "Premio por superarlo la primera vez: {reward}",
+    "fact.board": "Tablero {w}×{h}",
+    "fact.arrows": "Flechas: {n}",
+    "fact.clock": "Reloj {time}",
+    "fact.ice": "Hielo: {n}",
+    "fact.gold": "Oro: {n}",
+    "fact.dark": "Tablero a oscuras",
+    "goal.boss": "Vence al jefe",
+    "goal.clear": "Vacía el tablero",
+    "goal.hearts": "No pierdas corazones",
+    "goal.time": "Termina en {time}",
+    "preview.best": "Récord: {score} puntos en {time}",
+    "coins": "{n} monedas",
+    "reward": "Premio: {reward}",
+    "tier.score": "Puntos: {n}",
+    "tier.done": "Premio recogido",
+    "rush.best": "Tu mejor partida de la semana",
+    "rush.boards": "Tableros: {n}",
+    "rush.start": "Empezar",
+    "stage.n": "Fase {n}",
+    "stage.cleared": "Superada, récord {n}",
+    "event.next": "Próxima semana: {name}. Los eventos tienen su propia pestaña en la clasificación.",
+    "shop.own": "Tienes {n}",
+    "stat.levels": "niveles superados",
+    "stat.stars": "estrellas",
+    "stat.bosses": "jefes vencidos",
+    "stat.score": "puntuación total",
+    "stat.arrows": "flechas fuera",
+    "stat.combo": "mejor combo",
+    "sound": "Sonido",
+    "vibration": "Vibración",
+    "language": "Idioma",
+    "reset.label": "Borrar todo el progreso",
+    "reset": "Borrar",
+    "reset.confirm": "Toca otra vez para confirmar",
+    "board.empty.daily": "Nadie ha terminado aún el reto diario de hoy. Sé el primero.",
+    "board.empty.event": "Aún no hay puntuaciones del evento esta semana.",
+    "board.empty": "Aún no hay puntuaciones. Supera un nivel para entrar en la clasificación.",
+    "board.bosses": {
+      "one": "{n} jefe",
+      "many": "{n} jefes",
+      "other": "{n} jefes"
+    },
+    "board.player": "Jugador {id}",
+    "you": "(tú)",
+    "board.loading": "Cargando puntuaciones…",
+    "board.error": "Ahora mismo no se puede cargar la clasificación.",
+    "board.stale": "No se pudo actualizar; ves las últimas puntuaciones cargadas.",
+    "board.readonly": "Desde este navegador no se pueden enviar tus puntuaciones.",
+    "board.auto": "Las puntuaciones se envían solas tras cada victoria.",
+    "saved": "Guardado",
+    "nick.ask": "Elige un nombre para la clasificación",
+    "nick.checking": "Comprobando el nombre…",
+    "nick.taken": "Ese nombre ya está cogido. Prueba otro.",
+    "hud.left": "Quedan: {n}",
+    "hud.board": "Tablero {n}",
+    "hud.frozen": "Congelado",
+    "hud.attack": "{name} en {n} s",
+    "hud.combo": "Combo ×{n}",
+    "hud.power.aria": "{name}, te quedan: {n}",
+    "tip.first": "Toca una flecha para sacarla. ¡Que no choque con otra!",
+    "tip.boss": "{name} ataca cada pocos segundos. Vigila la barra de arriba.",
+    "tip.lamp": "Toca un hueco vacío para mover tu lámpara.",
+    "tip.ice": "Las flechas de hielo necesitan un toque para romperse.",
+    "pop.crack": "¡Crac!",
+    "pop.smash": "¡Mazazo!",
+    "seconds.plus": "+{n} segundos",
+    "seconds.minus": "−{n} segundos",
+    "toast.shield.hit": "El escudo paró el golpe",
+    "toast.shield.blocked": "Tu escudo bloqueó {name}",
+    "toast.fog": "¡Tormenta de papel!",
+    "toast.drain.blocked": "¡Tu combo bloqueó al Ladrón de tiempo!",
+    "toast.drain": "{boss} te robó {n} segundos",
+    "toast.blackout": "¡Luces fuera! Toca un hueco vacío para mover tu lámpara",
+    "toast.freeze": "¡Escarcha! Flechas congeladas: {n}",
+    "toast.smash.on": "Toca cualquier flecha para destrozarla",
+    "toast.smash.off": "Mazazo cancelado",
+    "toast.radar": "Radar: las flechas que parpadean pueden salir",
+    "toast.freeze.boss": "Reloj y jefe congelados {n} segundos",
+    "toast.freeze.clock": "Reloj congelado {n} segundos",
+    "toast.shield.already": "El escudo ya está activo",
+    "toast.shield": "Escudo activo",
+    "toast.hearts.full": "Tienes todos los corazones",
+    "toast.magnet.none": "Ahora mismo no puede salir ninguna",
+    "toast.next.board": "+{n} segundos · tablero {board}",
+    "buy.out": "Sin {name}",
+    "buy.ask": "¿Comprar uno por {price}?",
+    "buy.need": "Necesitas {price} monedas y tienes {coins}.",
+    "paused": "En pausa",
+    "pause.progress": "{title} · {done} de {total} fuera",
+    "resume": "Continuar",
+    "restart": "Reiniciar",
+    "win.1": "¡Superado!",
+    "win.2": "¡Gran partida!",
+    "win.3": "¡Perfecto!",
+    "win.boss": "¡Jefe derrotado!",
+    "row.arrows": "Flechas y combos (mejor ×{n})",
+    "row.time": "Tiempo restante {time}",
+    "row.hearts": "Corazones restantes: {n}",
+    "row.flawless": "Impecable",
+    "row.boss": "Bonus de jefe",
+    "total": "Total",
+    "new.best": "Nuevo récord",
+    "weekend.x2": "(finde ×2)",
+    "rush.over": "¡Se acabó el tiempo!",
+    "rush.row.boards": "Tableros superados",
+    "rush.row.arrows": "Flechas fuera",
+    "rush.row.combo": "Mejor combo",
+    "run.again": "Otra partida",
+    "continue.time": "Sigue jugando: +{n} segundos por {price}",
+    "continue.heart": "Sigue jugando: +1 corazón por {price}",
+    "lose.time": "Sin tiempo",
+    "lose.hearts": "Sin corazones",
+    "lose.boss": "A {name} le quedaban {n} de vida.",
+    "lose.text": "{done} de {total} flechas fuera. Todos los tableros tienen solución: busca flechas con el camino libre.",
+    "extra.defeated": "{name}, ¡KO!",
+    "extra.power": "+1 {name}",
+    "extra.event": "Evento completado",
+    "extra.gold": "Flechas de oro: {n}",
+    "badge.first.name": "Primera fuga",
+    "badge.first.desc": "Supera tu primer nivel",
+    "badge.flawless.name": "Impecable",
+    "badge.flawless.desc": "Supera un nivel sin perder ningún corazón",
+    "badge.combo5.name": "En racha",
+    "badge.combo5.desc": "Consigue un combo ×5",
+    "badge.speed.name": "Velocista",
+    "badge.speed.desc": "Termina con la mitad del reloj de sobra",
+    "badge.boss1.name": "Matajefes",
+    "badge.boss1.desc": "Vence a tu primer jefe",
+    "badge.bossall.name": "Némesis",
+    "badge.bossall.desc": "Vence a los 5 jefes",
+    "badge.daily.name": "Jugador diario",
+    "badge.daily.desc": "Termina un reto diario",
+    "badge.event.name": "Campeón de eventos",
+    "badge.event.desc": "Termina las 5 fases de un evento",
+    "badge.rush5.name": "Demonio veloz",
+    "badge.rush5.desc": "Supera 5 tableros en una partida Contrarreloj",
+    "badge.power10.name": "Superpoderoso",
+    "badge.power10.desc": "Usa 10 superpoderes",
+    "badge.w3.name": "Búho nocturno",
+    "badge.w3.desc": "Termina el Mundo 3",
+    "badge.w5.name": "Gran maestro",
+    "badge.w5.desc": "Termina los 5 mundos",
+    "badge.arrows.name": "Domaflechas",
+    "badge.arrows.desc": "Saca 1000 flechas del tablero",
+    "badge.stars.name": "Cazaestrellas",
+    "badge.stars.desc": "Consigue 90 estrellas"
+  },
+  "worlds": [
+    {
+      "name": "Rastro de papel",
+      "desc": "Aprende lo básico. Tableros pequeños y un reloj generoso."
+    },
+    {
+      "name": "Hora punta",
+      "desc": "Mismas reglas, mucho menos tiempo. Encadena toques para hacer combos."
+    },
+    {
+      "name": "Turno de noche",
+      "desc": "Tableros más grandes, y a oscuras."
+    },
+    {
+      "name": "Congelado",
+      "desc": "Las flechas de hielo necesitan un toque para romperse antes de moverse."
+    },
+    {
+      "name": "Gran maestro",
+      "desc": "Tableros enormes, hielo y un reloj implacable. Suerte."
+    }
+  ],
+  "bosses": [
+    {
+      "name": "Capitán Pliegue",
+      "line": "Un pirata de origami que entierra el tablero bajo papel."
+    },
+    {
+      "name": "El Maquinista",
+      "line": "Sus trenes siempre llegan a la hora, sobre todo porque te roba la tuya."
+    },
+    {
+      "name": "Mamá Polilla",
+      "line": "Adora la oscuridad y odia tu lámpara."
+    },
+    {
+      "name": "Reina Glacial",
+      "line": "Congela todo lo que intenta salir de su corte."
+    },
+    {
+      "name": "El Arquitecto",
+      "line": "Diseñó todos los tableros que has jugado. Usa todos los trucos."
+    }
+  ],
+  "attacks": {
+    "fog": {
+      "name": "Tormenta de papel",
+      "desc": "Trozos de papel tapan partes del tablero durante 5 segundos."
+    },
+    "drain": {
+      "name": "Ladrón de tiempo",
+      "desc": "Roba 8 segundos. Un combo ×3 o mayor lo bloquea."
+    },
+    "blackout": {
+      "name": "Luces fuera",
+      "desc": "Solo queda iluminado un pequeño círculo durante 7 segundos. Toca un hueco vacío para moverlo."
+    },
+    "freeze": {
+      "name": "Escarcha",
+      "desc": "Congela 5 flechas; cada una necesita un toque para romperse."
+    }
+  },
+  "powers": {
+    "smash": {
+      "name": "Mazazo",
+      "desc": "Destroza cualquier flecha, aunque esté bloqueada."
+    },
+    "radar": {
+      "name": "Radar",
+      "desc": "Ilumina todas las flechas que pueden salir ahora mismo."
+    },
+    "freeze": {
+      "name": "Congelar",
+      "desc": "Para el reloj (y los ataques del jefe) durante 15 segundos."
+    },
+    "shield": {
+      "name": "Escudo",
+      "desc": "Bloquea tu próximo choque o el próximo ataque del jefe."
+    },
+    "magnet": {
+      "name": "Imán",
+      "desc": "Saca del tablero hasta 6 flechas libres."
+    },
+    "heart": {
+      "name": "Corazón",
+      "desc": "Un corazón extra, hasta un máximo de 5."
+    }
+  },
+  "events": {
+    "rush": {
+      "name": "Contrarreloj",
+      "desc": "Supera todos los tableros que puedas antes de que se acabe el tiempo. Cada tablero suma 10 segundos; cada choque resta 5."
+    },
+    "blizzard": {
+      "name": "Ventisca",
+      "desc": "Cinco fases enterradas en hielo. Casi la mitad de las flechas empiezan congeladas."
+    },
+    "blackout": {
+      "name": "Apagón",
+      "desc": "Cinco fases a oscuras, a la luz de tu lámpara. Toca un hueco vacío para moverla."
+    },
+    "gold": {
+      "name": "Fiebre del oro",
+      "desc": "Cinco fases llenas de flechas de oro. Cada una vale el triple de puntos y 2 monedas."
+    }
+  }
+};

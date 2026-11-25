@@ -1,0 +1,341 @@
+// Romanian texts. Same keys and {placeholders} as en.js.
+export default {
+  "ui": {
+    "tagline": "Scoate toate săgețile de pe tablă.",
+    "weekend": "Weekend cu monede duble: orice recompensă ×2 până duminică seara.",
+    "play": "Joacă",
+    "tile.daily": "Provocarea zilei",
+    "tile.worlds": "Lumi",
+    "tile.board": "Clasament",
+    "tile.board.sub": "Zilnic și general",
+    "tile.shop": "Superputeri",
+    "tile.badges": "Insigne și statistici",
+    "tile.gift": "Cadoul zilei",
+    "title.event": "Eveniment săptămânal",
+    "settings": "Setări",
+    "back": "Înapoi",
+    "pause": "Pauză",
+    "zoom.in": "Mărește",
+    "zoom.out": "Micșorează",
+    "zoom.fit": "Încadrează tabla",
+    "shield.up": "Scut activ",
+    "score": "Scor",
+    "tab.today": "Azi",
+    "tab.alltime": "General",
+    "tab.stars": "Stele",
+    "nick.placeholder": "Numele tău de jucător",
+    "nick.aria": "Nume de jucător",
+    "save": "Salvează",
+    "shop.note": "Câștigi monede din stele, cadouri zilnice, provocări zilnice și insigne.",
+    "ok": "OK",
+    "close": "Închide",
+    "fight": "Luptă",
+    "replay": "Rejoacă",
+    "next": "Înainte",
+    "quit": "Ieși",
+    "retry": "Reîncearcă",
+    "done": "Gata",
+    "buy": "Cumpără",
+    "not.now": "Nu acum",
+    "collect": "Colectează",
+    "level.title": "Nivelul {id}",
+    "world.boss": "Bossul lumii {n}",
+    "daily.short": "Zilnic",
+    "stage.of": "Etapa {n} din {total}",
+    "event.stage": "{event} · etapa {n}",
+    "dur.d": "z",
+    "dur.h": "h",
+    "dur.m": "min",
+    "home.event.kicker": "Evenimentul săptămânii",
+    "home.best.run": "Cea mai bună cursă: {n}",
+    "home.stages": "{n} din {total} etape terminate",
+    "ends.in": "Se termină în {time}",
+    "home.daily.best": "Recordul de azi: {n}",
+    "home.daily.new": "O tablă nouă în fiecare zi",
+    "home.worlds": "{stars} din {max} stele · {bosses}/{total} boși",
+    "home.bag": "{n} în geantă",
+    "home.badges": "{n} din {total} insigne",
+    "gift.ready": "Gata de deschis",
+    "gift.wait": "Revino mâine",
+    "gift.opened.title": "Deja deschis",
+    "gift.opened.text": "Mâine sosește un cadou nou.",
+    "gift.title": "Super!",
+    "map.boss": "Boss: {name}.",
+    "map.locked": "Câștigă lupta cu {boss} din nivelul {level} ca să deblochezi lumea asta.",
+    "map.boss.locked": "Boss, blocat",
+    "locked": "Blocat",
+    "boss": "Boss",
+    "defeated": "Învins",
+    "weak.title": "Puncte slabe",
+    "weak.text": "Săgețile de aur fac daune triple. Scoate toate săgețile ca să învingi bossul.",
+    "first.win": "Prima victorie:",
+    "preview.world": "Lumea {n} · {name}",
+    "preview.daily.text": "O tablă nouă în fiecare zi. Cel mai bun scor al tău de azi intră în clasament.",
+    "preview.event": "Eveniment: {event}",
+    "preview.reward": "Recompensă la prima reușită: {reward}",
+    "fact.board": "Tablă {w}×{h}",
+    "fact.arrows": "Săgeți: {n}",
+    "fact.clock": "Timp {time}",
+    "fact.ice": "Gheață: {n}",
+    "fact.gold": "Aur: {n}",
+    "fact.dark": "Tablă în întuneric",
+    "goal.boss": "Învinge bossul",
+    "goal.clear": "Golește tabla",
+    "goal.hearts": "Nu pierde nicio inimă",
+    "goal.time": "Termină în {time}",
+    "preview.best": "Record: scor {score} în {time}",
+    "coins": {
+      "one": "{n} monedă",
+      "few": "{n} monede",
+      "other": "{n} de monede"
+    },
+    "reward": "Recompensă: {reward}",
+    "tier.score": "Scor {n}",
+    "tier.done": "Recompensă colectată",
+    "rush.best": "Cea mai bună cursă a ta din săptămâna asta",
+    "rush.boards": {
+      "one": "{n} tablă",
+      "few": "{n} table",
+      "other": "{n} de table"
+    },
+    "rush.start": "Începe cursa",
+    "stage.n": "Etapa {n}",
+    "stage.cleared": "Terminată, record {n}",
+    "event.next": "Săptămâna viitoare: {name}. Scorurile din evenimente au propria filă în clasament.",
+    "shop.own": "Ai {n}",
+    "stat.levels": "niveluri terminate",
+    "stat.stars": "stele",
+    "stat.bosses": "boși învinși",
+    "stat.score": "scor total",
+    "stat.arrows": "săgeți scoase",
+    "stat.combo": "cel mai bun combo",
+    "sound": "Sunet",
+    "vibration": "Vibrații",
+    "language": "Limbă",
+    "reset.label": "Șterge tot progresul",
+    "reset": "Resetează",
+    "reset.confirm": "Atinge din nou pentru a confirma",
+    "board.empty.daily": "Nimeni n-a terminat încă provocarea de azi. Fii primul!",
+    "board.empty.event": "Niciun scor de eveniment săptămâna asta.",
+    "board.empty": "Niciun scor încă. Termină un nivel ca să intri în clasament.",
+    "board.bosses": {
+      "one": "{n} boss",
+      "few": "{n} boși",
+      "other": "{n} de boși"
+    },
+    "board.player": "Jucător {id}",
+    "you": "(tu)",
+    "board.loading": "Se încarcă scorurile…",
+    "board.error": "Clasamentul nu poate fi accesat acum.",
+    "board.stale": "Actualizarea a eșuat; vezi ultimele scoruri încărcate.",
+    "board.readonly": "Scorurile tale nu pot fi trimise din acest browser.",
+    "board.auto": "Scorurile se sincronizează automat după fiecare victorie.",
+    "saved": "Salvat",
+    "nick.ask": "Alege un nume pentru clasament",
+    "nick.checking": "Se verifică numele…",
+    "nick.taken": "Numele e deja luat. Încearcă altul.",
+    "hud.left": "Rămase: {n}",
+    "hud.board": "Tabla {n}",
+    "hud.frozen": "Înghețat",
+    "hud.attack": "{name} în {n}s",
+    "hud.combo": "Combo ×{n}",
+    "hud.power.aria": "{name}, mai ai {n}",
+    "tip.first": "Atinge o săgeată ca s-o scoți. N-o lăsa să se lovească de alta!",
+    "tip.boss": "{name} atacă la fiecare câteva secunde. Fii cu ochii pe bara de sus.",
+    "tip.lamp": "Atinge un loc gol ca să muți lampa.",
+    "tip.ice": "Săgețile de gheață trebuie întâi sparte cu o atingere.",
+    "pop.crack": "Crac!",
+    "pop.smash": "Zdrang!",
+    "seconds.plus": {
+      "one": "+{n} secundă",
+      "few": "+{n} secunde",
+      "other": "+{n} de secunde"
+    },
+    "seconds.minus": "−{n} secunde",
+    "toast.shield.hit": "Scutul a încasat lovitura",
+    "toast.shield.blocked": "Scutul tău a blocat atacul: {name}",
+    "toast.fog": "Furtună de hârtie!",
+    "toast.drain.blocked": "Comboul tău a blocat Hoțul de timp!",
+    "toast.drain": "{boss} a furat {n} secunde",
+    "toast.blackout": "Stingerea! Atinge un loc gol ca să muți lampa",
+    "toast.freeze": "Ger! Săgeți înghețate: {n}",
+    "toast.smash.on": "Atinge orice săgeată ca s-o zdrobești",
+    "toast.smash.off": "Zdrobire anulată",
+    "toast.radar": "Radar: săgețile care clipesc pot ieși",
+    "toast.freeze.boss": "Ceasul și bossul, înghețați {n} secunde",
+    "toast.freeze.clock": "Ceasul e înghețat {n} secunde",
+    "toast.shield.already": "Scutul e deja activ",
+    "toast.shield": "Scut activ",
+    "toast.hearts.full": "Ai toate inimile",
+    "toast.magnet.none": "Nicio săgeată nu poate ieși acum",
+    "toast.next.board": "+{n} s · tabla {board}",
+    "buy.out": "Nu mai ai: {name}",
+    "buy.ask": "Cumperi o bucată pentru {price}?",
+    "buy.need": "Monede necesare: {price}. Ai {coins}.",
+    "paused": "Pauză",
+    "pause.progress": "{title} · {done} din {total} scoase",
+    "resume": "Continuă",
+    "restart": "De la capăt",
+    "win.1": "Reușit!",
+    "win.2": "Bravo!",
+    "win.3": "Perfect!",
+    "win.boss": "Boss învins!",
+    "row.arrows": "Săgeți și combouri (max ×{n})",
+    "row.time": "Timp rămas: {time}",
+    "row.hearts": "Inimi rămase: {n}",
+    "row.flawless": "Fără greșeală",
+    "row.boss": "Bonus de boss",
+    "total": "Total",
+    "new.best": "Record nou",
+    "weekend.x2": "(weekend ×2)",
+    "rush.over": "Timpul a expirat!",
+    "rush.row.boards": "Table terminate",
+    "rush.row.arrows": "Săgeți scoase",
+    "rush.row.combo": "Cel mai bun combo",
+    "run.again": "Încă o cursă",
+    "continue.time": "Mergi mai departe: +{n} de secunde pentru {price}",
+    "continue.heart": "Mergi mai departe: +1 inimă pentru {price}",
+    "lose.time": "Timpul a expirat",
+    "lose.hearts": "Ai rămas fără inimi",
+    "lose.boss": "Viață rămasă pentru {name}: {n}.",
+    "lose.text": "Săgeți scoase: {done} din {total}. Orice tablă are soluție, deci caută săgețile cu drum liber.",
+    "extra.defeated": "Ai învins: {name}",
+    "extra.power": "+1 {name}",
+    "extra.event": "Eveniment terminat",
+    "extra.gold": "Săgeți de aur: {n}",
+    "badge.first.name": "Prima evadare",
+    "badge.first.desc": "Termină primul nivel",
+    "badge.flawless.name": "Fără greșeală",
+    "badge.flawless.desc": "Termină un nivel fără să pierzi vreo inimă",
+    "badge.combo5.name": "În flăcări",
+    "badge.combo5.desc": "Ajungi la un combo ×5",
+    "badge.speed.name": "Fulger",
+    "badge.speed.desc": "Termină cu jumătate din timp rămas",
+    "badge.boss1.name": "Spaima boșilor",
+    "badge.boss1.desc": "Învinge primul boss",
+    "badge.bossall.name": "Nemesis",
+    "badge.bossall.desc": "Învinge toți cei 5 boși",
+    "badge.daily.name": "Jucător zilnic",
+    "badge.daily.desc": "Termină o provocare zilnică",
+    "badge.event.name": "Campion de eveniment",
+    "badge.event.desc": "Termină toate cele 5 etape ale unui eveniment",
+    "badge.rush5.name": "Demonul vitezei",
+    "badge.rush5.desc": "Termină 5 table într-o singură cursă Contratimp",
+    "badge.power10.name": "Maestrul puterilor",
+    "badge.power10.desc": "Folosește 10 superputeri",
+    "badge.w3.name": "Pasăre de noapte",
+    "badge.w3.desc": "Termină Lumea 3",
+    "badge.w5.name": "Mare maestru",
+    "badge.w5.desc": "Termină toate cele 5 lumi",
+    "badge.arrows.name": "Îmblânzitor de săgeți",
+    "badge.arrows.desc": "Scoate 1.000 de săgeți de pe tablă",
+    "badge.stars.name": "Colecționar de stele",
+    "badge.stars.desc": "Adună 90 de stele"
+  },
+  "worlds": [
+    {
+      "name": "Drum de hârtie",
+      "desc": "Înveți regulile. Table mici și timp din belșug."
+    },
+    {
+      "name": "Ora de vârf",
+      "desc": "Aceleași reguli, mult mai puțin timp. Leagă atingerile pentru combouri."
+    },
+    {
+      "name": "Tura de noapte",
+      "desc": "Table mai mari, jucate pe întuneric."
+    },
+    {
+      "name": "Ținutul înghețat",
+      "desc": "Săgețile de gheață trebuie sparte cu o atingere înainte să se miște."
+    },
+    {
+      "name": "Mare maestru",
+      "desc": "Table uriașe, gheață și timp puțin. Succes!"
+    }
+  ],
+  "bosses": [
+    {
+      "name": "Căpitanul Cută",
+      "line": "Un pirat origami care îngroapă tabla sub hârtii."
+    },
+    {
+      "name": "Conductorul",
+      "line": "La el toate trenurile vin la timp, mai ales cu timpul furat de la tine."
+    },
+    {
+      "name": "Mama Molie",
+      "line": "Iubește întunericul și nu-ți suportă lampa."
+    },
+    {
+      "name": "Regina Promoroacă",
+      "line": "Îngheață tot ce încearcă să plece de la curtea ei."
+    },
+    {
+      "name": "Arhitectul",
+      "line": "A proiectat fiecare tablă pe care ai jucat. Știe toate trucurile."
+    }
+  ],
+  "attacks": {
+    "fog": {
+      "name": "Furtună de hârtie",
+      "desc": "Bucăți de hârtie acoperă părți din tablă timp de 5 secunde."
+    },
+    "drain": {
+      "name": "Hoțul de timp",
+      "desc": "Fură 8 secunde. Un combo ×3 sau mai mare îl blochează."
+    },
+    "blackout": {
+      "name": "Stingerea",
+      "desc": "Doar un cerc mic rămâne luminat 7 secunde. Atinge un loc gol ca să-l muți."
+    },
+    "freeze": {
+      "name": "Ger",
+      "desc": "Îngheață 5 săgeți; fiecare trebuie spartă cu o atingere."
+    }
+  },
+  "powers": {
+    "smash": {
+      "name": "Zdrobire",
+      "desc": "Distruge orice săgeată, chiar și una blocată."
+    },
+    "radar": {
+      "name": "Radar",
+      "desc": "Luminează toate săgețile care pot ieși chiar acum."
+    },
+    "freeze": {
+      "name": "Îngheț",
+      "desc": "Oprește ceasul (și atacurile bossului) timp de 15 secunde."
+    },
+    "shield": {
+      "name": "Scut",
+      "desc": "Blochează următoarea ciocnire sau următorul atac al bossului."
+    },
+    "magnet": {
+      "name": "Magnet",
+      "desc": "Trage de pe tablă până la 6 săgeți libere."
+    },
+    "heart": {
+      "name": "Inimă",
+      "desc": "O inimă în plus, până la 5."
+    }
+  },
+  "events": {
+    "rush": {
+      "name": "Contratimp",
+      "desc": "Termină cât mai multe table până expiră timpul. Fiecare tablă aduce 10 secunde; fiecare ciocnire costă 5."
+    },
+    "blizzard": {
+      "name": "Viscol",
+      "desc": "Cinci etape îngropate în gheață. Aproape jumătate din săgeți pornesc înghețate."
+    },
+    "blackout": {
+      "name": "Pană de curent",
+      "desc": "Cinci etape întunecate, jucate la lumina lămpii. Atinge un loc gol ca să muți lampa."
+    },
+    "gold": {
+      "name": "Goana după aur",
+      "desc": "Cinci etape pline de săgeți de aur. Fiecare valorează puncte triple și 2 monede."
+    }
+  }
+};

@@ -6,6 +6,7 @@ import { player, persist, totalScore, totalStars, clearedCount, bossesBeaten, ev
 import { weekInfo } from '../week.js';
 import { today, clock, num } from '../format.js';
 import { registerScreen, currentScreen } from '../router.js';
+import { t } from '../i18n.js';
 
 const POLL_MS = 20000;
 export const NICK_MAX_LENGTH = 16;
@@ -39,24 +40,23 @@ let syncing = false, syncAgain = false, pollTimer = 0;
 
 const byValue = (a, b) => b.value - a.value;
 
-// How each tab picks, ranks and labels rows. `wk` is the current week.
+// How each tab picks, ranks and labels rows. `wk` is the current week; `empty` is a text key.
 const TABS = {
   daily: {
     includes: r => r.dDate === today() && r.dScore > 0, value: r => r.dScore,
     sub: r => clock(r.dTime || 0), order: (a, b) => byValue(a, b) || a.dTime - b.dTime,
-    empty: 'No one has finished today’s daily challenge yet. Be the first.',
+    empty: 'board.empty.daily',
   },
   event: {
     includes: (r, wk) => r.eKey === wk.key && r.eScore > 0, value: r => r.eScore,
-    empty: 'No event scores yet this week.',
+    empty: 'board.empty.event',
   },
   total: {
     includes: r => r.total > 0, value: r => r.total,
-    sub: r => (r.bosses || 0) + ((r.bosses || 0) === 1 ? ' boss' : ' bosses'),
+    sub: r => t('board.bosses', { n: r.bosses || 0 }),
   },
   stars: { includes: r => r.stars > 0, value: r => r.stars, format: v => esc(v) + '★' },
 };
-const NO_SCORES = 'No scores yet. Clear a level to get on the board.';
 
 // ---------- network ----------
 
@@ -108,20 +108,20 @@ async function fetchBoard() {
 // ---------- rendering ----------
 
 function rowHtml(r, rank, format = num) {
-  const mine = r.id === playerId, name = r.nick || 'Player ' + String(r.id).slice(0, 4).toUpperCase();
-  return `<div class="row ${mine ? 'me' : ''} ${rank <= 3 ? 'g' + rank : ''}"><span class="rk">${rank}</span><span class="nm">${esc(name)}${mine ? ' (you)' : ''}</span><small style="color:var(--mute)">${esc(r.sub)}</small><span class="vl">${format(r.value)}</span></div>`;
+  const mine = r.id === playerId, name = r.nick || t('board.player', { id: String(r.id).slice(0, 4).toUpperCase() });
+  return `<div class="row ${mine ? 'me' : ''} ${rank <= 3 ? 'g' + rank : ''}"><span class="rk">${rank}</span><span class="nm">${esc(name)}${mine ? ' ' + t('you') : ''}</span><small style="color:var(--mute)">${esc(r.sub)}</small><span class="vl">${format(r.value)}</span></div>`;
 }
 
 function emptyText(view) {
-  if (loadState === 'loading') return 'Loading scores…';
-  if (loadState === 'err') return 'Can’t reach the leaderboard right now.';
-  return view.empty || NO_SCORES;
+  if (loadState === 'loading') return t('board.loading');
+  if (loadState === 'err') return t('board.error');
+  return t(view.empty || 'board.empty');
 }
 
 function noteText() {
-  if (loadState === 'stale') return 'Couldn’t refresh; showing the last scores loaded.';
-  if (!canWrite) return 'Your scores can’t be posted from this browser.';
-  return 'Scores sync automatically after each win.';
+  if (loadState === 'stale') return t('board.stale');
+  if (!canWrite) return t('board.readonly');
+  return t('board.auto');
 }
 
 function renderBoard() {
@@ -152,8 +152,6 @@ function openBoard() {
 
 export const cleanNick = name => String(name).trim().slice(0, NICK_MAX_LENGTH);
 
-export const NAME_TAKEN_TEXT = 'That name is taken. Try another.';
-
 /**
  * Asks the server for a name (names are unique) and keeps it if it is free. Resolves to false
  * when another player has it. Offline, the name is kept for now and checked by the next sync.
@@ -169,7 +167,7 @@ export async function claimNick(name) {
 
 async function saveNick() {
   const saved = await claimNick($('#nick').value);
-  $('#bnote').textContent = saved ? 'Saved' : NAME_TAKEN_TEXT;
+  $('#bnote').textContent = saved ? t('saved') : t('nick.taken');
 }
 
 export function initLeaderboard() {

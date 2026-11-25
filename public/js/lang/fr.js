@@ -1,0 +1,328 @@
+// French texts. Same keys and {placeholders} as en.js.
+export default {
+  "ui": {
+    "tagline": "Fais glisser chaque flèche hors de la grille.",
+    "weekend": "Week-end pièces doublées : récompenses ×2 jusqu’à dimanche soir.",
+    "play": "Jouer",
+    "tile.daily": "Défi du jour",
+    "tile.worlds": "Mondes",
+    "tile.board": "Classement",
+    "tile.board.sub": "Du jour et général",
+    "tile.shop": "Super-pouvoirs",
+    "tile.badges": "Badges et stats",
+    "tile.gift": "Cadeau du jour",
+    "title.event": "Événement de la semaine",
+    "settings": "Réglages",
+    "back": "Retour",
+    "pause": "Pause",
+    "zoom.in": "Zoom avant",
+    "zoom.out": "Zoom arrière",
+    "zoom.fit": "Ajuster la grille",
+    "shield.up": "Bouclier actif",
+    "score": "Score",
+    "tab.today": "Du jour",
+    "tab.alltime": "Général",
+    "tab.stars": "Étoiles",
+    "nick.placeholder": "Ton nom de joueur",
+    "nick.aria": "Nom de joueur",
+    "save": "Enregistrer",
+    "shop.note": "Gagne des pièces avec les étoiles, les cadeaux, les défis du jour et les badges.",
+    "ok": "OK",
+    "close": "Fermer",
+    "fight": "Combattre",
+    "replay": "Rejouer",
+    "next": "Suivant",
+    "quit": "Quitter",
+    "retry": "Réessayer",
+    "done": "Terminé",
+    "buy": "Acheter",
+    "not.now": "Pas maintenant",
+    "collect": "Récupérer",
+    "level.title": "Niveau {id}",
+    "world.boss": "Boss du monde {n}",
+    "daily.short": "Du jour",
+    "stage.of": "Étape {n} sur {total}",
+    "event.stage": "{event} · étape {n}",
+    "dur.d": "j",
+    "dur.h": "h",
+    "dur.m": "min",
+    "home.event.kicker": "L’événement de la semaine",
+    "home.best.run": "Meilleure partie : {n}",
+    "home.stages": "{n} sur {total} étapes terminées",
+    "ends.in": "Fin dans {time}",
+    "home.daily.best": "Record du jour : {n}",
+    "home.daily.new": "Une nouvelle grille chaque jour",
+    "home.worlds": "{stars} sur {max} étoiles · {bosses}/{total} boss",
+    "home.bag": "{n} dans ton sac",
+    "home.badges": "{n} sur {total} badges",
+    "gift.ready": "Prêt à ouvrir",
+    "gift.wait": "Reviens demain",
+    "gift.opened.title": "Déjà ouvert",
+    "gift.opened.text": "Un nouveau cadeau arrive demain.",
+    "gift.title": "Super !",
+    "map.boss": "Boss : {name}.",
+    "map.locked": "Bats {boss} au niveau {level} pour débloquer ce monde.",
+    "map.boss.locked": "Boss, verrouillé",
+    "locked": "Verrouillé",
+    "boss": "Boss",
+    "defeated": "Vaincu",
+    "weak.title": "Points faibles",
+    "weak.text": "Les flèches d’or font des dégâts triples. Sors toutes les flèches pour vaincre le boss.",
+    "first.win": "Première victoire :",
+    "preview.world": "Monde {n} · {name}",
+    "preview.daily.text": "Une nouvelle grille chaque jour. Ton meilleur score du jour va au classement.",
+    "preview.event": "Événement {event}",
+    "preview.reward": "Récompense de la première réussite : {reward}",
+    "fact.board": "Grille {w}×{h}",
+    "fact.arrows": "Flèches : {n}",
+    "fact.clock": "Chrono {time}",
+    "fact.ice": "Glace : {n}",
+    "fact.gold": "Or : {n}",
+    "fact.dark": "Grille sombre",
+    "goal.boss": "Bats le boss",
+    "goal.clear": "Vide la grille",
+    "goal.hearts": "Ne perds aucun cœur",
+    "goal.time": "Termine en {time} ou moins",
+    "preview.best": "Record : {score} points en {time}",
+    "coins": "{n} pièces",
+    "reward": "Récompense : {reward}",
+    "tier.score": "Score {n}",
+    "tier.done": "Récompense récupérée",
+    "rush.best": "Ta meilleure partie de la semaine",
+    "rush.boards": "Grilles : {n}",
+    "rush.start": "Démarrer",
+    "stage.n": "Étape {n}",
+    "stage.cleared": "Terminée, record {n}",
+    "event.next": "La semaine prochaine : {name}. Les scores d’événement ont leur propre onglet au classement.",
+    "shop.own": "Tu en as {n}",
+    "stat.levels": "niveaux terminés",
+    "stat.stars": "étoiles",
+    "stat.bosses": "boss vaincus",
+    "stat.score": "score total",
+    "stat.arrows": "flèches sorties",
+    "stat.combo": "meilleur combo",
+    "sound": "Son",
+    "vibration": "Vibration",
+    "language": "Langue",
+    "reset.label": "Effacer toute la progression",
+    "reset": "Réinitialiser",
+    "reset.confirm": "Touche encore pour confirmer",
+    "board.empty.daily": "Personne n’a encore terminé le défi du jour. Sois le premier.",
+    "board.empty.event": "Pas encore de score d’événement cette semaine.",
+    "board.empty": "Pas encore de score. Termine un niveau pour entrer au classement.",
+    "board.bosses": {
+      "one": "{n} boss",
+      "other": "{n} boss"
+    },
+    "board.player": "Joueur {id}",
+    "you": "(toi)",
+    "board.loading": "Chargement des scores…",
+    "board.error": "Impossible de joindre le classement pour l’instant.",
+    "board.stale": "Actualisation impossible ; voici les derniers scores chargés.",
+    "board.readonly": "Tes scores ne peuvent pas être envoyés depuis ce navigateur.",
+    "board.auto": "Les scores se synchronisent tout seuls après chaque victoire.",
+    "saved": "Enregistré",
+    "nick.ask": "Choisis un nom pour le classement",
+    "nick.checking": "Vérification du nom…",
+    "nick.taken": "Ce nom est déjà pris. Essaies-en un autre.",
+    "hud.left": "Reste {n}",
+    "hud.board": "Grille {n}",
+    "hud.frozen": "Gelé",
+    "hud.attack": "{name} dans {n} s",
+    "hud.combo": "Combo ×{n}",
+    "hud.power.aria": "{name}, reste {n}",
+    "tip.first": "Touche une flèche pour la faire sortir. Attention à ne pas en percuter une autre !",
+    "tip.boss": "{name} attaque régulièrement. Surveille la barre tout en haut.",
+    "tip.lamp": "Touche un espace vide pour déplacer ta lampe.",
+    "tip.ice": "Les flèches de glace doivent d’abord être fissurées d’une touche.",
+    "pop.crack": "Crac !",
+    "pop.smash": "Boum !",
+    "seconds.plus": "+{n} secondes",
+    "seconds.minus": "−{n} secondes",
+    "toast.shield.hit": "Le bouclier a encaissé le coup",
+    "toast.shield.blocked": "Ton bouclier a bloqué {name}",
+    "toast.fog": "Tempête de papier !",
+    "toast.drain.blocked": "Ton combo a bloqué le Voleur de temps !",
+    "toast.drain": "{boss} a volé {n} secondes",
+    "toast.blackout": "Noir total ! Touche un espace vide pour déplacer ta lampe",
+    "toast.freeze": "Givre ! Flèches gelées : {n}",
+    "toast.smash.on": "Touche une flèche pour la détruire",
+    "toast.smash.off": "Fracas annulé",
+    "toast.radar": "Radar : les flèches qui clignotent peuvent sortir",
+    "toast.freeze.boss": "Chrono et boss gelés pendant {n} secondes",
+    "toast.freeze.clock": "Chrono gelé pendant {n} secondes",
+    "toast.shield.already": "Le bouclier est déjà actif",
+    "toast.shield": "Bouclier actif",
+    "toast.hearts.full": "Tes cœurs sont au max",
+    "toast.magnet.none": "Rien ne peut sortir pour l’instant",
+    "toast.next.board": "+{n} s · grille {board}",
+    "buy.out": "{name} : stock épuisé",
+    "buy.ask": "En acheter un pour {price} ?",
+    "buy.need": "Il te faut {price} pièces, tu en as {coins}.",
+    "paused": "En pause",
+    "pause.progress": "{title} · progression : {done} sur {total}",
+    "resume": "Reprendre",
+    "restart": "Recommencer",
+    "win.1": "Réussi !",
+    "win.2": "Belle partie !",
+    "win.3": "Parfait !",
+    "win.boss": "Boss vaincu !",
+    "row.arrows": "Flèches et combos (max ×{n})",
+    "row.time": "Temps restant {time}",
+    "row.hearts": "Cœurs restants : {n}",
+    "row.flawless": "Sans faute",
+    "row.boss": "Bonus de boss",
+    "total": "Total",
+    "new.best": "Nouveau record",
+    "weekend.x2": "(week-end ×2)",
+    "rush.over": "Temps écoulé !",
+    "rush.row.boards": "Grilles terminées",
+    "rush.row.arrows": "Flèches sorties",
+    "rush.row.combo": "Meilleur combo",
+    "run.again": "Relancer",
+    "continue.time": "Continuer : +{n} secondes pour {price}",
+    "continue.heart": "Continuer : +1 cœur pour {price}",
+    "lose.time": "Plus de temps",
+    "lose.hearts": "Plus de cœurs",
+    "lose.boss": "Il restait {n} PV à {name}.",
+    "lose.text": "{done} sur {total} flèches sorties. Chaque grille a une solution : cherche les flèches dont la voie est libre.",
+    "extra.defeated": "{name} est K.-O.",
+    "extra.power": "+1 {name}",
+    "extra.event": "Événement terminé",
+    "extra.gold": "Flèches d’or : {n}",
+    "badge.first.name": "Première évasion",
+    "badge.first.desc": "Termine ton premier niveau",
+    "badge.flawless.name": "Sans faute",
+    "badge.flawless.desc": "Termine un niveau sans perdre de cœur",
+    "badge.combo5.name": "En feu",
+    "badge.combo5.desc": "Atteins un combo ×5",
+    "badge.speed.name": "Bolide",
+    "badge.speed.desc": "Termine avec la moitié du chrono restant",
+    "badge.boss1.name": "Tueur de boss",
+    "badge.boss1.desc": "Bats ton premier boss",
+    "badge.bossall.name": "Némésis",
+    "badge.bossall.desc": "Bats les 5 boss",
+    "badge.daily.name": "Joueur du jour",
+    "badge.daily.desc": "Termine un défi du jour",
+    "badge.event.name": "Champion d’événement",
+    "badge.event.desc": "Termine les 5 étapes d’un événement",
+    "badge.rush5.name": "Démon de la vitesse",
+    "badge.rush5.desc": "Termine 5 grilles en une partie de Contre-la-montre",
+    "badge.power10.name": "Accro aux pouvoirs",
+    "badge.power10.desc": "Utilise 10 super-pouvoirs",
+    "badge.w3.name": "Oiseau de nuit",
+    "badge.w3.desc": "Termine le monde 3",
+    "badge.w5.name": "Grand maître",
+    "badge.w5.desc": "Termine les 5 mondes",
+    "badge.arrows.name": "Dompteur de flèches",
+    "badge.arrows.desc": "Fais sortir 1 000 flèches de la grille",
+    "badge.stars.name": "Chasseur d’étoiles",
+    "badge.stars.desc": "Récolte 90 étoiles"
+  },
+  "worlds": [
+    {
+      "name": "Sentier de papier",
+      "desc": "Apprends les bases. Petites grilles et chrono généreux."
+    },
+    {
+      "name": "Heure de pointe",
+      "desc": "Mêmes règles, chrono bien plus serré. Enchaîne les touches pour des combos."
+    },
+    {
+      "name": "Service de nuit",
+      "desc": "Des grilles plus grandes, à jouer dans le noir."
+    },
+    {
+      "name": "Grand froid",
+      "desc": "Les flèches de glace doivent être fissurées d’une touche avant de bouger."
+    },
+    {
+      "name": "Grand maître",
+      "desc": "Grilles immenses, glace et chrono sévère. Bonne chance."
+    }
+  ],
+  "bosses": [
+    {
+      "name": "Capitaine Pliure",
+      "line": "Un pirate en origami qui ensevelit la grille sous le papier."
+    },
+    {
+      "name": "Le Chef de train",
+      "line": "Ses trains sont toujours à l’heure, surtout en volant la tienne."
+    },
+    {
+      "name": "Mère Phalène",
+      "line": "Elle adore le noir et déteste ta lampe."
+    },
+    {
+      "name": "Reine Givrebyte",
+      "line": "Elle gèle tout ce qui tente de quitter sa cour."
+    },
+    {
+      "name": "L’Architecte",
+      "line": "Il a conçu toutes les grilles que tu as jouées. Il connaît toutes les ruses."
+    }
+  ],
+  "attacks": {
+    "fog": {
+      "name": "Tempête de papier",
+      "desc": "Des bouts de papier couvrent une partie de la grille pendant 5 secondes."
+    },
+    "drain": {
+      "name": "Voleur de temps",
+      "desc": "Vole 8 secondes. Un combo ×3 ou plus le bloque."
+    },
+    "blackout": {
+      "name": "Noir total",
+      "desc": "Seul un petit cercle reste éclairé pendant 7 secondes. Touche un espace vide pour le déplacer."
+    },
+    "freeze": {
+      "name": "Givre",
+      "desc": "Gèle 5 flèches ; chacune doit être fissurée d’une touche."
+    }
+  },
+  "powers": {
+    "smash": {
+      "name": "Fracas",
+      "desc": "Détruis n’importe quelle flèche, même bloquée."
+    },
+    "radar": {
+      "name": "Radar",
+      "desc": "Illumine toutes les flèches qui peuvent sortir tout de suite."
+    },
+    "freeze": {
+      "name": "Gel",
+      "desc": "Arrête le chrono (et les attaques du boss) pendant 15 secondes."
+    },
+    "shield": {
+      "name": "Bouclier",
+      "desc": "Bloque ton prochain choc ou la prochaine attaque du boss."
+    },
+    "magnet": {
+      "name": "Aimant",
+      "desc": "Fait sortir jusqu’à 6 flèches libres de la grille."
+    },
+    "heart": {
+      "name": "Cœur",
+      "desc": "Un cœur en plus, jusqu’à 5."
+    }
+  },
+  "events": {
+    "rush": {
+      "name": "Contre-la-montre",
+      "desc": "Termine un maximum de grilles avant la fin du chrono. Chaque grille ajoute 10 secondes ; chaque choc en coûte 5."
+    },
+    "blizzard": {
+      "name": "Blizzard",
+      "desc": "Cinq étapes ensevelies sous la glace. Près de la moitié des flèches sont gelées au départ."
+    },
+    "blackout": {
+      "name": "Black-out",
+      "desc": "Cinq étapes sombres à la lueur de la lampe. Touche un espace vide pour déplacer ta lampe."
+    },
+    "gold": {
+      "name": "Ruée vers l’or",
+      "desc": "Cinq étapes pleines de flèches d’or. Chacune vaut le triple de points et 2 pièces."
+    }
+  }
+};

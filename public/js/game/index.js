@@ -1,6 +1,7 @@
 // Wires the game screen together. Called once at startup.
 
 import { $, esc } from '../dom.js';
+import { t } from '../i18n.js';
 import { modal } from '../ui/modal.js';
 import { game } from './state.js';
 import { setFrameHandler } from './frame.js';
@@ -13,8 +14,8 @@ import { restartGame, exitGame } from './session.js';
 
 function openPauseMenu() {
   if (game.over) return;
-  modal(`<h2>Paused</h2><p>${esc(game.cfg.title)} · ${game.total - game.left} of ${game.total} cleared</p>
-  <div style="display:grid;gap:10px"><button class="btn main" data-act="close">Resume</button><button class="btn" data-act="restart">Restart</button><button class="btn" data-act="quit">Quit</button></div>`,
+  modal(`<h2>${t('paused')}</h2><p>${t('pause.progress', { title: esc(game.cfg.title), done: game.total - game.left, total: game.total })}</p>
+  <div style="display:grid;gap:10px"><button class="btn main" data-act="close">${t('resume')}</button><button class="btn" data-act="restart">${t('restart')}</button><button class="btn" data-act="quit">${t('quit')}</button></div>`,
   { restart: restartGame, quit: () => { game.over = true; exitGame(); } });
 }
 

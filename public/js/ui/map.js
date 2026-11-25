@@ -6,6 +6,7 @@ import { player, isLevelUnlocked, isWorldOpen, nextLevel } from '../player.js';
 import { levelCfg } from '../levels.js';
 import { ico, LOCK, portrait, stars } from '../icons.js';
 import { registerScreen } from '../router.js';
+import { t } from '../i18n.js';
 import { previewLevel } from './preview.js';
 
 const WORLD_STARS = LEVELS_PER_WORLD * 3;
@@ -23,8 +24,8 @@ function renderBand(open) {
   const w = WORLDS[world - 1], boss = BOSSES[world - 1], band = $('#band');
   const earned = levelsOf(world).reduce((total, g) => total + (player.lv[g]?.s || 0), 0);
   const text = open
-    ? w.desc + ' Boss: ' + boss.name + '.'
-    : 'Beat ' + BOSSES[world - 2].name + ' in level ' + (world - 1) + '-' + LEVELS_PER_WORLD + ' to unlock this world.';
+    ? w.desc + ' ' + t('map.boss', { name: boss.name })
+    : t('map.locked', { boss: BOSSES[world - 2].name, level: (world - 1) + '-' + LEVELS_PER_WORLD });
   band.style.setProperty('--c', w.col);
   band.innerHTML = `${portrait(boss, 'art')}<h3>${w.name}</h3><p>${text}</p><div style="display:flex;align-items:center;gap:10px"><div class="meter" style="flex:1"><i style="width:${earned / WORLD_STARS * 100}%"></i></div><b>${earned}/${WORLD_STARS}★</b></div>`;
 }
@@ -33,9 +34,9 @@ function levelButton(g, open, next) {
   const w = WORLDS[world - 1], boss = BOSSES[world - 1], result = player.lv[g];
   const isBoss = g % LEVELS_PER_WORLD === 0, state = `${result ? 'done' : ''} ${g === next ? 'next' : ''}`;
   if (!(open && isLevelUnlocked(g))) return isBoss
-    ? `<button class="lv lock bossT" disabled aria-label="Boss, locked">${portrait(boss, 'pt')}Boss</button>`
-    : `<button class="lv lock" disabled aria-label="Locked">${ico(LOCK)}</button>`;
-  if (isBoss) return `<button class="lv bossT ${state}" data-g="${g}">${portrait(boss, 'pt')}${result ? 'Defeated' : 'Boss'}</button>`;
+    ? `<button class="lv lock bossT" disabled aria-label="${t('map.boss.locked')}">${portrait(boss, 'pt')}${t('boss')}</button>`
+    : `<button class="lv lock" disabled aria-label="${t('locked')}">${ico(LOCK)}</button>`;
+  if (isBoss) return `<button class="lv bossT ${state}" data-g="${g}">${portrait(boss, 'pt')}${result ? t('defeated') : t('boss')}</button>`;
   return `<button class="lv ${state}" data-g="${g}"><span>${(g - 1) % LEVELS_PER_WORLD + 1}</span><span class="st">${stars(result?.s, g === next ? '#fff' : w.col)}</span></button>`;
 }
 
