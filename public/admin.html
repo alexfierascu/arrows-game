@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Arrows Escape: admin</title>
+<style>
+ :root{color-scheme:light dark;--line:light-dark(#dfe2ee,#272c55);--mute:light-dark(#5d6385,#9aa0c8);--bad:#e5484d}
+ body{font:15px/1.4 system-ui,sans-serif;margin:0 auto;padding:16px;max-width:1100px}
+ h1{font-size:22px;margin:0 0 12px}h2{font-size:17px;margin:28px 0 8px}
+ form,.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+ [hidden]{display:none!important}
+ input{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;min-width:0}
+ button{font:inherit;padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:none;color:inherit;cursor:pointer}
+ button.bad{border-color:var(--bad);color:var(--bad)}
+ .wrap{overflow-x:auto}table{border-collapse:collapse;width:100%}
+ th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+ th{color:var(--mute);font-weight:600}td.num{text-align:right;font-variant-numeric:tabular-nums}
+ .warn{color:var(--bad);font-weight:600}.mute{color:var(--mute)}
+ .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+ .cards div{border:1px solid var(--line);border-radius:10px;padding:10px 12px}.cards b{display:block;font-size:22px}
+</style>
+</head>
+<body>
+<h1>Arrows Escape: admin</h1>
+<form id="login"><input id="key" type="password" placeholder="Admin key" autocomplete="current-password" required><button>Open</button><span class="warn" id="loginNote"></span></form>
+<main id="main" hidden>
+ <div class="bar"><button id="reload">Reload</button><button id="logout">Lock</button><span class="mute" id="status"></span></div>
+ <h2>Last 30 days</h2><div class="cards" id="totals"></div>
+ <h2>Needs a look <span class="mute">(reported names and suspicious scores)</span></h2><div class="wrap"><table id="flagged"></table></div>
+ <h2>Refused names <span class="mute">(newest first)</span></h2><div class="wrap"><table id="refused"></table></div>
+ <h2>Players <span class="mute">(latest 500 by activity)</span></h2><div class="wrap"><table id="players"></table></div>
+ <h2>Usage per day</h2><div class="wrap"><table id="usage"></table></div>
+</main>
+<script type="module" src="/js/admin.js"></script>
+</body>
+</html>

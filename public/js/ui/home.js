@@ -15,6 +15,7 @@ import { registerScreen, show, currentScreen } from '../router.js';
 import { t } from '../i18n.js';
 import { modal } from './modal.js';
 import { previewLevel } from './preview.js';
+import { startEndless } from '../game/session.js';
 import { openSettings } from './settings.js';
 
 const REFRESH_MS = 30000; // keeps the event countdown current
@@ -37,6 +38,7 @@ function renderHome() {
   renderEventTile(wk);
   const daily = player.daily.d === today() ? t('home.daily.best', { n: num(player.daily.score) }) : t('home.daily.new');
   $('#dailySub').textContent = daily + (streak ? ' · ' + t('streak.short', { n: streak }) : '');
+  $('#endlessSub').textContent = player.endless.best ? t('home.best.run', { n: num(player.endless.best) }) : t('home.endless.new');
   $('#worldsSub').textContent = t('home.worlds', { stars: totalStars(), max: MAX_STARS, bosses: bossesBeaten(), total: BOSSES.length });
   $('#shopSub').textContent = t('home.bag', { n: powersOwned() });
   $('#badgeSub').textContent = t('home.badges', { n: badgeCount(), total: BADGES.length });
@@ -59,6 +61,14 @@ function openGift() {
   renderHome();
 }
 
+function openEndless() {
+  const { best, boards } = player.endless;
+  modal(`<span class="kick" style="--c:#0f9d76">${t('endless')}</span><h2>${t('endless.title')}</h2><p>${t('endless.text')}</p>
+  ${best ? `<p style="margin:0;color:var(--mute)">${t('endless.best', { score: `<b style="color:var(--ink)">${num(best)}</b>`, n: boards })}</p>` : ''}
+  <div class="acts"><button class="btn" data-act="close">${t('close')}</button><button class="btn main" data-act="play">${t('play')}</button></div>`,
+  { play: startEndless });
+}
+
 function playNext() {
   const g = nextLevel();
   previewLevel(g ? levelCfg(g) : dailyCfg());
@@ -69,6 +79,7 @@ export function initHome() {
   $('#playBtn').onclick = playNext;
   $('#tDaily').onclick = () => previewLevel(dailyCfg());
   $('#tEvent').onclick = () => show('event');
+  $('#tEndless').onclick = openEndless;
   $('#tWorlds').onclick = () => show('map', { world: worldOf(nextLevel() || 1) });
   $('#tBoard').onclick = () => show('board');
   $('#tShop').onclick = () => show('shop');

@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Arrows Escape</title>
+<meta name="description" content="Slide every arrow off the board. A puzzle game with daily challenges and leaderboards.">
+<meta name="theme-color" content="#2f6bff">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Arrows">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
@@ -22,6 +29,7 @@
   <div class="tiles">
    <button class="tile ev" id="tEvent"></button>
    <button class="tile daily" id="tDaily"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><b data-i18n="tile.daily">Daily challenge</b><small id="dailySub"></small></button>
+   <button class="tile" id="tEndless"><svg class="i" viewBox="0 0 24 24"><path d="M7 8a4 4 0 1 0 0 8c3 0 7-8 10-8a4 4 0 1 1 0 8c-3 0-7-8-10-8z"/></svg><b data-i18n="endless">Endless</b><small id="endlessSub"></small></button>
    <button class="tile" id="tWorlds"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><b data-i18n="tile.worlds">Worlds</b><small id="worldsSub"></small></button>
    <button class="tile" id="tBoard"><svg class="i" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><b data-i18n="tile.board">Leaderboard</b><small id="boardSub" data-i18n="tile.board.sub">Daily and all-time</small></button>
    <button class="tile" id="tShop"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><b data-i18n="tile.shop">Superpowers</b><small id="shopSub"></small></button>
@@ -48,6 +56,7 @@
  <div class="timer" id="timer"><div class="tbar"><i id="tFill"></i></div><span id="tTxt">0:00</span></div>
  <div class="srow"><span><span data-i18n="score">Score</span> <b id="gScore">0</b></span><span id="gCombo"></span><span class="sp"></span><span id="gLeft"></span></div>
  <div id="stage"><canvas id="cv" tabindex="0" role="application" data-i18n-label="board.aria" aria-label="Puzzle board"></canvas><div id="pops"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="assist"><button class="ib" id="hintBtn" data-i18n-label="hint" aria-label="Hint"><svg class="i" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.3 1 2.1h5c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><span class="n"></span></button><button class="ib" id="undoBtn" data-i18n-label="undo" aria-label="Undo"><svg class="i" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5M4 12h10a6 6 0 0 1 0 12h-2" transform="translate(0 -3)"/></svg><span class="n"></span></button></div>
   <div class="zoom"><button class="ib" id="zin" data-i18n-label="zoom.in" aria-label="Zoom in"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button><button class="ib" id="zout" data-i18n-label="zoom.out" aria-label="Zoom out"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button class="ib" id="zfit" data-i18n-label="zoom.fit" aria-label="Fit board"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
  </div>
  <div class="powers" id="powers"></div>
@@ -55,7 +64,7 @@
 
 <section class="scr" id="s-board" hidden>
  <div class="top"><button class="ib" data-go="home" data-i18n-label="back" aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2 data-i18n="tile.board">Leaderboard</h2></div>
- <div class="tabs" id="btabs"><button class="tab on" data-t="daily" data-i18n="tab.today">Today</button><button class="tab" data-t="event" id="evTab">Event</button><button class="tab" data-t="total" data-i18n="tab.alltime">All-time</button><button class="tab" data-t="stars" data-i18n="tab.stars">Stars</button></div>
+ <div class="tabs" id="btabs"><button class="tab on" data-t="daily" data-i18n="tab.today">Today</button><button class="tab" data-t="event" id="evTab">Event</button><button class="tab" data-t="season" data-i18n="tab.season">Season</button><button class="tab" data-t="total" data-i18n="tab.alltime">All-time</button><button class="tab" data-t="stars" data-i18n="tab.stars">Stars</button><button class="tab" data-t="endless" data-i18n="endless">Endless</button></div>
  <div class="body">
   <div class="nick"><button class="avbtn" id="avBtn" type="button" data-i18n-label="avatar.pick" aria-label="Choose your avatar"></button><input id="nick" maxlength="16" data-i18n-placeholder="nick.placeholder" placeholder="Your player name" data-i18n-label="nick.aria" aria-label="Player name"><button class="btn" id="nickSave" data-i18n="save">Save</button></div>
   <p class="note nickpub" data-i18n="nick.public">Your name is shown to other players.</p>

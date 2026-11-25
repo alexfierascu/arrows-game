@@ -12,6 +12,9 @@
 //   wk      this week's play (see weekly.js), prevWk the finished week awaiting its recap
 //   friends [player names], skin (active skin id), skins [owned ids], av (avatar number)
 //   stats   whether anonymous usage counts may be sent
+//   mus, cb, remind   music / colour-blind mode / daily reminder switched on
+//   endless { best: score, boards } of the best Endless run
+//   season  { id: month YYYY-MM, score: points earned in it }
 // The keys are part of the stored format: renaming one loses existing players' progress.
 
 import { TOTAL_LEVELS, LEVELS_PER_WORLD } from './content.js';
@@ -27,6 +30,8 @@ const DEFAULTS = {
   streak: { n: 0, last: '', best: 0 },
   wk: { id: 0, wins: 0, stars: 0, coins: 0, best: 0, dailies: 0 }, prevWk: null,
   friends: [], skin: 'classic', skins: ['classic'], av: 0,
+  mus: false, cb: false, remind: false,
+  endless: { best: 0, boards: 0 }, season: { id: '', score: 0 },
 };
 const fresh = () => JSON.parse(JSON.stringify(DEFAULTS));
 

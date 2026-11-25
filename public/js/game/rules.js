@@ -11,6 +11,7 @@ import { view } from './view.js';
 import { rayInfo, extendedPath, headOnScreen, arrowWeight } from './arrows.js';
 import { hitBoss } from './bosses.js';
 import { renderHud, renderPowers, toast, pop } from './hud.js';
+import { renderAssist } from './assist.js';
 import { requestFrame } from './frame.js';
 
 const BASE_POINTS = 10;
@@ -32,6 +33,7 @@ function removeFromBoard(a) {
 /** Sends a free arrow off the board and scores it. */
 export function launch(a) {
   const now = performance.now();
+  game.canUndo = false; // only the very last move can be taken back
   // Far enough to slide off the board and off the screen at any zoom.
   const runway = Math.ceil(game.W + game.H + a.pts.length + (view.width + view.height) / view.scale + 4);
   a.state = 'exit';
@@ -112,8 +114,10 @@ export function bump(anim) {
     } else {
       game.hearts--;
       game.heartsLost++;
+      game.canUndo = true;
       if (game.hearts <= 0 && !game.over) { game.over = true; game.pendingLose = 'hearts'; }
     }
   }
   renderHud();
+  renderAssist();
 }

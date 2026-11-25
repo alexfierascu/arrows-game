@@ -33,7 +33,11 @@ export const game = {
   smash: false,       // Smash is armed: the next tap destroys an arrow
   radarUntil: 0,
   tutorial: false,    // first game ever: free arrows blink until one is sent off
-  rushBoards: 0, rushArrows: 0,
+  rushBoards: 0, rushArrows: 0,   // boards and arrows cleared in a Time Attack or Endless run
+  // help, per board (see assist.js)
+  hintsLeft: 0, hint: null,       // hint: { id: arrow, until: time } while one is blinking
+  undosLeft: 0, canUndo: false,   // canUndo: the last move was a bump that cost a heart
+  challenge: null,    // { name, score }: the friend's score this game tries to beat
 };
 
 /** Resets everything that belongs to one run (a level attempt or a whole Time Attack). */
@@ -43,7 +47,7 @@ export function resetRun() {
     hearts: START_HEARTS, heartsLost: 0,
     score: 0, combo: 0, lastClear: 0, bestCombo: 0, goldCleared: 0,
     frozen: 0, shield: false, smash: false, radarUntil: 0, tutorial: false,
-    rushBoards: 0, rushArrows: 0,
+    rushBoards: 0, rushArrows: 0, challenge: null,
   });
 }
 

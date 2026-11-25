@@ -81,11 +81,14 @@ Each file in `public/js/` has one job, and there are no circular imports.
 | `rng.js`, `grid.js`, `generator.js` | Seeded board generator. Every generated board is solvable. |
 | `levels.js` | Turns a level number, the date or an event stage into a board config. |
 | `player.js`, `progress.js`, `badges.js`, `economy.js` | Save data (localStorage), recording results (including the daily streak), badges and coins. |
-| `weekly.js`, `skins.js`, `avatars.js`, `friends.js` | This week's numbers for the recap, arrow skins, avatars and the friends list. |
+| `weekly.js`, `season.js`, `skins.js`, `avatars.js`, `friends.js` | This week's numbers for the recap, the monthly season, arrow skins, avatars and the friends list. |
+| `challenge.js` | Challenge links: the code that names a board, and reading one from the page's address. |
+| `pwa.js`, `music.js`, `../sw.js` | Installing the game, offline play and the daily reminder; the synthesised background music; the service worker. |
+| `admin.js`, `../admin.html` | The admin page (see "Moderating the leaderboard"). |
 | `analytics.js` | Anonymous usage counts (see "Usage statistics"). |
-| `week.js`, `format.js`, `icons.js`, `dom.js`, `feedback.js` | Weekly calendar, formatting, SVG snippets, DOM helpers, sound and vibration. |
+| `week.js`, `format.js`, `icons.js`, `dom.js`, `feedback.js`, `motion.js` | Weekly calendar, formatting, SVG snippets, DOM helpers, sound and vibration, reduced motion and colour-blind mode. |
 | `router.js`, `ui/*.js` | Screen switching and one file per screen or dialog (home, map, event, shop, badges, settings, leaderboard, level preview, how to play, language menu, avatar picker, weekly recap, sharing, modal). |
-| `game/*.js` | The game screen: shared state (`state.js`), tap rules, bosses, superpowers, clock, animations, canvas rendering, pointer and keyboard input, and win/lose handling (`outcome.js`). |
+| `game/*.js` | The game screen: shared state (`state.js`), tap rules, bosses, superpowers, hint and undo (`assist.js`), clock, animations, canvas rendering, pointer and keyboard input, and win/lose handling (`outcome.js`). |
 | `main.js` | Entry point: starts every module. |
 
 Common changes:
@@ -96,6 +99,32 @@ Common changes:
 - New skin: add an entry to `SKINS` in `skins.js` and its name (`skin.<id>`) to the language files.
 - New badge: add an entry to `BADGES` in `badges.js` and `badge.<id>.name` / `badge.<id>.desc` to the
   language files.
+
+## Game modes and help
+- **Endless** (`endlessCfg` in `levels.js`): boards that grow harder one after another. Hearts carry
+  over and one comes back per cleared board; the seconds left on each board become points. It has
+  its own leaderboard tab.
+- **Season**: the points of every finished game add up per calendar month (`season.js`) and feed a
+  leaderboard tab that starts again on the 1st.
+- **Hint and undo** (`game/assist.js`): three free hints and one free undo per board. Undo gives back
+  the heart of the last mistake, also when that mistake ended the game.
+- **Challenges**: the Share button on a result sends a picture card and a link such as `/?c=l12&s=4800`.
+  Whoever opens it plays the same board and sees who won. A board the opener has not unlocked is
+  played as practice: no coins, no progress. The codes are explained in `challenge.js`.
+
+## Installing, offline play and reminders
+The game is a PWA: `public/manifest.webmanifest` plus the service worker `public/sw.js`. Files are
+always fetched from the network when it answers, and the worker's copies are used only offline, so
+a deploy is never held back by a cache.
+
+The daily reminder is a Web Push message sent by the Worker's hourly cron trigger (`sendReminders`
+in `src/worker.js`) to players who switched it on and have not played today's daily challenge by
+18:00 their time. It needs a key pair: the public half is `VAPID_PUBLIC_KEY` in `wrangler.jsonc`,
+the private half is the secret `VAPID_PRIVATE_KEY` (a JWK). To replace them, generate a P-256 key
+pair, put the public key (uncompressed point, base64url) in `wrangler.jsonc` and run
+`npx wrangler secret put VAPID_PRIVATE_KEY`; existing reminders then stop until players switch
+them on again. On iPhones, reminders only work after the game is added to the home screen. One
+cron run sends at most 40 reminders (`MAX_REMINDERS_PER_RUN`), a limit of the free Workers plan.
 
 ## Friends, sharing and avatars
 - Friends are a list of player names kept in the player's browser. Names are unique, so a name is
@@ -174,7 +203,19 @@ Every refused name is written to the Worker's logs with the player id and the co
 came from (never the IP address). To see them: Cloudflare dashboard → Workers & Pages →
 `arrows-game` → Logs, and search for `name refused`. Logs are kept for a few days.
 
-The filter only checks names as they are posted. To find and remove names that got in earlier:
+Players can report a name from the leaderboard (tap a name, then "Report name").
+
+**Admin page.** Open `/admin` on your site and enter the admin key. It lists reported names and
+suspicious scores, refused names, all players (rename, remove the name, delete) and the usage counts.
+Set the key once with `npx wrangler secret put ADMIN_KEY`; choose a long random one.
+
+**Cheat checks.** The server refuses scores no real game can produce: more stars or bosses than the
+cleared levels allow, a total above what those levels can pay (`TOTAL_CAPS` in `src/worker.js`), or
+a daily score without a real game. A player who reports many more levels than the time since their
+last post allows is kept but marked for the admin page. The server does not replay games, so a
+score inside those limits is still taken on trust.
+
+The same can be done from the terminal:
 ```bash
 npx wrangler d1 execute arrows-game --remote --command "SELECT id, nick, total, d_score FROM scores ORDER BY total DESC LIMIT 20"
 npx wrangler d1 execute arrows-game --remote --command "DELETE FROM scores WHERE id='<player-id>'"

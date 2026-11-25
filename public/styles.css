@@ -82,6 +82,10 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:pointer}
 .zoom{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
 .zoom .ib{width:40px;height:40px;border-radius:12px;opacity:.92}
+.assist{position:absolute;left:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
+.assist .ib{width:40px;height:40px;border-radius:12px;opacity:.92;position:relative}
+.assist .ib:disabled{opacity:.35;cursor:default}
+.assist .n{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:12px;font-weight:800;display:grid;place-items:center;padding:2px 4px 0}
 .toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 14px 6px;border-radius:12px;font-size:15px;pointer-events:none;opacity:0;transition:opacity .3s;max-width:80%;text-align:center}
 .toast.on{opacity:.95}
 .pop{position:absolute;transform:translate(-50%,-50%);font:800 20px/1 "Baloo 2",sans-serif;color:var(--acc);pointer-events:none;animation:up .9s ease-out forwards;white-space:nowrap;text-shadow:0 2px 0 var(--paper)}
@@ -100,7 +104,8 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 .item .tx{flex:1}.item .tx b{display:block;font-size:18px;line-height:1.1}.item .tx small{color:var(--mute);font-size:14px;line-height:1.25;display:block}
 .item .own{color:var(--mute);font-size:13px}
 .price{display:inline-flex;align-items:center;gap:4px}.price svg{width:18px;height:18px}
-.tabs{display:flex;gap:6px;padding:0 14px 10px}
+.tabs{display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;min-width:76px}
 .tab{flex:1;min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--paper);font-weight:800;cursor:pointer;padding:6px 4px 3px}
 /* long words in some languages: shrink a little, then break rather than overflow */
 .tab{font-size:14px;line-height:1.1;overflow-wrap:anywhere;hyphens:auto}
@@ -247,3 +252,16 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
 @media(max-width:360px){.pw{font-size:0}.pw svg.i{width:22px;height:22px}.levels{gap:8px}.hero svg{width:92px;height:92px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :root[data-reduce-motion] *{animation:none!important;transition:none!important}
+
+/* Leaderboard: a name is a button that opens the player's card */
+button.nm{border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:6px 0 4px;min-width:0}
+.pcard{display:grid;justify-items:center;gap:6px;margin-bottom:12px}.pcard .av{width:64px;height:64px}.pcard h2{margin:0;overflow-wrap:anywhere}
+/* Challenges */
+.duel{margin:4px 0 10px!important;padding:8px 12px 6px;border-radius:12px;background:var(--soft);color:var(--ink)!important;font-weight:800}
+.duel.won{background:var(--gold);color:#161b3d!important}
+/* Settings: long texts (privacy) and small actions */
+.mcard .legal{text-align:left;font-size:15px;color:var(--ink);margin:0 0 10px}
+.set .btn{min-height:40px}
+/* Colour-blind mode: stronger text and borders. The board adds patterns (game/render.js). */
+:root[data-contrast]{--mute:light-dark(#2e3350,#d3d7f5);--line:light-dark(#8088a8,#6a72a8);--dot:light-dark(#aab0cc,#4a528a)}
+:root[data-contrast] .btn,:root[data-contrast] .tile,:root[data-contrast] .ib{border-width:3px}

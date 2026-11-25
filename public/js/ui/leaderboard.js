@@ -3,6 +3,7 @@
 
 import { $, $$, esc, onDataClick } from '../dom.js';
 import { player, persist, totalScore, totalStars, clearedCount, bossesBeaten, eventScore } from '../player.js';
+import { seasonId, seasonScore } from '../season.js';
 import { weekInfo } from '../week.js';
 import { today, clock, num, duration } from '../format.js';
 import { registerScreen, currentScreen } from '../router.js';
@@ -11,7 +12,7 @@ import { ico } from '../icons.js';
 import { avatarOf, avatarHtml } from '../avatars.js';
 import { friends, isFriend, addFriend, removeFriend } from '../friends.js';
 import { track } from '../analytics.js';
-import { modal } from './modal.js';
+import { modal, confirmDialog } from './modal.js';
 import { openAvatarPicker } from './avatar-picker.js';
 import { lockOut } from './lockout.js';
 
@@ -32,7 +33,7 @@ const uuid = () => crypto.randomUUID
   ? crypto.randomUUID()
   : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
 
-const playerId = stored('ae-player-id', uuid);
+export const playerId = stored('ae-player-id', uuid);
 const token = stored('ae-player-token', () => uuid() + uuid());
 
 // ---------- state ----------
@@ -66,6 +67,8 @@ const TABS = {
     sub: r => t('board.bosses', { n: r.bosses || 0 }), about: () => t('board.about.total'),
   },
   stars: { includes: r => r.stars > 0, value: r => r.stars, format: v => esc(v) + '★', about: () => t('board.about.stars') },
+  season: { includes: r => r.sKey === seasonId() && r.sScore > 0, value: r => r.sScore, about: () => t('board.about.season') },
+  endless: { includes: r => r.endless > 0, value: r => r.endless, about: () => t('board.about.endless') },
 };
 
 // ---------- network ----------
@@ -82,6 +85,7 @@ async function postScores(nick) {
     total: totalScore(), stars: totalStars(), cleared: clearedCount(), bosses: bossesBeaten(),
     dDate: player.daily.d || '', dScore: player.daily.score || 0, dTime: player.daily.time || 0,
     eKey: wk.key, eScore: eventScore(wk.key),
+    sKey: seasonId(), sScore: seasonScore(), endless: player.endless.best,
   };
   try {
     const res = await fetch('/api/score', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
@@ -108,7 +112,7 @@ export async function sync() {
 async function fetchBoard() {
   try {
     // Friends are asked for by name, so they are listed even when they are outside the top lists.
-    const query = new URLSearchParams({ d: today(), e: weekInfo().key });
+    const query = new URLSearchParams({ d: today(), e: weekInfo().key, s: seasonId() });
     for (const name of friends()) query.append('f', name);
     const res = await fetch('/api/scores?' + query, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -134,7 +138,9 @@ function friendButton(r, mine) {
 
 function rowHtml(r, rank, format = num) {
   const mine = r.id === playerId, name = r.nick || t('board.player', { id: String(r.id).slice(0, 4).toUpperCase() });
-  return `<div class="row ${mine ? 'me' : ''} ${rank <= 3 ? 'g' + rank : ''}"><span class="rk">${rank}</span>${avatarHtml(avatarOf(r.avatar, r.id))}<span class="nm">${esc(name)}${mine ? ' ' + t('you') : ''}</span><small style="color:var(--mute)">${esc(r.sub)}</small><span class="vl">${format(r.value)}</span>${friendButton(r, mine)}</div>`;
+  // Other players' names open their card, which is where a name can be reported.
+  const label = mine ? `<span class="nm">${esc(name)} ${t('you')}</span>` : `<button class="nm" data-card="${esc(r.id)}">${esc(name)}</button>`;
+  return `<div class="row ${mine ? 'me' : ''} ${rank <= 3 ? 'g' + rank : ''}"><span class="rk">${rank}</span>${avatarHtml(avatarOf(r.avatar, r.id))}${label}<small style="color:var(--mute)">${esc(r.sub)}</small><span class="vl">${format(r.value)}</span>${friendButton(r, mine)}</div>`;
 }
 
 function emptyText(view) {
@@ -228,13 +234,41 @@ function toggleFriend(name) {
   renderBoard();
 }
 
-/** A link shared by another player (?friend=Name) makes them a friend when the game opens. */
-async function acceptInvite() {
+// ---------- player card and reports ----------
+
+async function report(id) {
+  let ok = false;
+  try {
+    const res = await fetch('/api/report', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: playerId, token, target: id }) });
+    ok = res.ok;
+  } catch { /* offline */ }
+  if (ok) track('report');
+  $('#bnote').textContent = t(ok ? 'report.sent' : 'report.failed');
+}
+
+/** A small dialog about one player: add or remove them as a friend, or report their name. */
+function openPlayerCard(id) {
+  const r = rows.find(row => row.id === id);
+  if (!r) return;
+  const name = r.nick || t('board.player', { id: String(r.id).slice(0, 4).toUpperCase() }), friend = r.nick && isFriend(r.nick);
+  modal(`<div class="pcard">${avatarHtml(avatarOf(r.avatar, r.id))}<h2>${esc(name)}</h2></div>
+  <div style="display:grid;gap:10px">${r.nick ? `<button class="btn" data-act="friend">${t(friend ? 'friend.remove' : 'friend.add')}</button><button class="btn" data-act="report">${t('report')}</button>` : ''}<button class="btn main" data-act="close">${t('close')}</button></div>`,
+  {
+    friend: () => toggleFriend(r.nick),
+    report: () => confirmDialog(esc(t('report.ask', { name })), t('report'), () => report(id)),
+  });
+}
+
+/**
+ * A link shared by another player (?friend=Name) makes them a friend when the game opens.
+ * Says so in a dialog, unless `quiet` (a challenge link has its own dialog to show).
+ */
+export async function acceptInvite(quiet = false) {
   const name = new URLSearchParams(location.search).get('friend');
   if (!name) return;
-  history.replaceState(null, '', location.pathname);
+  if (!quiet) history.replaceState(null, '', location.pathname);
   const added = await befriend(name);
-  if (added) modal(`<h2>${t('friends')}</h2><p>${esc(t('friend.added', { name: added }))}</p><div class="acts"><button class="btn main" data-act="close">${t('ok')}</button></div>`);
+  if (added && !quiet) modal(`<h2>${t('friends')}</h2><p>${esc(t('friend.added', { name: added }))}</p><div class="acts"><button class="btn main" data-act="close">${t('ok')}</button></div>`);
 }
 
 // Counted in characters, not UTF-16 units, so an emoji at the limit is never cut in half.
@@ -272,7 +306,7 @@ export function initLeaderboard() {
   $('#friendsOnly').onclick = () => { friendsOnly = !friendsOnly; renderBoard(); };
   $('#friendAddBtn').onclick = addFriendFromForm;
   onDataClick('#rows', 'friend', toggleFriend);
-  acceptInvite();
+  onDataClick('#rows', 'card', openPlayerCard);
   // Returning players: make sure the server has their latest scores.
-  if (totalScore() > 0 || player.daily.d || eventScore(weekInfo().key)) sync();
+  if (totalScore() > 0 || player.daily.d || eventScore(weekInfo().key) || player.endless.best) sync();
 }

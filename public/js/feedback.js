@@ -11,6 +11,10 @@ const TONES = {
   crack: { type: 'sawtooth', from: 1800, to: 400,  sweep: .08, gain: .08, fade: .1 },
   power: { type: 'sine',     from: 400,  to: 1600, sweep: .25, gain: .12, fade: .3 },
   win:   { type: 'sine',     notes: [523, 659, 784, 1046],     gain: .14, fade: .55 },
+  lose:  { type: 'triangle', notes: [392, 330, 262, 196],      gain: .12, fade: .6 },
+  hint:  { type: 'sine',     notes: [880, 1175],               gain: .1,  fade: .3 },
+  coin:  { type: 'square',   notes: [988, 1319],               gain: .06, fade: .25 },
+  tap:   { type: 'sine',     from: 700,  to: 500,  sweep: .04, gain: .05, fade: .06 },
 };
 
 // The combo sound climbs in pitch with the combo count.
@@ -21,11 +25,18 @@ function comboTone(combo) {
 
 let audio = null;
 
-/** Plays a sound: out, combo (pass the combo count), gold, bump, boss, crack, power or win. */
+/** The one audio output, created on first use (browsers only allow that after a tap). */
+export function audioContext() {
+  audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+  if (audio.state === 'suspended') audio.resume();
+  return audio;
+}
+
+/** Plays a sound: out, combo (pass the combo count), gold, bump, boss, crack, power, win, lose, hint, coin or tap. */
 export function sfx(kind, combo = 1) {
   if (!player.snd) return;
   try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    audioContext();
     const tone = kind === 'combo' ? comboTone(combo) : TONES[kind] || TONES.win;
     const t = audio.currentTime, osc = audio.createOscillator(), gain = audio.createGain();
     osc.connect(gain);
@@ -41,6 +52,11 @@ export function sfx(kind, combo = 1) {
     osc.start(t);
     osc.stop(t + .6);
   } catch { /* audio unavailable */ }
+}
+
+/** A soft click on every button, so the whole game answers to touch. */
+export function initTapSound() {
+  document.addEventListener('click', e => { if (e.target.closest('button')) sfx('tap'); });
 }
 
 export function vibrate(pattern) {

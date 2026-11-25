@@ -7,6 +7,7 @@ import { today, yesterday } from './format.js';
 import { t } from './i18n.js';
 
 const REPLAY_COINS = 5;
+const ENDLESS_BOARD_COINS = 8;
 
 /** The player's earlier result on this board as { b: score, t: seconds }, if any. */
 export function bestFor(cfg) {
@@ -78,6 +79,14 @@ export function recordWin(cfg, run) {
   if (run.timeLeft >= cfg.limit * .5) st.speed++;
   st.bestCombo = Math.max(st.bestCombo, run.bestCombo);
   return { ...result, coins: result.coins * coinMultiplier() };
+}
+
+/** Records a finished Endless run. Returns { coins, isNew }; the caller pays out and saves. */
+export function recordEndless({ score, boards, bestCombo }) {
+  const isNew = score > player.endless.best;
+  if (isNew) player.endless = { best: score, boards };
+  player.st.bestCombo = Math.max(player.st.bestCombo, bestCombo);
+  return { coins: boards * ENDLESS_BOARD_COINS * coinMultiplier(), isNew };
 }
 
 /** Records a finished Time Attack run. Returns { coins, isNew }; the caller pays out and saves. */

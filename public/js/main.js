@@ -2,7 +2,7 @@
 // The language loads first, because every screen draws its texts from it.
 
 import { initLanguage } from './i18n.js';
-import { applyMotionSetting } from './motion.js';
+import { applyMotionSetting, applyContrastSetting } from './motion.js';
 import { trackVisit } from './analytics.js';
 import { rollWeek } from './weekly.js';
 import { showLastWeekRecap } from './ui/recap.js';
@@ -14,12 +14,17 @@ import { initMap } from './ui/map.js';
 import { initEvent } from './ui/event.js';
 import { initShop } from './ui/shop.js';
 import { initBadges } from './ui/badges.js';
-import { initLeaderboard } from './ui/leaderboard.js';
+import { initLeaderboard, acceptInvite } from './ui/leaderboard.js';
+import { openChallenge } from './ui/challenge.js';
+import { initPwa } from './pwa.js';
+import { initMusic } from './music.js';
+import { initTapSound } from './feedback.js';
 import { initLockout } from './ui/lockout.js';
 import { initGame } from './game/index.js';
 
 await initLanguage();
 applyMotionSetting();
+applyContrastSetting();
 initModal();
 initLanguageMenu();
 initNavigation();
@@ -33,5 +38,11 @@ initGame();
 show('home');
 initLockout();
 rollWeek();
-showLastWeekRecap();
+// A challenge link takes the place of the weekly recap: one dialog at a time.
+const invited = new URLSearchParams(location.search).has('c');
+acceptInvite(invited); // reads the link's friend before openChallenge clears the address
+if (!openChallenge()) showLastWeekRecap();
 trackVisit();
+initMusic();
+initTapSound();
+initPwa();

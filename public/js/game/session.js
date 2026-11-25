@@ -3,7 +3,7 @@
 import { RUSH_SECONDS } from '../content.js';
 import { headDir } from '../grid.js';
 import { player, persist } from '../player.js';
-import { build, rushCfg } from '../levels.js';
+import { build, rushCfg, endlessCfg } from '../levels.js';
 import { weekInfo } from '../week.js';
 import { show } from '../router.js';
 import { t } from '../i18n.js';
@@ -12,6 +12,7 @@ import { game, resetRun } from './state.js';
 import { arrowWeight } from './arrows.js';
 import { resizeBoard, focusBoard } from './render.js';
 import { renderBoardHeader, renderHud, renderPowers, toast } from './hud.js';
+import { resetAssist } from './assist.js';
 
 const FIRST_ICE_LEVEL = 37;       // first level of the Frozen world
 const BOSS_FIRST_ATTACK_DELAY = 2; // extra seconds before a boss's first attack
@@ -46,6 +47,7 @@ export function loadBoard(cfg) {
     boss, bossNext: boss ? boss.every + BOSS_FIRST_ATTACK_DELAY : 0, attackIndex: 0,
   });
   game.bossMax = game.bossHP = arrows.reduce((total, a) => total + arrowWeight(a), 0);
+  resetAssist();
   renderBoardHeader();
   resizeBoard();
   renderHud();
@@ -53,6 +55,7 @@ export function loadBoard(cfg) {
 
 export function startGame(cfg) {
   resetRun();
+  game.challenge = cfg.challenge || null;
   player.st.plays++;
   persist();
   track('game_start');
@@ -74,11 +77,16 @@ export function startGame(cfg) {
 /** Starts a Time Attack run from its first board. */
 export const startRush = (wk = weekInfo()) => startGame(rushCfg(wk, 1));
 
-/** Plays the current mode again from the start. */
+/** Starts an Endless run from its first board. */
+export const startEndless = () => startGame(endlessCfg(1));
+
+// Runs of several boards start again from their first one.
+const FIRST_BOARD = { rush: cfg => rushCfg(cfg.wk, 1), endless: () => endlessCfg(1) };
+
+/** Plays the current mode again from the start, against the same challenge if there is one. */
 export function restartGame() {
-  const { cfg } = game;
-  if (cfg.kind === 'rush') startRush(cfg.wk);
-  else startGame(cfg);
+  const { cfg, challenge } = game, first = FIRST_BOARD[cfg.kind];
+  startGame(first ? { ...first(cfg), challenge } : cfg);
 }
 
 // Where "back" leads from each kind of game.
@@ -87,6 +95,7 @@ const EXITS = {
   daily: () => show('home'),
   event: () => show('event'),
   rush: () => show('event'),
+  endless: () => show('home'),
 };
 
 export function exitGame() {

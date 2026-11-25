@@ -8,6 +8,7 @@ import { pointAt, canLeave } from './arrows.js';
 import { requestFrame } from './frame.js';
 import { cursorArrow } from './keyboard.js';
 import { activeSkin } from '../skins.js';
+import { player } from '../player.js';
 
 const canvas = $('#cv'), ctx = canvas.getContext('2d');
 const FULL_CIRCLE = Math.PI * 2;
@@ -95,11 +96,15 @@ function drawCursor(lineWidth) {
   ctx.globalAlpha = 1;
 }
 
+// Colour-blind mode: each special arrow also differs in shape, as [dash, gap] in line widths.
+const PATTERNS = { ice: [1.2, 1.6], gold: [3.2, 1.4], red: [.4, 1.5], radar: [2, 1.2] };
+
 /** Arrows are batched by look, so each look is stroked once. Returns true if still animating. */
 function drawArrows(colours, now) {
   const skin = activeSkin(), onDark = (game.cfg && game.cfg.dark) || theme.dark;
   const lineWidth = Math.max(1.4, view.scale * .14) * (skin.width || 1);
   const radar = now < game.radarUntil, blinkOn = Math.floor(now / 240) % 2;
+  const hinted = game.hint && now < game.hint.until ? game.hint.id : -1;
   const looks = {
     ink: { colour: skin.ink ? skin.ink[onDark ? 1 : 0] : colours.ink }, // only plain arrows wear the skin
     red: { colour: RED },
@@ -107,7 +112,7 @@ function drawArrows(colours, now) {
     ice: { colour: ICE, bold: true, core: colours.paper },
     gold: { colour: GOLD, bold: true, core: '#fff3c4' },
   };
-  let animating = radar;
+  let animating = radar || hinted !== -1;
   ctx.lineCap = ctx.lineJoin = 'round';
   drawCursor(lineWidth);
 
@@ -116,18 +121,20 @@ function drawArrows(colours, now) {
     if (a.state === 'poof') { drawPoof(a, lineWidth); continue; }
     let look = a.ice ? 'ice' : a.gold ? 'gold' : 'ink';
     if (a.errUntil > now) { look = 'red'; animating = true; }
-    else if (radar && blinkOn && canLeave(a)) look = 'radar';
+    else if (blinkOn && (a.id === hinted || (radar && canLeave(a)))) look = 'radar';
     const batch = looks[look];
     batch.line = batch.line || new Path2D();
     batch.heads = batch.heads || new Path2D();
     traceArrow(batch.line, batch.heads, a);
   }
 
-  for (const { colour, bold, core, line, heads } of Object.values(looks)) {
+  for (const [name, { colour, bold, core, line, heads }] of Object.entries(looks)) {
     if (!line) continue;
     ctx.strokeStyle = ctx.fillStyle = colour;
     ctx.lineWidth = lineWidth * (bold ? 1.25 : 1);
+    if (player.cb && PATTERNS[name]) ctx.setLineDash(PATTERNS[name].map(n => n * lineWidth));
     ctx.stroke(line);
+    ctx.setLineDash([]);
     ctx.fill(heads);
     ctx.lineWidth = lineWidth * .45;
     ctx.stroke(heads);

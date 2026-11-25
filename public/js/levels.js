@@ -1,4 +1,4 @@
-// Level configs: what to play. Each mode (world level, daily, event stage, Time Attack board)
+// Level configs: what to play. Each mode (world level, daily, event stage, Time Attack or Endless board)
 // describes its board with the same fields, so the game itself never needs to know the details.
 //
 // Common fields: kind, title + subtitle (HUD), col (accent colour), W, H, seed, maxL (longest
@@ -31,8 +31,7 @@ export function levelCfg(g) {
 }
 
 /** Today's daily challenge: the same board for everyone, seeded from the date. */
-export function dailyCfg() {
-  const date = today();
+export function dailyCfg(date = today()) {
   let hash = 7;
   for (const ch of date) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
   return {
@@ -58,9 +57,20 @@ export function stageCfg(wk, n) {
 export function rushCfg(wk, n) {
   const W = Math.min(18, 7 + Math.floor(n * 1.5));
   return {
-    kind: 'rush', ev: wk.ev, wk, stage: n, title: wk.ev.name, subtitle: t('title.event'),
+    kind: 'rush', ev: wk.ev, wk, stage: n, title: wk.ev.name, subtitle: t('title.event'), resultLabel: wk.ev.name,
     col: wk.ev.col, W, H: boardHeight(W), seed: wk.id * 777 + n * 13,
     maxL: Math.min(10, 4 + n), bias: .9, ice: n > 4 ? .08 : 0, gold: .06, sec: 1, dark: false,
+  };
+}
+
+/** Board `n` (1-based) of an Endless run: the same boards for everyone, harder every time. */
+export function endlessCfg(n) {
+  const W = Math.min(22, 7 + n);
+  return {
+    kind: 'endless', stage: n, title: t('endless'), subtitle: t('hud.board', { n }), resultLabel: t('endless'),
+    col: '#0f9d76', W, H: boardHeight(W), seed: 9000 + n * 17,
+    maxL: Math.min(13, 4 + n), bias: .88, ice: Math.min(.3, Math.max(0, n - 3) * .04), gold: .05,
+    sec: Math.max(1.1, 2.2 - n * .08), dark: false,
   };
 }
 

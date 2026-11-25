@@ -18,6 +18,13 @@
 			"migrations_dir": "migrations"
 		}
 	],
+	"triggers": {
+		"crons": ["0 * * * *"]
+	},
+	"vars": {
+		"VAPID_PUBLIC_KEY": "BJYWRAj-ZT176MxIpH2LIKbT9fzhwhrjzwIni688VoMD-V-8xxsMc2WtMY5GakuELkSdlYvnz3JqSw9YVi_LE_c",
+		"VAPID_SUBJECT": "https://arrows-game.univocal.workers.dev"
+	},
 	"observability": {
 		"enabled": true
 	}

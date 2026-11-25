@@ -18,6 +18,7 @@ export function addCoins(n) {
 export function spendCoins(n) {
   if (player.coins < n) return false;
   addCoins(-n);
+  sfx('coin');
   return true;
 }
 
@@ -26,6 +27,5 @@ export function buyPower(power) {
   if (!spendCoins(power.price)) return false;
   player.pw[power.id]++;
   persist();
-  sfx('power');
   return true;
 }

@@ -1,16 +1,20 @@
-// Settings dialog: sound, vibration, motion, language, help and the progress reset.
+// Settings dialog: sound, music, vibration, motion, contrast, reminder, language, install,
+// privacy, help and the progress reset.
 
 import { $, $$ } from '../dom.js';
 import { player, persist, resetProgress } from '../player.js';
 import { show } from '../router.js';
 import { t } from '../i18n.js';
-import { applyMotionSetting } from '../motion.js';
+import { applyMotionSetting, applyContrastSetting } from '../motion.js';
+import { applyMusicSetting } from '../music.js';
+import { canInstall, install, canRemind, setReminder } from '../pwa.js';
 import { languageButtonContent } from './language-menu.js';
 import { openHelp } from './help.js';
 import { modal, closeModal } from './modal.js';
 
 // Each switch flips a boolean of the same name in the save data.
-const SWITCHES = [['snd', 'sound'], ['hap', 'vibration'], ['rm', 'motion'], ['stats', 'usage.stats']];
+const SWITCHES = [['snd', 'sound'], ['mus', 'music'], ['hap', 'vibration'], ['rm', 'motion'], ['cb', 'contrast'], ['stats', 'usage.stats']];
+const PRIVACY_PARAGRAPHS = 6;
 
 const switchHtml = ([key, label]) =>
   `<div class="set"><span>${t(label)}</span><button class="sw ${player[key] ? 'on' : ''}" data-switch="${key}" aria-label="${t(label)}"></button></div>`;
@@ -25,6 +29,29 @@ function toggle(button) {
   persist();
   button.classList.toggle('on', player[key]);
   applyMotionSetting();
+  applyContrastSetting();
+  applyMusicSetting();
+}
+
+// The reminder needs the browser's permission, so its switch only moves once that is settled.
+const reminderHtml = () => (canRemind() ?
+  `<div class="set"><span>${t('remind')}<small class="note" id="sRemindNote" style="display:block;margin:0"></small></span><button class="sw ${player.remind ? 'on' : ''}" id="sRemind" aria-label="${t('remind')}"></button></div>` : '');
+
+async function toggleReminder(button) {
+  const wanted = !player.remind;
+  button.disabled = true;
+  const on = await setReminder(wanted);
+  button.disabled = false;
+  button.classList.toggle('on', on);
+  $('#sRemindNote').textContent = wanted && !on ? t('remind.blocked') : on ? t('remind.on') : '';
+}
+
+const installHtml = () => (canInstall() ?
+  `<div class="set"><span>${t('install')}</span><button class="btn" id="sInstall">${t('install.go')}</button></div>` : '');
+
+function openPrivacy() {
+  const paragraphs = Array.from({ length: PRIVACY_PARAGRAPHS }, (_, i) => `<p class="legal">${t('privacy.' + (i + 1))}</p>`).join('');
+  modal(`<h2>${t('privacy')}</h2>${paragraphs}<div class="acts"><button class="btn main" data-act="back">${t('back')}</button></div>`, { back: openSettings });
 }
 
 // The first tap arms the button, the second one resets.
@@ -41,9 +68,11 @@ function confirmReset(button) {
 }
 
 export function openSettings() {
-  modal(`<h2>${t('settings')}</h2>${SWITCHES.map(switchHtml).join('')}${languageHtml()}
-  <div class="set"><span>${t('reset.label')}</span><button class="btn" id="sReset" style="min-height:40px">${t('reset')}</button></div><div class="acts"><button class="btn" data-act="help">${t('help.title')}</button><button class="btn main" data-act="close">${t('done')}</button></div>`,
-  { help: () => openHelp(openSettings) });
+  modal(`<h2>${t('settings')}</h2>${SWITCHES.map(switchHtml).join('')}${reminderHtml()}${languageHtml()}${installHtml()}
+  <div class="set"><span>${t('reset.label')}</span><button class="btn" id="sReset">${t('reset')}</button></div><div class="acts"><button class="btn" data-act="help">${t('help.title')}</button><button class="btn" data-act="privacy">${t('privacy')}</button><button class="btn main" data-act="close">${t('done')}</button></div>`,
+  { help: () => openHelp(openSettings), privacy: openPrivacy });
   $$('#mcard [data-switch]').forEach(b => { b.onclick = () => toggle(b); });
+  if ($('#sRemind')) $('#sRemind').onclick = e => toggleReminder(e.currentTarget);
+  if ($('#sInstall')) $('#sInstall').onclick = () => { closeModal(); install(); };
   $('#sReset').onclick = e => confirmReset(e.currentTarget);
 }

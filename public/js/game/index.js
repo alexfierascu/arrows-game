@@ -10,6 +10,7 @@ import { stepAnimations } from './animations.js';
 import { draw, initRender } from './render.js';
 import { initInput } from './input.js';
 import { initPowers } from './powers.js';
+import { initAssist } from './assist.js';
 import { initKeyboard } from './keyboard.js';
 import { startClock } from './clock.js';
 import { restartGame, exitGame } from './session.js';
@@ -35,6 +36,7 @@ export function initGame() {
   initRender();
   initInput();
   initPowers();
+  initAssist();
   initKeyboard(openPauseMenu);
   startClock();
   $('#pauseBtn').onclick = openPauseMenu;
