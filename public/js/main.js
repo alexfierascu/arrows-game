@@ -4,6 +4,7 @@
 import { initLanguage } from './i18n.js';
 import { initNavigation, show } from './router.js';
 import { initModal } from './ui/modal.js';
+import { initLanguageMenu } from './ui/language-menu.js';
 import { initHome } from './ui/home.js';
 import { initMap } from './ui/map.js';
 import { initEvent } from './ui/event.js';
@@ -14,6 +15,7 @@ import { initGame } from './game/index.js';
 
 await initLanguage();
 initModal();
+initLanguageMenu();
 initNavigation();
 initHome();
 initMap();

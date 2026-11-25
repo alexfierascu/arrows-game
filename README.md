@@ -93,8 +93,8 @@ Common changes:
 
 ## Languages
 The game speaks English, Spanish, French, Italian, German, Romanian, Greek and Polish. It starts in
-the browser's language when that is one of these, otherwise in English, and the player can switch in
-Settings. The choice is remembered in that browser.
+the browser's language when that is one of these, otherwise in English. The player can switch with
+the flag button on the home screen or in Settings; the choice is remembered in that browser.
 
 - Every text the player sees lives in `public/js/lang/<code>.js`. `en.js` is the reference: the other
   files have the same keys and the same `{placeholders}`. Anything missing falls back to English.
@@ -104,8 +104,8 @@ Settings. The choice is remembered in that browser.
   a new piece of content needs its texts added to each language (or at least to `en.js`).
 - A text can be a set of plural forms, for example `{ "one": "{n} boss", "other": "{n} bosses" }`,
   picked by `{n}` using the language's own plural rules.
-- To add a language: copy `lang/en.js`, translate the values, and add its code and name to
-  `LANGUAGES` in `i18n.js`.
+- To add a language: copy `lang/en.js`, translate the values, add its code and name to `LANGUAGES`
+  in `i18n.js`, and draw its flag in `flags.js`.
 - To fix a translation: edit the value in that language's file. Nothing else needs to change.
 
 Two things must stay stable, because players' browsers and the leaderboard depend on them:
