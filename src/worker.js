@@ -1,10 +1,13 @@
 // Arrows Escape — Cloudflare Worker: serves the game (static assets) and the leaderboard API (D1).
 //   GET    /api/scores?d=YYYY-MM-DD&e=<eventKey>   top players for each leaderboard tab
-//   POST   /api/score                              create/update your own row (id + secret token)
+//   POST   /api/score                              create/update your own row (id + secret token);
+//                                                  409 when the name belongs to another player
 //   DELETE /api/score/<id>                         admin only: header "Authorization: Bearer <ADMIN_KEY>"
 
 const LEADERBOARD_SIZE = 100;
 const NICK_MAX_LENGTH = 16;
+// A name is released for others once its owner has not posted a score for this long.
+const NICK_HOLD_MS = 90 * 24 * 60 * 60 * 1000;
 
 // Score fields a player can post: the name used in JSON -> the column in the `scores` table.
 const FIELDS = {
@@ -27,6 +30,8 @@ const UPSERT = `
   VALUES (?, ?, ${COLUMNS.map(() => "?").join(", ")}, ?)
   ON CONFLICT(id) DO UPDATE SET ${COLUMNS.map((c) => `${c} = excluded.${c}`).join(", ")}, updated_at = excluded.updated_at
   WHERE scores.token_hash = excluded.token_hash`;
+
+const RELEASE_STALE_NICK = "UPDATE scores SET nick = '' WHERE nick = ? COLLATE NOCASE AND id <> ? AND updated_at < ?";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -93,9 +98,18 @@ async function postScore(request, env) {
   try { body = await request.json(); } catch { return error("bad json", 400); }
   const score = parseScore(body);
   if (score.error) return error(score.error, 400);
-  const values = Object.keys(FIELDS).map((key) => score.values[key]);
-  const result = await env.DB.prepare(UPSERT).bind(score.id, await sha256(score.token), ...values, Date.now()).run();
-  if (!result.meta.changes) return error("this player id belongs to someone else", 403);
+  const values = Object.keys(FIELDS).map((key) => score.values[key]), now = Date.now(), { nick } = score.values;
+  const statements = [env.DB.prepare(UPSERT).bind(score.id, await sha256(score.token), ...values, now)];
+  if (nick) statements.unshift(env.DB.prepare(RELEASE_STALE_NICK).bind(nick, score.id, now - NICK_HOLD_MS));
+  let results;
+  try {
+    results = await env.DB.batch(statements);
+  } catch (err) {
+    // The only unique index besides the primary key is the one on names (migrations/0002).
+    if (/UNIQUE constraint failed/i.test(String(err && err.message))) return error("name taken", 409);
+    throw err;
+  }
+  if (!results.at(-1).meta.changes) return error("this player id belongs to someone else", 403);
   return json({ ok: true });
 }
 

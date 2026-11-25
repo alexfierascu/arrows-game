@@ -14,7 +14,7 @@ public/index.html          markup for every screen
 public/styles.css          all styling
 public/js/                 the game, as ES modules (see "Code map" below)
 src/worker.js              API: GET /api/scores, POST /api/score, DELETE /api/score/:id (admin)
-migrations/0001_init.sql   D1 schema
+migrations/                D1 schema, one numbered file per change
 wrangler.jsonc             Worker + D1 configuration
 ```
 
@@ -106,6 +106,10 @@ Or set an admin key once (`npx wrangler secret put ADMIN_KEY`) and call
 ## Good to know
 - Players have no accounts. Each browser gets a random player id plus a secret token, so nobody can
   overwrite someone else's row. Progress is stored in that browser.
+- Player names are unique, ignoring upper and lower case (`migrations/0002_unique_nick.sql`). The API
+  answers 409 when a name belongs to someone else, and the game asks for another one. Because there
+  are no accounts, a name is tied to one browser; it is released for others once its owner has not
+  posted a score for 90 days (`NICK_HOLD_MS` in `src/worker.js`).
 - The game runs in the browser, so a determined player could post a fake score. The API rejects
   impossible values; add a WAF rate-limiting rule on `/api/score` (Security → WAF → Rate limiting rules)
   for extra protection.

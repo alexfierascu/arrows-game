@@ -60,22 +60,33 @@ const NO_SCORES = 'No scores yet. Clear a level to get on the board.';
 
 // ---------- network ----------
 
-/** Posts the player's current scores. Calls made while one is in flight collapse into one more. */
-export async function sync() {
-  if (!playerId || !token || !canWrite) return;
-  if (syncing) { syncAgain = true; return; }
-  syncing = true;
+const HTTP_FORBIDDEN = 403, HTTP_NAME_TAKEN = 409;
+
+/** Sends the player's scores under the given name. Returns the HTTP status, or 0 when offline. */
+async function postScores(nick) {
   const wk = weekInfo();
   const body = {
-    id: playerId, token, nick: player.nick || '',
+    id: playerId, token, nick,
     total: totalScore(), stars: totalStars(), cleared: clearedCount(), bosses: bossesBeaten(),
     dDate: player.daily.d || '', dScore: player.daily.score || 0, dTime: player.daily.time || 0,
     eKey: wk.key, eScore: eventScore(wk.key),
   };
   try {
     const res = await fetch('/api/score', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    if (res.status === 403) canWrite = false;
-  } catch { /* offline: the next win retries */ }
+    return res.status;
+  } catch { return 0; }
+}
+
+/** Posts the player's current scores. Calls made while one is in flight collapse into one more. */
+export async function sync() {
+  if (!playerId || !token || !canWrite) return;
+  if (syncing) { syncAgain = true; return; }
+  syncing = true;
+  const status = await postScores(player.nick || '');
+  if (status === HTTP_FORBIDDEN) canWrite = false;
+  // A name saved while offline turned out to be someone else's: drop it, post the scores
+  // without it, and let the next win ask for a new one.
+  if (status === HTTP_NAME_TAKEN) { player.nick = ''; persist(); syncAgain = true; }
   syncing = false;
   if (syncAgain) { syncAgain = false; sync(); }
   else if (currentScreen() === 'board') fetchBoard();
@@ -141,16 +152,24 @@ function openBoard() {
 
 export const cleanNick = name => String(name).trim().slice(0, NICK_MAX_LENGTH);
 
-/** Stores the player's leaderboard name and posts it. */
-export function setNick(name) {
-  player.nick = cleanNick(name);
+export const NAME_TAKEN_TEXT = 'That name is taken. Try another.';
+
+/**
+ * Asks the server for a name (names are unique) and keeps it if it is free. Resolves to false
+ * when another player has it. Offline, the name is kept for now and checked by the next sync.
+ */
+export async function claimNick(name) {
+  const nick = cleanNick(name);
+  if (playerId && token && canWrite && await postScores(nick) === HTTP_NAME_TAKEN) return false;
+  player.nick = nick;
   persist();
-  sync();
+  if (currentScreen() === 'board') fetchBoard();
+  return true;
 }
 
-function saveNick() {
-  setNick($('#nick').value);
-  $('#bnote').textContent = 'Saved';
+async function saveNick() {
+  const saved = await claimNick($('#nick').value);
+  $('#bnote').textContent = saved ? 'Saved' : NAME_TAKEN_TEXT;
 }
 
 export function initLeaderboard() {
