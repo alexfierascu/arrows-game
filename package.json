@@ -1,13 +1,13 @@
 {
-  "name": "arrows-escape",
+  "name": "arrows-game",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "db:local": "wrangler d1 migrations apply arrows-escape --local",
-    "db:remote": "wrangler d1 migrations apply arrows-escape --remote",
+    "db:local": "wrangler d1 migrations apply arrows-game --local",
+    "db:remote": "wrangler d1 migrations apply arrows-game --remote",
     "deploy": "wrangler deploy",
-    "deploy:with-migrations": "wrangler d1 migrations apply arrows-escape --remote && wrangler deploy"
+    "deploy:with-migrations": "wrangler d1 migrations apply arrows-game --remote && wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "arrows-escape",
+	"name": "arrows-game",
 	"main": "./src/worker.js",
 	"compatibility_date": "2025-09-01",
 	"assets": {
@@ -13,7 +13,7 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "arrows-escape",
+			"database_name": "arrows-game",
 			"database_id": "3da07fef-f298-4f0a-842b-18c910f7c93d",
 			"migrations_dir": "migrations"
 		}

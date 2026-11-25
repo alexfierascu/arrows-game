@@ -26,7 +26,7 @@ You need a Cloudflare account, a GitHub account and Node.js 20 or later.
 ```bash
 npm install
 npx wrangler login
-npx wrangler d1 create arrows-escape
+npx wrangler d1 create arrows-game
 ```
 Paste the printed `database_id` into `wrangler.jsonc` (replace `REPLACE_WITH_YOUR_DATABASE_ID`), then:
 ```bash
@@ -41,17 +41,18 @@ git init
 git add .
 git commit -m "Arrows Escape"
 git branch -M main
-git remote add origin https://github.com/<you>/arrows-escape.git
+git remote add origin https://github.com/<you>/arrows-game.git
 git push -u origin main
 ```
 
 ### 3. Connect the repo to Cloudflare
-Dashboard → Workers & Pages → Create → Import a repository → pick `arrows-escape`.
-- Project name: `arrows-escape` (must match `name` in `wrangler.jsonc`)
+Dashboard → Workers & Pages → Create → Import a repository → pick `arrows-game`.
+- Project name: `arrows-game` (must match `name` in `wrangler.jsonc`)
 - Build command: leave empty
 - Deploy command: `npx wrangler deploy`
 
-Save and deploy. You get `https://arrows-escape.<your-subdomain>.workers.dev`.
+Save and deploy. You get `https://arrows-game.<your-subdomain>.workers.dev`.
+The live game is at https://arrows-game.univocal.workers.dev.
 From now on every push to `main` redeploys automatically. Builds for other branches get their own
 preview URLs, but they use the same database, so test scores from previews land on the real leaderboard.
 
@@ -96,8 +97,8 @@ Two things must stay stable, because players' browsers and the leaderboard depen
 
 ## Moderating the leaderboard
 ```bash
-npx wrangler d1 execute arrows-escape --remote --command "SELECT id, nick, total, d_score FROM scores ORDER BY total DESC LIMIT 20"
-npx wrangler d1 execute arrows-escape --remote --command "DELETE FROM scores WHERE id='<player-id>'"
+npx wrangler d1 execute arrows-game --remote --command "SELECT id, nick, total, d_score FROM scores ORDER BY total DESC LIMIT 20"
+npx wrangler d1 execute arrows-game --remote --command "DELETE FROM scores WHERE id='<player-id>'"
 ```
 Or set an admin key once (`npx wrangler secret put ADMIN_KEY`) and call
 `curl -X DELETE https://<your-url>/api/score/<player-id> -H "Authorization: Bearer <ADMIN_KEY>"`.
