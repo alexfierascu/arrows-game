@@ -155,7 +155,8 @@ Two things must stay stable, because players' browsers and the leaderboard depen
 
 ## Moderating the leaderboard
 Offensive player names are refused by the server. The words, in the game's eight languages, are
-listed in `src/profanity.js`; the top of that file explains how to add one. Spelling tricks such
+listed in `src/profanity.js`; the top of that file explains how to add one. Part of the list comes
+from [LDNOOBW](https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words) (CC BY 4.0). Spelling tricks such
 as `p.u.l.a`, `puuula` or `sh1t` are caught without listing them.
 
 Three refused names within ten minutes lock that player out of the game for five minutes: a

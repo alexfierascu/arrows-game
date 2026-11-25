@@ -10,6 +10,9 @@
 // accents and separators ("p.u.l.a") are handled by isProfane(), so do not list such variants.
 
 // One list per language, only to keep them readable: every name is checked against all of them.
+// Part of the entries come from the "List of Dirty, Naughty, Obscene, and Otherwise Bad Words"
+// (github.com/LDNOOBW), used under the Creative Commons Attribution 4.0 licence. Only its entries
+// that are not ordinary words or names were taken.
 const LISTS = {
   english: `
     *fuck* fck* fuk fuq fuker fuking *phuck* *fuxk* shit* *bullshit* *dipshit* *shithead* *shitface* *horseshit*
@@ -24,7 +27,20 @@ const LISTS = {
     cucks cuckold* incel incels *whitepower* kys *killyourself* *sodomy* *sodomi* *molest* *necrophil*
     *masturbat* *orgasm* boner clit clitoris *fellatio* *cunnilingus* *gangbang* *bukkake* *hentai* *queef*
     *smegma* spunk *schlong* minge slag wog wogs paki pakis nonce mong lesbo homo homos *whitetrash*
-    *mongoloid* *prostitut*`,
+    *mongoloid* *prostitut*
+    anilingus *assmunch* *apeshit* autoerotic ballgag ballsucking balllicking bangbros bareback bbw bdsm
+    bestiality beastiality *zoophil* bimbo bimbos blumpkin bondage bootycall bulldyke bunghole busty buttcheeks
+    cameltoe camgirl carpetmuncher circlejerk *clevelandsteamer* *coprophil* cornhole creampie cumming darkie
+    daterape *deepthroat* dingleberry dirtysanchez doggystyle doggiestyle dominatrix donkeypunch
+    *doublepenetration* dryhump dvda ecchi ejaculation erotic erotism fecal felch femdom fingerbang fingering
+    fisting footjob fudgepacker futanari genitals goatse goatcx goddamn *goldenshower* gokkun grope gspot guro
+    homoerotic honkey hooker horny humping incest intercourse jackoff jailbait jerkoff *jigaboo* *jiggaboo*
+    kinbaku kinky lemonparty livesex mrhands nambla *neonazi* nignog nipple nipples nsfw nude nudity nympho
+    *nymphomania* omorashi orgy panties panty pedobear pegging pikey pissing playboy poon poontang pthc pubes
+    punany queaf quim raghead raping rectum rimming sadism semen sexcam sexo sexy sexual sexually sexuality
+    shibari slanteye smut splooge spooge strapon stripclub suck sucks swastika teabagging threesome titty
+    topless towelhead tubgirl twink twogirlsonecup upskirt viagra cialis vibrator voyeur vulva wetdream xxx
+    yaoi yiffy bluewaffle dolcett`,
 
   spanish: `
     puta* puto* putita putitas putilla *hijodeput* *hijoput* *hijaput* *hijadeput* *hijueput* *jueput* hdp hpta
@@ -37,7 +53,9 @@ const LISTS = {
     *caraculo* *tontopolla* *tontolaba* *soplapolla* *huevon* *guevon* weon weona *bolud* *pelotud* cagar
     cagada cagon cagona *mecago* teta tetas tetona* chocho panocha cachonda cachondo ramera guarra guarro
     subnormal *retrasad* mongolo mongola mongolico sudaca negrata bollera tortillera joto jotos *careverga*
-    *caremonda* cerote choto chota garcha trolo puneta punetas *mierdero* *mierdoso* *violador*`,
+    *caremonda* cerote choto chota garcha trolo puneta punetas *mierdero* *mierdoso* *violador*
+    chupada *conchadetumadre* coprofagia esperma gilipichis *hacerunapaja* *jilipoll* kapullo macizorra
+    pervertido pervertida sexooral soplagaitas`,
 
   french: `
     *putain* pute putes *putasse* *salepute* *grossepute* *petitepute* *filsdepute* *filsdeput* *filledepute*
@@ -50,7 +68,9 @@ const LISTS = {
     nichons *nibard* cul *trouducul* *troudeballe* *trouduc* *lechecul* *tetedecul* *facedecul* *petasse*
     *pouffiasse* *poufiasse* *grognasse* garce abruti abrutie bordel pisse baise baiseur baiseuse
     *baisetamere* *partouz* *raclure* *enflure* *violeur* *violeuse* *mongolien* trisomique attarde *crevard*
-    *foufoune* schnek chnek *cramouille*`,
+    *foufoune* schnek chnek *cramouille*
+    brackmard braquemard *brouterlecresson* chiasse clito etron grogniasse palucher poussecrotte teuch
+    tringler trique troncher turlute zigounette bloblos`,
 
   italian: `
     *cazzo* cazzi *cazzon* *cazzat* *cazzut* *incazz* *minchia* *minchion* *stronz* *vaffancul* *fancul* vaffa
@@ -62,7 +82,11 @@ const LISTS = {
     handicappato ritardato *negraccio* terrone terroni zingaro zingara zingari checca *lesbicona* trombare
     *trombata* scopare scopata chiavare chiavata *fott* suca *sucamelo* *succhiamelo* pirla topa *patonza*
     tette tettona culona *vaiacagare* cagare cagata piscia pisciare *porcone* maiala *mortacci* *nazist*
-    stupro *stuprator* *pedofil*`,
+    stupro *stuprator* *pedofil*
+    allupato ammucchiata anale arrapato arrapata arrusa arruso bagassa belino bucaiolo budiulo busone
+    cagna *cazzimm* chiappa chiappe culattina ditalino figone froscio goldone guardone ingoio lecchino loffa
+    *merdos* nerchia pecorina picio pippone piscio potta puppami rompiballe sbrodolata smandrappata socmel
+    sorca sticchio succhiami succhione sveltina sverginare zinne bordello mussa`,
 
   german: `
     *scheiss* *beschiss* *arschloch* arsch* *fick* *fotze* *votze* *hurensohn* *hurenkind* *hurenbock* hure
@@ -76,7 +100,8 @@ const LISTS = {
     *dumpfbacke* *bumsbirne* bums rammeln *blasmir* *pussi* hoden *eierkopf* *sackleck* *kotzbrocken* kotze
     kotzen *affenarsch* *duarsch* *leckarsch* *nazischwein* *untermensch* *auslanderraus* *judenraus*
     *volltrottel* behindi *lesbensau* *kampflesbe* stricher zuhalter nuttig *onanie* vergasen vergast
-    *kinderschander* *padophil*`,
+    *kinderschander* *padophil*
+    analritter dodel mopse morgenlatte nackt nippel pimpern pissen schnackeln tittchen`,
 
   romanian: `
     pula* pule pulii pulic* pulifric* *pulamea* *sugipula* *sugepula* *capdepula* *inpula* *npula* *bagpula*
@@ -111,7 +136,9 @@ const LISTS = {
     *odpieprz* lesba debil debilu *lachociag* *obciagar* *obciagacz* *ssijpale* cycki cyce cycek *walsie*
     *walickonia* *spermiarz* bydlak menda gnida gnoj gnoju gnojek scierwo lajza *lachudra* *lafirynda* burdel
     zdzira zdziro wywloka *lampucera* pinda *raszpla* *zboczen* *zwyrol* gwalt *gwalci* *czarnuch* *ciapat*
-    brudas szwab szwaby kacap hwdp chwdp zdechnij`,
+    brudas szwab szwaby kacap hwdp chwdp zdechnij
+    burdelmama cyc dupa dupy *lizacpale* *obciagacloda* *robicloda* pieprzyc pierdziec rzygac sraczka
+    syf`,
 
   // Common among players everywhere: Russian, Balkan, Hungarian, Turkish, Portuguese, Dutch, Nordic.
   other: `
@@ -119,7 +146,12 @@ const LISTS = {
     *блят* *бляд* *пидор* *пизд* *хуе* *хуи* *ебат* *ебан* *уеб* *заеб* *мудак* *гандон* *шлюх* *залуп*
     *siktir* *orospu* amk kurac picka *pickamater* kokot picsa geci fasz *bazdmeg* *baszdmeg* govno *caralh*
     foda fodase *buceta* cuzao viado *filhodaput* *arrombado* *punheta* *kanker* kut lul *godverdomme*
-    *klootzak* hoer neuken *vittu* *perkele* fitta *knulla* javla faen`,
+    *klootzak* hoer neuken *vittu* *perkele* fitta *knulla* javla faen
+    dolboyeb ebalo mudack otsosi pedik shalava svoloch ublyudok zalupa zaebis жопа говно говнюк дерьмо
+    дрочить ебарь ебло ебнуть манда мандавошка мудило мудозвон *хуя* *хую* срать ссать сиськи шалава сволочь
+    ублюдок хохол *ебтво* *выеб* *наеб* *проеб* bicha boceta bosta cabrao cacete chochota colhoes cona
+    esporra foder *vaitefoder* *vaitomarnocu* paneleiro porra sacanagem vadia veado xana xochota queca kloten
+    klote flikker slet teef stront hufter rotzak reet`,
 };
 const WORDS = Object.values(LISTS).join(" ").trim().split(/\s+/);
 
