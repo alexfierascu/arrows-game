@@ -1,0 +1,27 @@
+# Dependencies (restored with `npm install`)
+node_modules/
+
+# Wrangler: local dev database, build cache and local secrets
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+
+# Editors
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+*.tmp
+*.swp
+
+# Archives of the project (old exports)
+*.zip

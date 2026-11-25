@@ -1,0 +1,22 @@
+// Arrows Escape: entry point. Each module sets up its own screen; this file only starts them.
+
+import { initNavigation, show } from './router.js';
+import { initModal } from './ui/modal.js';
+import { initHome } from './ui/home.js';
+import { initMap } from './ui/map.js';
+import { initEvent } from './ui/event.js';
+import { initShop } from './ui/shop.js';
+import { initBadges } from './ui/badges.js';
+import { initLeaderboard } from './ui/leaderboard.js';
+import { initGame } from './game/index.js';
+
+initModal();
+initNavigation();
+initHome();
+initMap();
+initEvent();
+initShop();
+initBadges();
+initLeaderboard();
+initGame();
+show('home');

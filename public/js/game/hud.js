@@ -1,0 +1,94 @@
+// Everything around the board: title, hearts, clock, boss bar, superpower buttons, toasts
+// and floating score pop-ups.
+
+import { $ } from '../dom.js';
+import { ATTACKS, POWERS, START_HEARTS } from '../content.js';
+import { player } from '../player.js';
+import { clock, num } from '../format.js';
+import { heart, ico, portrait } from '../icons.js';
+import { game, comboActive } from './state.js';
+
+const LOW_TIME = .2;  // the clock turns red below this share
+
+/** The parts that only change when a board loads. */
+export function renderBoardHeader() {
+  const { cfg, boss } = game;
+  document.documentElement.style.setProperty('--acc', cfg.col);
+  $('#stage').classList.toggle('night', cfg.dark);
+  $('#gTitle').textContent = cfg.title;
+  $('#gSub').textContent = cfg.subtitle;
+  $('#bossBar').hidden = !boss;
+  if (boss) {
+    $('#bossPic').innerHTML = portrait(boss, '');
+    $('#bossName').textContent = boss.name;
+  }
+}
+
+function heartsHtml() {
+  if (game.cfg.kind === 'rush') return `<b style="font-size:18px">Board ${game.rushBoards + 1}</b>`;
+  const slots = Math.max(START_HEARTS, game.hearts);
+  return Array.from({ length: slots }, (_, i) => heart(i < game.hearts ? '' : 'lost')).join('');
+}
+
+function renderBoss() {
+  const { boss, frozen } = game, seconds = Math.ceil(game.bossNext), label = $('#bossAtk');
+  const attack = ATTACKS[boss.atk[game.attackIndex % boss.atk.length]];
+  $('#bossHp').style.width = (100 * game.bossHP / game.bossMax) + '%';
+  label.textContent = frozen > 0 ? 'Frozen' : attack.name + ' in ' + seconds + 's';
+  label.classList.toggle('warn', seconds <= 3 && !frozen);
+}
+
+function renderTimer() {
+  const timer = $('#timer'), { frozen } = game;
+  game.timeMax = Math.max(game.timeMax, game.timeLeft);
+  $('#tFill').style.width = (100 * game.timeLeft / game.timeMax) + '%';
+  $('#tTxt').textContent = frozen > 0 ? Math.ceil(frozen) + 's' : clock(game.timeLeft);
+  timer.classList.toggle('low', game.timeLeft < game.timeMax * LOW_TIME && !frozen);
+  timer.classList.toggle('frz', frozen > 0);
+}
+
+export function renderHud() {
+  $('#hearts').innerHTML = heartsHtml();
+  $('#shieldI').hidden = !game.shield;
+  $('#gScore').textContent = num(game.score);
+  $('#gLeft').textContent = game.left;
+  $('#gCombo').textContent = game.combo > 1 && comboActive(performance.now()) ? '×' + game.combo + ' combo' : '';
+  if (game.boss) renderBoss();
+  renderTimer();
+}
+
+export function renderPowers() {
+  $('#powers').innerHTML = POWERS.map(p => {
+    const owned = player.pw[p.id], armed = p.id === 'smash' && game.smash;
+    return `<button class="pw ${armed ? 'on' : ''}" data-p="${p.id}" aria-label="${p.name}, ${owned} left">${ico(p.d)}${p.name}<span class="n ${owned ? '' : 'zero'}">${owned || '+'}</span></button>`;
+  }).join('');
+}
+
+/** Replays the boss portrait's shake animation. */
+export function shakeBoss() {
+  const pic = $('#bossPic');
+  pic.classList.remove('hit');
+  void pic.offsetWidth; // restart the CSS animation
+  pic.classList.add('hit');
+}
+
+let toastTimer = 0;
+export function toast(message, ms = 1700) {
+  const el = $('#toast');
+  el.textContent = message;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('on'), ms);
+}
+
+/** A short text that floats up from a point of the stage. */
+export function pop(text, [px, py], colour) {
+  const el = document.createElement('div');
+  el.className = 'pop';
+  el.textContent = text;
+  el.style.left = px + 'px';
+  el.style.top = py + 'px';
+  if (colour) el.style.color = colour;
+  $('#pops').appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
