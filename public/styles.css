@@ -249,6 +249,19 @@ svg.i{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke
  .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.tile.ev{grid-column:1/-1}
  .mcard{padding:16px 16px 14px}.portrait{width:64px;height:64px}.bigstars svg{width:40px;height:40px}
 }
+@media (orientation:portrait) and (max-height:760px),(min-width:700px) and (max-height:760px){
+ #s-home .hero{padding:2px 4px 12px;gap:14px}#s-home .hero svg{width:84px;height:84px}#s-home .hero h1{font-size:40px}
+ #s-home .play{min-height:60px;margin-bottom:10px}#s-home .tile{min-height:86px;padding:11px 14px 9px}#s-home .tile.ev{min-height:78px}
+}
+@media (orientation:portrait) and (max-height:700px){
+ #s-home .hero svg{width:60px;height:60px}#s-home .hero h1{font-size:30px}#s-home .hero h1 br{display:none}#s-home .hero p{margin-top:2px;font-size:14px}
+ #s-home .play{min-height:54px;font-size:23px}#s-home .tile{min-height:0;padding:9px 12px 7px}#s-home .tile svg.i{width:22px;height:22px;margin-bottom:2px}#s-home .tile b{font-size:17px}#s-home .tile small{font-size:13px}
+ #s-home .tile.ev{min-height:0}#s-home .tile.ev .evi{width:44px;height:44px}#s-home .tile.ev b{font-size:19px}
+}
+@media (orientation:portrait) and (max-height:590px){
+ #s-home .hero{padding-bottom:8px}#s-home .hero svg{width:44px;height:44px}#s-home .hero p{display:none}
+ #s-home .tile:not(.ev) svg.i{display:none}#s-home .tiles{gap:8px}
+}
 @media(max-width:360px){.pw{font-size:0}.pw svg.i{width:22px;height:22px}.levels{gap:8px}.hero svg{width:92px;height:92px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :root[data-reduce-motion] *{animation:none!important;transition:none!important}

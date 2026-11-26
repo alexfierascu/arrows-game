@@ -3,7 +3,6 @@
 import { $ } from '../dom.js';
 import { POWERS, BOSSES, MAX_STARS, EVENT_STAGES, GIFT_COINS } from '../content.js';
 import { player, nextLevel, eventState, totalStars, bossesBeaten, powersOwned, currentStreak } from '../player.js';
-import { BADGES, badgeCount } from '../badges.js';
 import { addCoins } from '../economy.js';
 import { weekInfo, coinMultiplier } from '../week.js';
 import { levelCfg, dailyCfg, worldOf } from '../levels.js';
@@ -41,7 +40,6 @@ function renderHome() {
   $('#endlessSub').textContent = player.endless.best ? t('home.best.run', { n: num(player.endless.best) }) : t('home.endless.new');
   $('#worldsSub').textContent = t('home.worlds', { stars: totalStars(), max: MAX_STARS, bosses: bossesBeaten(), total: BOSSES.length });
   $('#shopSub').textContent = t('home.bag', { n: powersOwned() });
-  $('#badgeSub').textContent = t('home.badges', { n: badgeCount(), total: BADGES.length });
   $('#giftSub').textContent = giftReady() ? t('gift.ready') : t('gift.wait');
   $('#tGift .dotb')?.remove();
   if (giftReady()) $('#tGift').insertAdjacentHTML('beforeend', '<i class="dotb"></i>');
@@ -83,7 +81,7 @@ export function initHome() {
   $('#tWorlds').onclick = () => show('map', { world: worldOf(nextLevel() || 1) });
   $('#tBoard').onclick = () => show('board');
   $('#tShop').onclick = () => show('shop');
-  $('#tBadges').onclick = () => show('badges');
+  $('#badgeBtn').onclick = () => show('badges');
   $('#tGift').onclick = openGift;
   $('#gear').onclick = openSettings;
   setInterval(() => { if (currentScreen() === 'home') renderHome(); }, REFRESH_MS);
