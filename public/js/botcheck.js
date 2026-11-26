@@ -28,7 +28,7 @@ export async function passBotCheck(sitekey, token) {
     document.body.appendChild(box);
     const response = await new Promise((resolve, reject) => {
       setTimeout(() => reject(new Error('timeout')), TIMEOUT_MS);
-      window.turnstile.render(box, { sitekey, appearance: 'interaction-only', callback: resolve, 'error-callback': () => reject(new Error('failed')) });
+      window.turnstile.render(box, { sitekey, action: 'score', appearance: 'interaction-only', callback: resolve, 'error-callback': () => reject(new Error('failed')) });
     }).finally(() => setTimeout(() => box.remove(), 500));
     const res = await fetch('/api/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, response }) });
     return res.ok;

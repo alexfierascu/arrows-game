@@ -6,7 +6,7 @@ export const UNSAFE_TEXT_CHARS = /[\u0000-\u001f\u007f<>]/g;
 export const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" },
   });
 export const error = (message, status) => json({ error: message }, status);
 

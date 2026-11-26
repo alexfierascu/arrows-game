@@ -97,7 +97,11 @@ async function postScores(nick, checked = false) {
   };
   try {
     const res = await fetch('/api/score', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    if (res.status === HTTP_LOCKED_OUT) lockOut((await res.json()).wait); // too many offensive names
+    if (res.status === HTTP_LOCKED_OUT) {
+      const answer = await res.json();
+      if (answer.error !== 'locked out') return 0; // calling too fast: like being offline, try again later
+      lockOut(answer.wait); // too many offensive names
+    }
     // The server wants proof that this is a person's browser: pass the check, then post again.
     if (res.status === HTTP_VERIFY_FIRST && !checked) {
       const { sitekey } = await res.json();

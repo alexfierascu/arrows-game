@@ -1,13 +1,13 @@
 // Live races: two players clear the same board at the same time and see each other's progress.
 // There is no open connection: each player's game asks for the state every second or two.
-//   POST /api/race                 { name, avatar }            open a race; answers { code, key, seed }
+//   POST /api/race                 { id, token, name, avatar } open a race (players only); answers { code, key, seed }
 //   POST /api/race/<code>/join     { name, avatar }            join it; answers { key, seed, ...state }
 //   POST /api/race/<code>          { key, left, state }        report progress; answers the state
 //   GET  /api/race/<code>?key=                                 the state
 // `key` is a secret the server hands each of the two players; only its hash is stored.
 // State: { startsIn (ms, null while waiting), you: { left, state }, other: { name, avatar, left, state } | null }
 
-import { json, error, readJson, sha256, randomCode, cleanText } from "./http.js";
+import { json, error, readJson, sha256, randomCode, cleanText, knownPlayer } from "./http.js";
 import { isProfane } from "./profanity.js";
 
 const CODE_LENGTH = 6, KEY_LENGTH = 24;
@@ -40,6 +40,7 @@ async function find(db, code, key) {
 
 export async function createRace(request, env) {
   const body = (await readJson(request)) || {}, now = Date.now();
+  if (!(await knownPlayer(env.DB, body.id, body.token))) return error("forbidden", 403);
   const code = randomCode(CODE_LENGTH), key = randomCode(KEY_LENGTH), seed = crypto.getRandomValues(new Uint32Array(1))[0] % 900000 + 1000;
   await env.DB.batch([
     env.DB.prepare("DELETE FROM races WHERE created_at < ?").bind(now - KEEP_MS),

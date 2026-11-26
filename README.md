@@ -14,6 +14,7 @@ public/index.html          markup for every screen
 public/styles.css          all styling
 public/js/                 the game, as ES modules (see "Code map" below)
 src/worker.js              API: scores, usage counts and admin routes (listed at the top of the file)
+src/limits.js              how fast one visitor may call the API
 src/profanity.js          the list of offensive words a player name may not contain
 src/ldnoobw.js            generated: the LDNOOBW word lists in 28 languages, used by profanity.js
 scripts/update-ldnoobw.mjs  downloads those lists again and rewrites src/ldnoobw.js
@@ -149,8 +150,25 @@ domain, mode "Managed") and store its two keys:
 npx wrangler secret put TURNSTILE_SECRET     # the widget's secret key
 ```
 and add `"TURNSTILE_SITEKEY": "<the widget's site key>"` to `vars` in `wrangler.jsonc`, then deploy.
+The server only accepts answers made on the hostnames in `TURNSTILE_HOSTNAMES` (also in `vars`);
+change it if you move to your own domain.
 A pass lasts 30 days per browser (`VERIFIED_MS` in `src/worker.js`). To switch it off again, delete
 the secret: `npx wrangler secret delete TURNSTILE_SECRET`.
+
+## Protection against abuse
+- **Limits per visitor** (`src/limits.js`, the `ratelimits` in `wrangler.jsonc`): 300 API calls a
+  minute, 60 calls that change something, and 10 of each kind that adds something new (players,
+  clubs, races, feedback, reports, reminders). Above that the server answers 429 for a minute.
+  Wrong guesses at the admin key are counted the same way. The IP address is only the counter's
+  key; it is never stored.
+- **Players only**: feedback, races, clubs and reports need the id and secret token of a player
+  the server knows.
+- **Request size**: bodies above 16 KB are refused.
+- **Reminders** are only sent to the push services of the browsers, never to another address.
+- **Security headers** for every page and file are in `public/_headers`, among them a
+  Content-Security-Policy. If the game ever loads something from a new address (a font, a script),
+  add that address there or the browser blocks it.
+- The limits count per minute. Against someone patient, switch on the bot check above.
 
 ## Installing, offline play and reminders
 The game is a PWA: `public/manifest.webmanifest` plus the service worker `public/sw.js`. Files are

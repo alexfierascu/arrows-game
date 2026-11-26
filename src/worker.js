@@ -18,18 +18,20 @@
 //   DELETE /api/admin/clubs/<code>                 admin only: delete a club (its members stay)
 //   GET    /api/player/<id>                        a player's public profile
 //   GET    /api/season?key=YYYY-MM&id=<id>         where a player finished in a past season
-//   POST   /api/feedback                           a message for the owner: { id, text, lang }
+//   POST   /api/feedback                           a message for the owner: { id, token, text, lang }
 //   POST   /api/verify                             pass the bot check: { token, response }
 //   Clubs: see src/clubs.js. Live races: see src/race.js.
+// Every route is limited per visitor (src/limits.js): 429 { error: "slow down", wait }.
 // The page itself ("/") also runs through here, so shared links get a preview (src/preview.js).
 // A cron trigger (wrangler.jsonc) runs `scheduled` every hour to send the daily reminders.
 
 import { isProfane } from "./profanity.js";
 import { sendPush } from "./webpush.js";
-import { json, error, readJson, sha256, cleanText, ID_RE } from "./http.js";
+import { json, error, readJson, sha256, cleanText, knownPlayer, ID_RE } from "./http.js";
 import { createClub, joinClub, leaveClub, getClubs, adminClubs, deleteClub } from "./clubs.js";
 import { createRace, joinRace, getRace, postRace } from "./race.js";
 import { pageWithPreview } from "./preview.js";
+import { visitor, allowed, slowDown, tooLarge } from "./limits.js";
 
 const LEADERBOARD_SIZE = 100;
 const NICK_MAX_LENGTH = 16;
@@ -224,6 +226,7 @@ async function postScore(request, env) {
     return rejectName(env.DB, tokenHash, now);
   }
   const previous = await env.DB.prepare(PREVIOUS).bind(score.id).first();
+  if (!previous && !(await allowed(env.LIMIT_CREATE, `player:${visitor(request)}`))) return slowDown();
   const statements = [env.DB.prepare(UPSERT).bind(score.id, tokenHash, ...values, now)];
   if (nick) statements.unshift(env.DB.prepare(RELEASE_STALE_NICK).bind(nick, score.id, now - NICK_HOLD_MS));
   let results;
@@ -262,7 +265,8 @@ async function postReport(request, env) {
 }
 
 // ---------- bot check (Cloudflare Turnstile) ----------
-// Off until TURNSTILE_SECRET and TURNSTILE_SITEKEY are set. Then a browser has to pass the
+// Off until TURNSTILE_SECRET, TURNSTILE_SITEKEY and TURNSTILE_HOSTNAMES (the site's own
+// hostnames, comma-separated) are set. Then a browser has to pass the
 // check once before its scores are accepted; the pass lasts VERIFIED_MS.
 
 const HTTP_VERIFY_FIRST = 428;
@@ -271,17 +275,35 @@ const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 const isVerified = async (db, who, now) => !!(await db.prepare("SELECT 1 FROM verified WHERE who = ? AND until > ?").bind(who, now).first());
 
+const BOT_CHECK_ACTION = "score";
+const SITEVERIFY_TIMEOUT_MS = 10_000;
+
+/** Whether Cloudflare confirms the widget's answer was made on this site, for this purpose. Any doubt is a no. */
+async function passedBotCheck(env, response, ip) {
+  const hostnames = String(env.TURNSTILE_HOSTNAMES || "").split(",").map((name) => name.trim()).filter(Boolean);
+  if (!hostnames.length) return false;
+  try {
+    const res = await fetch(SITEVERIFY, {
+      method: "POST",
+      signal: AbortSignal.timeout(SITEVERIFY_TIMEOUT_MS),
+      body: new URLSearchParams({ secret: env.TURNSTILE_SECRET, response, remoteip: ip }),
+    });
+    if (!res.ok) return false;
+    const outcome = await res.json();
+    return outcome.success === true && outcome.action === BOT_CHECK_ACTION && hostnames.includes(outcome.hostname);
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
 async function postVerify(request, env) {
   const body = await readJson(request), now = Date.now();
   if (!env.TURNSTILE_SECRET) return json({ ok: true });
-  if (!body || typeof body.token !== "string" || body.token.length < 20 || body.token.length > 100 || typeof body.response !== "string")
-    return error("bad request", 400);
-  const form = new FormData();
-  form.append("secret", env.TURNSTILE_SECRET);
-  form.append("response", body.response);
-  form.append("remoteip", request.headers.get("cf-connecting-ip") || "");
-  const outcome = await (await fetch(SITEVERIFY, { method: "POST", body: form })).json();
-  if (!outcome.success) return error("check failed", 403);
+  const valid = body && typeof body.token === "string" && body.token.length >= 20 && body.token.length <= 100
+    && typeof body.response === "string" && body.response.length > 0 && body.response.length <= 2048;
+  if (!valid) return error("bad request", 400);
+  if (!(await passedBotCheck(env, body.response, request.headers.get("cf-connecting-ip") || ""))) return error("check failed", 403);
   await env.DB.batch([
     env.DB.prepare("INSERT INTO verified (who, until) VALUES (?, ?) ON CONFLICT(who) DO UPDATE SET until = excluded.until").bind(await sha256(body.token), now + VERIFIED_MS),
     env.DB.prepare("DELETE FROM verified WHERE until < ?").bind(now),
@@ -326,7 +348,8 @@ const FEEDBACK_MAX_LENGTH = 1000, FEEDBACK_PER_DAY = 5, FEEDBACK_KEPT = 500;
 async function postFeedback(request, env) {
   const body = await readJson(request), now = Date.now();
   const text = [...String(body?.text || "").replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, "").trim()].slice(0, FEEDBACK_MAX_LENGTH).join("");
-  if (!body || !ID_RE.test(body.id || "") || text.length < 3) return error("bad request", 400);
+  if (!body || text.length < 3) return error("bad request", 400);
+  if (!(await knownPlayer(env.DB, body.id, body.token))) return error("forbidden", 403);
   const today = await env.DB.prepare("SELECT COUNT(*) AS n FROM feedback WHERE player = ? AND at > ?").bind(body.id, now - 86_400_000).first("n");
   if (today >= FEEDBACK_PER_DAY) return error("too many", 429);
   await env.DB.batch([
@@ -341,6 +364,13 @@ async function postFeedback(request, env) {
 
 const getPushKey = (request, env) => json({ key: env.VAPID_PUBLIC_KEY || "" });
 
+// The push services of the browsers. Reminders are only ever sent to these, so the Worker
+// cannot be made to call an address of someone's choosing.
+const PUSH_HOSTS = /(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.apple\.com)$/;
+function isPushService(endpoint) {
+  try { return PUSH_HOSTS.test(new URL(endpoint).hostname); } catch { return false; }
+}
+
 async function postPush(request, env) {
   let body;
   try { body = await request.json(); } catch { return error("bad json", 400); }
@@ -348,7 +378,7 @@ async function postPush(request, env) {
   const valid = typeof endpoint === "string" && /^https:\/\//.test(endpoint) && endpoint.length < 1000
     && Number.isInteger(hour) && hour >= 0 && hour < 24 && Number.isInteger(tz) && Math.abs(tz) <= 14 * 60
     && (id === "" || ID_RE.test(id));
-  if (!valid) return error("bad request", 400);
+  if (!valid || !isPushService(endpoint)) return error("bad request", 400);
   await env.DB.prepare("INSERT INTO push (endpoint, player, hour, tz) VALUES (?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET player = excluded.player, hour = excluded.hour, tz = excluded.tz")
     .bind(endpoint, id, hour, tz).run();
   return json({ ok: true });
@@ -379,7 +409,13 @@ async function sendReminders(env) {
   }
 }
 
-const isAdmin = (request, env) => !!env.ADMIN_KEY && request.headers.get("authorization") === `Bearer ${env.ADMIN_KEY}`;
+/** Whether the request carries the admin key. Hashes are compared, in constant time. */
+async function isAdmin(request, env) {
+  if (!env.ADMIN_KEY) return false;
+  const encode = (text) => crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  const [given, wanted] = await Promise.all([encode(request.headers.get("authorization") || ""), encode(`Bearer ${env.ADMIN_KEY}`)]);
+  return crypto.subtle.timingSafeEqual(given, wanted);
+}
 const utcDay = (ms = Date.now()) => new Date(ms).toISOString().slice(0, 10);
 
 /** Adds one to today's count for an event. Unknown names are accepted and dropped. */
@@ -392,7 +428,6 @@ async function postEvent(request, env) {
 }
 
 async function getStats(request, env) {
-  if (!isAdmin(request, env)) return error("forbidden", 403);
   const days = Math.min(MAX_STATS_DAYS, Math.max(1, Number(new URL(request.url).searchParams.get("days")) || 30));
   const since = utcDay(Date.now() - (days - 1) * 86_400_000);
   const { results } = await env.DB.prepare("SELECT day, name, count FROM events WHERE day >= ? ORDER BY day DESC, name").bind(since).all();
@@ -400,7 +435,6 @@ async function getStats(request, env) {
 }
 
 async function deleteScore(request, env, id) {
-  if (!isAdmin(request, env)) return error("forbidden", 403);
   const player = decodeURIComponent(id);
   await env.DB.batch([
     env.DB.prepare("DELETE FROM scores WHERE id = ?").bind(player),
@@ -411,7 +445,6 @@ async function deleteScore(request, env, id) {
 
 /** Everything the admin page shows, in one answer. */
 async function getAdmin(request, env) {
-  if (!isAdmin(request, env)) return error("forbidden", 403);
   const since = utcDay(Date.now() - 29 * 86_400_000);
   const [players, refused, events, reminders, feedback] = await env.DB.batch([
     env.DB.prepare(`SELECT id, nick, total, stars, cleared, d_date, d_score, e_score, s_score, endless, flagged, updated_at,
@@ -428,7 +461,6 @@ async function getAdmin(request, env) {
 }
 
 async function renamePlayer(request, env) {
-  if (!isAdmin(request, env)) return error("forbidden", 403);
   let body;
   try { body = await request.json(); } catch { return error("bad json", 400); }
   const nick = String(body?.nick || "").replace(UNSAFE_NICK_CHARS, "").trim().slice(0, NICK_MAX_LENGTH);
@@ -442,7 +474,6 @@ async function renamePlayer(request, env) {
 }
 
 async function dismissReports(request, env, id) {
-  if (!isAdmin(request, env)) return error("forbidden", 403);
   const player = decodeURIComponent(id);
   await env.DB.batch([
     env.DB.prepare("DELETE FROM reports WHERE player_id = ?").bind(player),
@@ -452,46 +483,54 @@ async function dismissReports(request, env, id) {
 }
 
 async function deleteFeedback(request, env, id) {
-  if (!isAdmin(request, env)) return error("forbidden", 403);
   await env.DB.prepare("DELETE FROM feedback WHERE id = ?").bind(Number(id)).run();
   return json({ ok: true });
 }
 
 async function removeClub(request, env, code) {
-  if (!isAdmin(request, env)) return error("forbidden", 403);
   await deleteClub(env.DB, code);
   return json({ ok: true });
 }
 
 // A capture group in `path` is passed to the handler as its third argument.
+// `admin` routes need the admin key. `create` and `write` pick the visitor's limit (src/limits.js):
+// `create` names what is being added, each kind with its own counter.
 const ROUTES = [
   { method: "GET", path: /^\/api\/scores$/, handler: getScores },
-  { method: "POST", path: /^\/api\/score$/, handler: postScore },
-  { method: "DELETE", path: /^\/api\/score\/([^/]+)$/, handler: deleteScore },
-  { method: "POST", path: /^\/api\/event$/, handler: postEvent },
-  { method: "GET", path: /^\/api\/stats$/, handler: getStats },
-  { method: "POST", path: /^\/api\/report$/, handler: postReport },
+  { method: "POST", path: /^\/api\/score$/, handler: postScore, write: true },
+  { method: "DELETE", path: /^\/api\/score\/([^/]+)$/, handler: deleteScore, admin: true },
+  { method: "POST", path: /^\/api\/event$/, handler: postEvent, write: true },
+  { method: "GET", path: /^\/api\/stats$/, handler: getStats, admin: true },
+  { method: "POST", path: /^\/api\/report$/, handler: postReport, create: "report" },
   { method: "GET", path: /^\/api\/push$/, handler: getPushKey },
-  { method: "POST", path: /^\/api\/push$/, handler: postPush },
-  { method: "DELETE", path: /^\/api\/push$/, handler: deletePush },
-  { method: "GET", path: /^\/api\/admin$/, handler: getAdmin },
-  { method: "POST", path: /^\/api\/admin\/rename$/, handler: renamePlayer },
-  { method: "DELETE", path: /^\/api\/admin\/reports\/([^/]+)$/, handler: dismissReports },
-  { method: "DELETE", path: /^\/api\/admin\/feedback\/(\d+)$/, handler: deleteFeedback },
-  { method: "DELETE", path: /^\/api\/admin\/clubs\/([A-Z0-9]{6})$/, handler: removeClub },
+  { method: "POST", path: /^\/api\/push$/, handler: postPush, create: "push" },
+  { method: "DELETE", path: /^\/api\/push$/, handler: deletePush, write: true },
+  { method: "GET", path: /^\/api\/admin$/, handler: getAdmin, admin: true },
+  { method: "POST", path: /^\/api\/admin\/rename$/, handler: renamePlayer, admin: true },
+  { method: "DELETE", path: /^\/api\/admin\/reports\/([^/]+)$/, handler: dismissReports, admin: true },
+  { method: "DELETE", path: /^\/api\/admin\/feedback\/(\d+)$/, handler: deleteFeedback, admin: true },
+  { method: "DELETE", path: /^\/api\/admin\/clubs\/([A-Z0-9]{6})$/, handler: removeClub, admin: true },
   { method: "GET", path: /^\/api\/player\/([^/]+)$/, handler: getPlayer },
   { method: "GET", path: /^\/api\/season$/, handler: getSeason },
-  { method: "POST", path: /^\/api\/feedback$/, handler: postFeedback },
-  { method: "POST", path: /^\/api\/verify$/, handler: postVerify },
-  { method: "POST", path: /^\/api\/club$/, handler: createClub },
-  { method: "POST", path: /^\/api\/club\/join$/, handler: joinClub },
-  { method: "POST", path: /^\/api\/club\/leave$/, handler: leaveClub },
+  { method: "POST", path: /^\/api\/feedback$/, handler: postFeedback, create: "feedback" },
+  { method: "POST", path: /^\/api\/verify$/, handler: postVerify, create: "verify" },
+  { method: "POST", path: /^\/api\/club$/, handler: createClub, create: "club" },
+  { method: "POST", path: /^\/api\/club\/join$/, handler: joinClub, write: true },
+  { method: "POST", path: /^\/api\/club\/leave$/, handler: leaveClub, write: true },
   { method: "GET", path: /^\/api\/clubs$/, handler: getClubs },
-  { method: "POST", path: /^\/api\/race$/, handler: createRace },
-  { method: "POST", path: /^\/api\/race\/([A-Za-z0-9]{6})\/join$/, handler: joinRace },
+  { method: "POST", path: /^\/api\/race$/, handler: createRace, create: "race" },
+  { method: "POST", path: /^\/api\/race\/([A-Za-z0-9]{6})\/join$/, handler: joinRace, write: true },
   { method: "GET", path: /^\/api\/race\/([A-Za-z0-9]{6})$/, handler: getRace },
+  // Progress in a race is posted every second or two, so it only counts toward LIMIT_API.
   { method: "POST", path: /^\/api\/race\/([A-Za-z0-9]{6})$/, handler: postRace },
 ];
+
+/** Whether the visitor may call this route now. */
+function underLimit(route, env, who) {
+  if (route.create) return allowed(env.LIMIT_CREATE, `${route.create}:${who}`);
+  if (route.admin) return allowed(env.LIMIT_WRITE, `admin:${who}`);
+  return route.write ? allowed(env.LIMIT_WRITE, `write:${who}`) : true;
+}
 
 export default {
   async scheduled(controller, env, ctx) {
@@ -503,9 +542,16 @@ export default {
     if (pathname === "/") return pageWithPreview(request, env);
     if (!pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     try {
-      for (const { method, path, handler } of ROUTES) {
-        const match = request.method === method && pathname.match(path);
-        if (match) return await handler(request, env, match[1]);
+      const who = visitor(request);
+      if (tooLarge(request)) return error("too large", 413);
+      if (!(await allowed(env.LIMIT_API, who))) return slowDown();
+      for (const route of ROUTES) {
+        const match = request.method === route.method && pathname.match(route.path);
+        if (!match) continue;
+        if (!(await underLimit(route, env, who))) return slowDown();
+        // The limit comes first, so wrong guesses at the admin key are counted too.
+        if (route.admin && !(await isAdmin(request, env))) return error("forbidden", 403);
+        return await route.handler(request, env, match[1]);
       }
       return error("not found", 404);
     } catch (err) {

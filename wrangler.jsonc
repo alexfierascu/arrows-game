@@ -19,12 +19,20 @@
 			"migrations_dir": "migrations"
 		}
 	],
+	// Per-visitor limits (src/limits.js). `period` is in seconds.
+	"ratelimits": [
+		{ "name": "LIMIT_API", "namespace_id": "1001", "simple": { "limit": 300, "period": 60 } },
+		{ "name": "LIMIT_WRITE", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+		{ "name": "LIMIT_CREATE", "namespace_id": "1003", "simple": { "limit": 10, "period": 60 } }
+	],
 	"triggers": {
 		"crons": ["0 * * * *"]
 	},
 	"vars": {
 		"VAPID_PUBLIC_KEY": "BJYWRAj-ZT176MxIpH2LIKbT9fzhwhrjzwIni688VoMD-V-8xxsMc2WtMY5GakuELkSdlYvnz3JqSw9YVi_LE_c",
-		"VAPID_SUBJECT": "https://arrows-game.univocal.workers.dev"
+		"VAPID_SUBJECT": "https://arrows-game.univocal.workers.dev",
+		// The bot check only accepts answers made on these hostnames (comma-separated).
+		"TURNSTILE_HOSTNAMES": "arrows-game.univocal.workers.dev"
 	},
 	"observability": {
 		"enabled": true

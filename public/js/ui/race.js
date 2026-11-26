@@ -16,7 +16,7 @@ import { game } from '../game/state.js';
 import { startGame } from '../game/session.js';
 import { renderHud, toast } from '../game/hud.js';
 import { modal, closeModal } from './modal.js';
-import { myAvatar } from './leaderboard.js';
+import { myAvatar, sync, credentials } from './leaderboard.js';
 
 const LOBBY_POLL_MS = 1500, GAME_POLL_MS = 1500;
 const LOBBY_TIMEOUT_MS = 10 * 60 * 1000;
@@ -58,7 +58,8 @@ export function openRaceLobby() {
 }
 
 async function create() {
-  const made = await call('POST', '', { name: player.nick || '', avatar: myAvatar() });
+  await sync(); // only players may open a race, and a brand-new one has no row on the server yet
+  const made = await call('POST', '', { ...credentials(), name: player.nick || '', avatar: myAvatar() });
   if (!made) { message(t('race'), t('race.failed')); return; }
   race = { ...made, state: 'play', sent: '' };
   const link = raceLink(race.code), since = Date.now();

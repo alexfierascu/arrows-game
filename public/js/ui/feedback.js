@@ -4,7 +4,7 @@ import { $ } from '../dom.js';
 import { language, t } from '../i18n.js';
 import { track } from '../analytics.js';
 import { modal } from './modal.js';
-import { playerId } from './leaderboard.js';
+import { sync, credentials } from './leaderboard.js';
 
 const MAX_LENGTH = 1000, MIN_LENGTH = 3;
 const HTTP_TOO_MANY = 429;
@@ -14,8 +14,9 @@ async function send(onDone) {
   if (text.length < MIN_LENGTH) { note.textContent = t('feedback.empty'); return; }
   $('#fbSend').disabled = true;
   let status = 0;
+  await sync(); // the server only takes messages from players it knows
   try {
-    const res = await fetch('/api/feedback', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: playerId, text, lang: language() }) });
+    const res = await fetch('/api/feedback', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...credentials(), text, lang: language() }) });
     status = res.status;
   } catch { /* offline */ }
   if (status === 200) {
