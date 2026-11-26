@@ -13,6 +13,8 @@ import { arrowWeight } from './arrows.js';
 import { resizeBoard, focusBoard } from './render.js';
 import { renderBoardHeader, renderHud, renderPowers, toast } from './hud.js';
 import { resetAssist } from './assist.js';
+import { say } from './a11y.js';
+import { leaveRace } from '../ui/race.js';
 
 const FIRST_ICE_LEVEL = 37;       // first level of the Frozen world
 const BOSS_FIRST_ATTACK_DELAY = 2; // extra seconds before a boss's first attack
@@ -56,6 +58,9 @@ export function loadBoard(cfg) {
 export function startGame(cfg) {
   resetRun();
   game.challenge = cfg.challenge || null;
+  // Relaxed mode is for the worlds only: everything with a leaderboard stays fair.
+  game.relaxed = !!player.relax && cfg.kind === 'level' && !cfg.challenge;
+  game.race = cfg.race || null;
   player.st.plays++;
   persist();
   track('game_start');
@@ -72,6 +77,7 @@ export function startGame(cfg) {
   if (tip) toast(...tip);
   renderHud();
   renderPowers();
+  say(t('sr.start', { title: cfg.resultLabel || cfg.title, n: game.total }));
 }
 
 /** Starts a Time Attack run from its first board. */
@@ -96,8 +102,10 @@ const EXITS = {
   event: () => show('event'),
   rush: () => show('event'),
   endless: () => show('home'),
+  race: () => show('home'),
 };
 
 export function exitGame() {
+  if (game.race) leaveRace();
   EXITS[game.cfg.kind](game.cfg);
 }

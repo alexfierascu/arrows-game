@@ -14,10 +14,22 @@
 //   GET    /api/admin                              admin only: players, reports, refused names, usage
 //   POST   /api/admin/rename                       admin only: { id, nick } ('' removes the name)
 //   DELETE /api/admin/reports/<id>                 admin only: dismiss the reports and flag of a player
+//   DELETE /api/admin/feedback/<n>                 admin only: delete one feedback message
+//   DELETE /api/admin/clubs/<code>                 admin only: delete a club (its members stay)
+//   GET    /api/player/<id>                        a player's public profile
+//   GET    /api/season?key=YYYY-MM&id=<id>         where a player finished in a past season
+//   POST   /api/feedback                           a message for the owner: { id, text, lang }
+//   POST   /api/verify                             pass the bot check: { token, response }
+//   Clubs: see src/clubs.js. Live races: see src/race.js.
+// The page itself ("/") also runs through here, so shared links get a preview (src/preview.js).
 // A cron trigger (wrangler.jsonc) runs `scheduled` every hour to send the daily reminders.
 
 import { isProfane } from "./profanity.js";
 import { sendPush } from "./webpush.js";
+import { json, error, readJson, sha256, cleanText, ID_RE } from "./http.js";
+import { createClub, joinClub, leaveClub, getClubs, adminClubs, deleteClub } from "./clubs.js";
+import { createRace, joinRace, getRace, postRace } from "./race.js";
+import { pageWithPreview } from "./preview.js";
 
 const LEADERBOARD_SIZE = 100;
 const NICK_MAX_LENGTH = 16;
@@ -33,15 +45,15 @@ const LOCKOUT_MS = 5 * 60 * 1000;
 const FIELDS = {
   nick: "nick", total: "total", stars: "stars", cleared: "cleared", bosses: "bosses",
   dDate: "d_date", dScore: "d_score", dTime: "d_time", eKey: "e_key", eScore: "e_score", avatar: "avatar",
-  sKey: "s_key", sScore: "s_score", endless: "endless",
+  sKey: "s_key", sScore: "s_score", endless: "endless", badges: "badges",
 };
 // Upper bounds a real game can reach; anything above is rejected.
 const LIMITS = {
   total: 2_000_000, stars: 180, cleared: 60, bosses: 5, dScore: 100_000, dTime: 3_600, eScore: 500_000, avatar: 63,
-  sScore: 5_000_000, endless: 2_000_000,
+  sScore: 5_000_000, endless: 2_000_000, badges: 0x3fffffff,
 };
 // Fields that older copies of the game do not send yet.
-const OPTIONAL = { avatar: 0, sScore: 0, endless: 0 };
+const OPTIONAL = { avatar: 0, sScore: 0, endless: 0, badges: 0 };
 
 // Cheat checks. The numbers mirror the game's own rules (public/js/levels.js, content.js and
 // game/rules.js); when those change, change these too.
@@ -75,10 +87,11 @@ const EVENT_NAMES = new Set([
   "visit", "new_player", "game_start", "first_move", "first_win", "win", "lose", "daily_win", "event_win",
   "rush_end", "power_used", "share", "friend_added", "skin_bought", "name_set",
   "endless_end", "challenge_start", "challenge_win", "hint_used", "undo_used", "report", "reminder_on", "installed",
+  "mission_claimed", "past_daily", "race_start", "race_win", "solution_watched", "feedback", "club_joined",
+  "profile_view", "relaxed_win", "season_prize",
 ]);
 const MAX_STATS_DAYS = 365;
 
-const ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MONTH_RE = /^\d{4}-\d{2}$/;
 const EVENT_RE = /^[a-z]{2,12}-\d{1,6}$/;
@@ -95,7 +108,11 @@ const UPSERT = `
 
 // Keeps what the server itself knows about a row out of the player's reach: the upsert never
 // touches `flagged`.
-const PREVIOUS = "SELECT cleared, updated_at FROM scores WHERE id = ?";
+const PREVIOUS = "SELECT cleared, updated_at, s_key, s_score FROM scores WHERE id = ?";
+// Keeps the points of a month that is over, for the season prizes.
+const ARCHIVE_SEASON = `
+  INSERT INTO season_results (s_key, id, score) VALUES (?, ?, ?)
+  ON CONFLICT(s_key, id) DO UPDATE SET score = MAX(score, excluded.score)`;
 const FLAG = "UPDATE scores SET flagged = ? WHERE id = ? AND flagged = ''";
 
 const RELEASE_STALE_NICK = "UPDATE scores SET nick = '' WHERE nick = ? COLLATE NOCASE AND id <> ? AND updated_at < ?";
@@ -110,18 +127,6 @@ const ADD_STRIKE = `
     blocked_until = CASE WHEN blocked_until <= ?2 AND first_at >= ?3 AND count + 1 >= ?4 THEN ?5 ELSE blocked_until END
   RETURNING blocked_until`;
 const DROP_OLD_STRIKES = "DELETE FROM strikes WHERE first_at < ? AND blocked_until < ?";
-
-const json = (data, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
-  });
-const error = (message, status) => json({ error: message }, status);
-
-async function sha256(text) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 /** A database row as the JSON the game expects. */
 function toClient(row) {
@@ -206,6 +211,8 @@ async function postScore(request, env) {
   if (score.error) return error(score.error, 400);
   const values = Object.keys(FIELDS).map((key) => score.values[key]), now = Date.now(), { nick } = score.values;
   const tokenHash = await sha256(score.token);
+  if (env.TURNSTILE_SECRET && !(await isVerified(env.DB, tokenHash, now)))
+    return json({ error: "verify", sitekey: env.TURNSTILE_SITEKEY || "" }, HTTP_VERIFY_FIRST);
   if (isProfane(nick)) {
     // Shows up in the Worker's logs, so repeat offenders can be spotted. No IP address.
     const country = request.cf?.country || "";
@@ -231,6 +238,8 @@ async function postScore(request, env) {
   // Possible but not believable: many more levels than the time since the last post allows.
   // The row is kept and marked for the admin page; a person decides.
   if (previous) {
+    if (previous.s_key && previous.s_key !== score.values.sKey && previous.s_score > 0)
+      await env.DB.prepare(ARCHIVE_SEASON).bind(previous.s_key, score.id, previous.s_score).run();
     const levels = score.values.cleared - previous.cleared, seconds = (now - previous.updated_at) / 1000;
     if (levels > 1 && levels * MIN_SECONDS_PER_LEVEL > seconds)
       await env.DB.prepare(FLAG).bind(`${levels} levels in ${Math.round(seconds)} seconds`, score.id).run();
@@ -249,6 +258,82 @@ async function postReport(request, env) {
   if (!known) return error("forbidden", 403);
   await env.DB.prepare("INSERT OR IGNORE INTO reports (player_id, reporter, at) SELECT id, ?, ? FROM scores WHERE id = ?")
     .bind(reporter, Date.now(), body.target).run();
+  return json({ ok: true });
+}
+
+// ---------- bot check (Cloudflare Turnstile) ----------
+// Off until TURNSTILE_SECRET and TURNSTILE_SITEKEY are set. Then a browser has to pass the
+// check once before its scores are accepted; the pass lasts VERIFIED_MS.
+
+const HTTP_VERIFY_FIRST = 428;
+const VERIFIED_MS = 30 * 24 * 60 * 60 * 1000;
+const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+const isVerified = async (db, who, now) => !!(await db.prepare("SELECT 1 FROM verified WHERE who = ? AND until > ?").bind(who, now).first());
+
+async function postVerify(request, env) {
+  const body = await readJson(request), now = Date.now();
+  if (!env.TURNSTILE_SECRET) return json({ ok: true });
+  if (!body || typeof body.token !== "string" || body.token.length < 20 || body.token.length > 100 || typeof body.response !== "string")
+    return error("bad request", 400);
+  const form = new FormData();
+  form.append("secret", env.TURNSTILE_SECRET);
+  form.append("response", body.response);
+  form.append("remoteip", request.headers.get("cf-connecting-ip") || "");
+  const outcome = await (await fetch(SITEVERIFY, { method: "POST", body: form })).json();
+  if (!outcome.success) return error("check failed", 403);
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO verified (who, until) VALUES (?, ?) ON CONFLICT(who) DO UPDATE SET until = excluded.until").bind(await sha256(body.token), now + VERIFIED_MS),
+    env.DB.prepare("DELETE FROM verified WHERE until < ?").bind(now),
+  ]);
+  return json({ ok: true });
+}
+
+// ---------- profile, season prizes, feedback ----------
+
+const PROFILE = `
+  SELECT s.id, s.nick, s.avatar, s.total, s.stars, s.cleared, s.bosses, s.endless, s.d_date, s.d_score, s.s_key, s.s_score, s.badges,
+    COALESCE(c.name, '') AS club
+  FROM scores s LEFT JOIN clubs c ON c.id = s.club WHERE s.id = ?`;
+
+async function getPlayer(request, env, id) {
+  if (!ID_RE.test(id)) return error("not found", 404);
+  const row = await env.DB.prepare(PROFILE).bind(id).first();
+  if (!row) return error("not found", 404);
+  return json({
+    id: row.id, nick: row.nick, avatar: row.avatar, total: row.total, stars: row.stars, cleared: row.cleared, bosses: row.bosses,
+    endless: row.endless, dDate: row.d_date, dScore: row.d_score, sKey: row.s_key, sScore: row.s_score, badges: row.badges, club: row.club,
+  });
+}
+
+/** Where a player finished in a month that is over: { score, rank, players }, rank 0 if they did not play. */
+async function getSeason(request, env) {
+  const params = new URL(request.url).searchParams, key = params.get("key") || "", id = params.get("id") || "";
+  if (!MONTH_RE.test(key) || !ID_RE.test(id)) return error("bad request", 400);
+  // A player's points are in season_results once they have posted in a later month, and still
+  // in their own row until then.
+  const mine = await env.DB.prepare(`
+    SELECT COALESCE((SELECT score FROM season_results WHERE s_key = ?1 AND id = ?2),
+                    (SELECT s_score FROM scores WHERE s_key = ?1 AND id = ?2), 0) AS score`).bind(key, id).first("score");
+  const counts = await env.DB.prepare(`
+    SELECT (SELECT COUNT(*) FROM season_results WHERE s_key = ?1 AND score > ?2) + (SELECT COUNT(*) FROM scores WHERE s_key = ?1 AND s_score > ?2) AS ahead,
+           (SELECT COUNT(*) FROM season_results WHERE s_key = ?1 AND score > 0) + (SELECT COUNT(*) FROM scores WHERE s_key = ?1 AND s_score > 0) AS players`).bind(key, mine).first();
+  return json({ score: mine, rank: mine > 0 ? counts.ahead + 1 : 0, players: counts.players });
+}
+
+const FEEDBACK_MAX_LENGTH = 1000, FEEDBACK_PER_DAY = 5, FEEDBACK_KEPT = 500;
+
+async function postFeedback(request, env) {
+  const body = await readJson(request), now = Date.now();
+  const text = [...String(body?.text || "").replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, "").trim()].slice(0, FEEDBACK_MAX_LENGTH).join("");
+  if (!body || !ID_RE.test(body.id || "") || text.length < 3) return error("bad request", 400);
+  const today = await env.DB.prepare("SELECT COUNT(*) AS n FROM feedback WHERE player = ? AND at > ?").bind(body.id, now - 86_400_000).first("n");
+  if (today >= FEEDBACK_PER_DAY) return error("too many", 429);
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO feedback (at, player, text, lang, country) VALUES (?, ?, ?, ?, ?)")
+      .bind(now, body.id, text, cleanText(body.lang, 5), request.cf?.country || ""),
+    env.DB.prepare(`DELETE FROM feedback WHERE id NOT IN (SELECT id FROM feedback ORDER BY at DESC LIMIT ${FEEDBACK_KEPT})`),
+  ]);
   return json({ ok: true });
 }
 
@@ -328,14 +413,18 @@ async function deleteScore(request, env, id) {
 async function getAdmin(request, env) {
   if (!isAdmin(request, env)) return error("forbidden", 403);
   const since = utcDay(Date.now() - 29 * 86_400_000);
-  const [players, refused, events, reminders] = await env.DB.batch([
+  const [players, refused, events, reminders, feedback] = await env.DB.batch([
     env.DB.prepare(`SELECT id, nick, total, stars, cleared, d_date, d_score, e_score, s_score, endless, flagged, updated_at,
       (SELECT COUNT(*) FROM reports r WHERE r.player_id = scores.id) AS reports FROM scores ORDER BY updated_at DESC LIMIT 500`),
     env.DB.prepare("SELECT at, player, name, country FROM refused ORDER BY at DESC"),
     env.DB.prepare("SELECT day, name, count FROM events WHERE day >= ? ORDER BY day DESC, name").bind(since),
     env.DB.prepare("SELECT COUNT(*) AS n FROM push"),
+    env.DB.prepare("SELECT id, at, player, text, lang, country FROM feedback ORDER BY at DESC"),
   ]);
-  return json({ players: players.results, refused: refused.results, events: events.results, reminders: reminders.results[0].n });
+  return json({
+    players: players.results, refused: refused.results, events: events.results, reminders: reminders.results[0].n,
+    feedback: feedback.results, clubs: await adminClubs(env.DB),
+  });
 }
 
 async function renamePlayer(request, env) {
@@ -362,6 +451,18 @@ async function dismissReports(request, env, id) {
   return json({ ok: true });
 }
 
+async function deleteFeedback(request, env, id) {
+  if (!isAdmin(request, env)) return error("forbidden", 403);
+  await env.DB.prepare("DELETE FROM feedback WHERE id = ?").bind(Number(id)).run();
+  return json({ ok: true });
+}
+
+async function removeClub(request, env, code) {
+  if (!isAdmin(request, env)) return error("forbidden", 403);
+  await deleteClub(env.DB, code);
+  return json({ ok: true });
+}
+
 // A capture group in `path` is passed to the handler as its third argument.
 const ROUTES = [
   { method: "GET", path: /^\/api\/scores$/, handler: getScores },
@@ -376,6 +477,20 @@ const ROUTES = [
   { method: "GET", path: /^\/api\/admin$/, handler: getAdmin },
   { method: "POST", path: /^\/api\/admin\/rename$/, handler: renamePlayer },
   { method: "DELETE", path: /^\/api\/admin\/reports\/([^/]+)$/, handler: dismissReports },
+  { method: "DELETE", path: /^\/api\/admin\/feedback\/(\d+)$/, handler: deleteFeedback },
+  { method: "DELETE", path: /^\/api\/admin\/clubs\/([A-Z0-9]{6})$/, handler: removeClub },
+  { method: "GET", path: /^\/api\/player\/([^/]+)$/, handler: getPlayer },
+  { method: "GET", path: /^\/api\/season$/, handler: getSeason },
+  { method: "POST", path: /^\/api\/feedback$/, handler: postFeedback },
+  { method: "POST", path: /^\/api\/verify$/, handler: postVerify },
+  { method: "POST", path: /^\/api\/club$/, handler: createClub },
+  { method: "POST", path: /^\/api\/club\/join$/, handler: joinClub },
+  { method: "POST", path: /^\/api\/club\/leave$/, handler: leaveClub },
+  { method: "GET", path: /^\/api\/clubs$/, handler: getClubs },
+  { method: "POST", path: /^\/api\/race$/, handler: createRace },
+  { method: "POST", path: /^\/api\/race\/([A-Za-z0-9]{6})\/join$/, handler: joinRace },
+  { method: "GET", path: /^\/api\/race\/([A-Za-z0-9]{6})$/, handler: getRace },
+  { method: "POST", path: /^\/api\/race\/([A-Za-z0-9]{6})$/, handler: postRace },
 ];
 
 export default {
@@ -385,6 +500,7 @@ export default {
 
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
+    if (pathname === "/") return pageWithPreview(request, env);
     if (!pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     try {
       for (const { method, path, handler } of ROUTES) {

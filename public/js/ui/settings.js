@@ -11,13 +11,15 @@ import { canInstall, install, canRemind, setReminder } from '../pwa.js';
 import { languageButtonContent } from './language-menu.js';
 import { openHelp } from './help.js';
 import { modal, closeModal } from './modal.js';
+import { openFeedback } from './feedback.js';
 
 // Each switch flips a boolean of the same name in the save data.
-const SWITCHES = [['snd', 'sound'], ['mus', 'music'], ['hap', 'vibration'], ['rm', 'motion'], ['cb', 'contrast'], ['stats', 'usage.stats']];
-const PRIVACY_PARAGRAPHS = 6;
+// A third entry is a line of small print under the label.
+const SWITCHES = [['snd', 'sound'], ['mus', 'music'], ['hap', 'vibration'], ['rm', 'motion'], ['cb', 'contrast'], ['relax', 'relax', 'relax.about'], ['stats', 'usage.stats']];
+const PRIVACY_PARAGRAPHS = 7;
 
-const switchHtml = ([key, label]) =>
-  `<div class="set"><span>${t(label)}</span><button class="sw ${player[key] ? 'on' : ''}" data-switch="${key}" aria-label="${t(label)}"></button></div>`;
+const switchHtml = ([key, label, about]) =>
+  `<div class="set"><span>${t(label)}${about ? `<small class="note" style="display:block;margin:0">${t(about)}</small>` : ''}</span><button class="sw ${player[key] ? 'on' : ''}" data-switch="${key}" aria-label="${t(label)}"></button></div>`;
 
 // The button opens the shared language menu (see language-menu.js).
 const languageHtml = () =>
@@ -69,10 +71,12 @@ function confirmReset(button) {
 
 export function openSettings() {
   modal(`<h2>${t('settings')}</h2>${SWITCHES.map(switchHtml).join('')}${reminderHtml()}${languageHtml()}${installHtml()}
+  <div class="set"><span>${t('feedback')}</span><button class="btn" id="sFeedback">${t('feedback.write')}</button></div>
   <div class="set"><span>${t('reset.label')}</span><button class="btn" id="sReset">${t('reset')}</button></div><div class="acts"><button class="btn" data-act="help">${t('help.title')}</button><button class="btn" data-act="privacy">${t('privacy')}</button><button class="btn main" data-act="close">${t('done')}</button></div>`,
   { help: () => openHelp(openSettings), privacy: openPrivacy });
   $$('#mcard [data-switch]').forEach(b => { b.onclick = () => toggle(b); });
   if ($('#sRemind')) $('#sRemind').onclick = e => toggleReminder(e.currentTarget);
   if ($('#sInstall')) $('#sInstall').onclick = () => { closeModal(); install(); };
+  $('#sFeedback').onclick = () => openFeedback(openSettings);
   $('#sReset').onclick = e => confirmReset(e.currentTarget);
 }

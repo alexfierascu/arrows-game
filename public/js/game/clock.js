@@ -25,7 +25,7 @@ function tickBoss(dt) {
 function tick(dt, now) {
   if (game.frozen > 0) game.frozen = Math.max(0, game.frozen - dt); // Freeze stops clock and boss
   else {
-    game.timeLeft -= dt;
+    if (!game.relaxed) game.timeLeft -= dt;
     if (game.boss) tickBoss(dt);
     if (game.timeLeft <= 0) { game.timeLeft = 0; loseNow('time'); }
   }

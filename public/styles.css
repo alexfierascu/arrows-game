@@ -278,3 +278,23 @@ button.nm{border:0;background:none;color:inherit;font:inherit;text-align:left;cu
 /* Colour-blind mode: stronger text and borders. The board adds patterns (game/render.js). */
 :root[data-contrast]{--mute:light-dark(#2e3350,#d3d7f5);--line:light-dark(#8088a8,#6a72a8);--dot:light-dark(#aab0cc,#4a528a)}
 :root[data-contrast] .btn,:root[data-contrast] .tile,:root[data-contrast] .ib{border-width:3px}
+/* today: gift and missions */
+.mis{display:flex;align-items:center;gap:10px;text-align:left;background:var(--soft);border-radius:14px;padding:10px 12px 8px;margin-top:8px}
+.mis .mtx{flex:1;min-width:0}.mis b{display:flex;align-items:center;gap:6px;line-height:1.15}.mis b svg{width:20px;height:20px;flex:none}
+.mis small{color:var(--mute);font-size:13px}.mis .hp{margin:5px 0 1px}.mis .hp i{background:var(--acc)}
+.mis .btn{min-height:40px;padding:6px 12px 4px;font-size:16px}.mis .btn svg,.mis .price svg{width:18px;height:18px}
+.mis.got{opacity:.6}.mdone{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#161b3d;display:grid;place-items:center;flex:none}.mdone svg{width:18px;height:18px}
+/* earlier daily boards */
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:10px}
+.day{position:relative;border:2px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);padding:6px 0 3px;cursor:pointer;display:grid;justify-items:center;min-height:52px;font:inherit}
+.day small{font-size:11px;color:var(--mute);line-height:1}.day b{font-size:18px;line-height:1.2}
+.day.got{border-color:var(--gold);background:var(--soft)}.day svg{position:absolute;top:2px;right:2px;width:12px;height:12px;color:var(--gold)}
+/* relaxed mode, races, clubs, feedback, screen readers */
+.timer[hidden]{display:none}
+.frbar{gap:8px;align-items:center}.frbar .chip[hidden]{display:none}
+#raceBar .hp i{background:var(--acc)}
+.club{margin-bottom:10px;text-align:left}.club .chead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}.club .chead b{font-size:20px;overflow-wrap:anywhere}.club .chead small{color:var(--mute);white-space:nowrap}
+.club .acts{display:flex;gap:8px;margin-top:10px}.club .acts .btn{flex:1;min-height:42px}
+.ta{width:100%;font:600 16px/1.3 "Baloo 2",sans-serif;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper);color:var(--ink);resize:vertical}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.botcheck{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9}

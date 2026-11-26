@@ -1,10 +1,12 @@
 // Keyboard play: with the board focused, the arrow keys move a highlight from arrow to arrow,
-// Enter or Space taps the highlighted one and Escape pauses.
+// Enter or Space taps the highlighted one, H asks for a hint, U takes back a mistake and
+// Escape pauses. Each newly highlighted arrow is described to screen readers.
 
 import { $ } from '../dom.js';
 import { game } from './state.js';
 import { tapArrow } from './rules.js';
 import { requestFrame } from './frame.js';
+import { say, describeArrow } from './a11y.js';
 
 const STEPS = { ArrowRight: [1, 0], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowUp: [0, -1] };
 const SIDEWAYS_COST = 2; // an arrow straight ahead beats a closer one off to the side
@@ -43,6 +45,7 @@ function move([dx, dy]) {
     }) || current;
   }
   game.cursor = next.id;
+  say(describeArrow(next));
   requestFrame();
 }
 
@@ -57,7 +60,9 @@ export function initKeyboard(onPause) {
       const a = cursorArrow();
       if (a) tapArrow(a);
       else move([0, 0]);
-    } else if (e.key === 'Escape') {
+    } else if (e.key === 'h' || e.key === 'H') $('#hintBtn').click();
+    else if (e.key === 'u' || e.key === 'U') $('#undoBtn').click();
+    else if (e.key === 'Escape') {
       e.stopPropagation(); // or the dialog's own Escape handler would close the menu again at once
       onPause();
     }

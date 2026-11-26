@@ -18,7 +18,7 @@ import { restartGame, exitGame } from './session.js';
 function openPauseMenu() {
   if (game.over) return;
   modal(`<h2>${t('paused')}</h2><p>${t('pause.progress', { title: esc(game.cfg.title), done: game.total - game.left, total: game.total })}</p>
-  <div style="display:grid;gap:10px"><button class="btn main" data-act="close">${t('resume')}</button><button class="btn" data-act="help">${t('help.title')}</button><button class="btn" data-act="restart">${t('restart')}</button><button class="btn" data-act="quit">${t('quit')}</button></div>`,
+  <div style="display:grid;gap:10px"><button class="btn main" data-act="close">${t('resume')}</button><button class="btn" data-act="help">${t('help.title')}</button>${game.race ? '' : `<button class="btn" data-act="restart">${t('restart')}</button>`}<button class="btn" data-act="quit">${t('quit')}</button></div>`,
   {
     help: () => openHelp(openPauseMenu),
     // Both throw away the board in progress, so both ask first and return here on "Cancel".

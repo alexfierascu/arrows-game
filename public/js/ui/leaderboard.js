@@ -12,7 +12,12 @@ import { ico } from '../icons.js';
 import { avatarOf, avatarHtml } from '../avatars.js';
 import { friends, isFriend, addFriend, removeFriend } from '../friends.js';
 import { track } from '../analytics.js';
-import { modal, confirmDialog } from './modal.js';
+import { badgeBits } from '../badges.js';
+import { passBotCheck } from '../botcheck.js';
+import { openProfile } from './profile.js';
+import { openRaceLobby } from './race.js';
+import { loadClubs } from './clubs.js';
+import { modal } from './modal.js';
 import { openAvatarPicker } from './avatar-picker.js';
 import { lockOut } from './lockout.js';
 
@@ -35,6 +40,9 @@ const uuid = () => crypto.randomUUID
 
 export const playerId = stored('ae-player-id', uuid);
 const token = stored('ae-player-token', () => uuid() + uuid());
+
+/** What proves to the server who this player is. */
+export const credentials = () => ({ id: playerId, token });
 
 // ---------- state ----------
 
@@ -73,23 +81,28 @@ const TABS = {
 
 // ---------- network ----------
 
-const HTTP_FORBIDDEN = 403, HTTP_NAME_TAKEN = 409, HTTP_BAD_NAME = 422, HTTP_LOCKED_OUT = 429;
+const HTTP_FORBIDDEN = 403, HTTP_NAME_TAKEN = 409, HTTP_BAD_NAME = 422, HTTP_VERIFY_FIRST = 428, HTTP_LOCKED_OUT = 429;
 // Why the server refused a name: HTTP status -> the text that tells the player.
 const NAME_REFUSED = { [HTTP_NAME_TAKEN]: 'nick.taken', [HTTP_BAD_NAME]: 'nick.bad', [HTTP_LOCKED_OUT]: 'nick.bad' };
 
 /** Sends the player's scores under the given name. Returns the HTTP status, or 0 when offline. */
-async function postScores(nick) {
+async function postScores(nick, checked = false) {
   const wk = weekInfo();
   const body = {
     id: playerId, token, nick, avatar: player.av,
     total: totalScore(), stars: totalStars(), cleared: clearedCount(), bosses: bossesBeaten(),
     dDate: player.daily.d || '', dScore: player.daily.score || 0, dTime: player.daily.time || 0,
     eKey: wk.key, eScore: eventScore(wk.key),
-    sKey: seasonId(), sScore: seasonScore(), endless: player.endless.best,
+    sKey: seasonId(), sScore: seasonScore(), endless: player.endless.best, badges: badgeBits(),
   };
   try {
     const res = await fetch('/api/score', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     if (res.status === HTTP_LOCKED_OUT) lockOut((await res.json()).wait); // too many offensive names
+    // The server wants proof that this is a person's browser: pass the check, then post again.
+    if (res.status === HTTP_VERIFY_FIRST && !checked) {
+      const { sitekey } = await res.json();
+      if (sitekey && await passBotCheck(sitekey, token)) return postScores(nick, true);
+    }
     return res.status;
   } catch { return 0; }
 }
@@ -138,8 +151,8 @@ function friendButton(r, mine) {
 
 function rowHtml(r, rank, format = num) {
   const mine = r.id === playerId, name = r.nick || t('board.player', { id: String(r.id).slice(0, 4).toUpperCase() });
-  // Other players' names open their card, which is where a name can be reported.
-  const label = mine ? `<span class="nm">${esc(name)} ${t('you')}</span>` : `<button class="nm" data-card="${esc(r.id)}">${esc(name)}</button>`;
+  // A name opens that player's profile, which is also where a name can be reported.
+  const label = `<button class="nm" data-card="${esc(r.id)}">${esc(name)}${mine ? ' ' + t('you') : ''}</button>`;
   return `<div class="row ${mine ? 'me' : ''} ${rank <= 3 ? 'g' + rank : ''}"><span class="rk">${rank}</span>${avatarHtml(avatarOf(r.avatar, r.id))}${label}<small style="color:var(--mute)">${esc(r.sub)}</small><span class="vl">${format(r.value)}</span>${friendButton(r, mine)}</div>`;
 }
 
@@ -157,6 +170,17 @@ function noteText() {
 
 function renderBoard() {
   if (currentScreen() !== 'board') return;
+  const clubs = tab === 'clubs';
+  $('#clubBox').hidden = !clubs;
+  $('#friendsOnly').hidden = clubs;
+  $('#avBtn').innerHTML = avatarHtml(myAvatar());
+  if (clubs) {
+    $('#babout').textContent = t('board.about.clubs');
+    $('#friendAdd').hidden = true;
+    $('#bnote').textContent = '';
+    loadClubs();
+    return;
+  }
   const view = TABS[tab], wk = weekInfo();
   const shown = r => !friendsOnly || r.id === playerId || isFriend(r.nick);
   const list = rows.filter(r => view.includes(r, wk) && shown(r))
@@ -170,7 +194,6 @@ function renderBoard() {
   $('#friendsOnly').classList.toggle('on', friendsOnly);
   $('#friendsOnly').setAttribute('aria-pressed', friendsOnly);
   $('#friendAdd').hidden = !friendsOnly;
-  $('#avBtn').innerHTML = avatarHtml(myAvatar());
   $('#bnote').textContent = noteText();
 }
 
@@ -182,7 +205,7 @@ function openBoard() {
   clearInterval(pollTimer);
   pollTimer = setInterval(() => {
     if (currentScreen() !== 'board') clearInterval(pollTimer);
-    else if (!document.hidden) fetchBoard();
+    else if (!document.hidden && tab !== 'clubs') fetchBoard();
   }, POLL_MS);
   renderBoard();
 }
@@ -228,15 +251,15 @@ async function addFriendFromForm() {
   fetchBoard();
 }
 
-function toggleFriend(name) {
+export function toggleFriend(name) {
   if (isFriend(name)) removeFriend(name);
   else if (addFriend(name)) track('friend_added');
   renderBoard();
 }
 
-// ---------- player card and reports ----------
+// ---------- reports ----------
 
-async function report(id) {
+export async function reportPlayer(id) {
   let ok = false;
   try {
     const res = await fetch('/api/report', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: playerId, token, target: id }) });
@@ -244,19 +267,6 @@ async function report(id) {
   } catch { /* offline */ }
   if (ok) track('report');
   $('#bnote').textContent = t(ok ? 'report.sent' : 'report.failed');
-}
-
-/** A small dialog about one player: add or remove them as a friend, or report their name. */
-function openPlayerCard(id) {
-  const r = rows.find(row => row.id === id);
-  if (!r) return;
-  const name = r.nick || t('board.player', { id: String(r.id).slice(0, 4).toUpperCase() }), friend = r.nick && isFriend(r.nick);
-  modal(`<div class="pcard">${avatarHtml(avatarOf(r.avatar, r.id))}<h2>${esc(name)}</h2></div>
-  <div style="display:grid;gap:10px">${r.nick ? `<button class="btn" data-act="friend">${t(friend ? 'friend.remove' : 'friend.add')}</button><button class="btn" data-act="report">${t('report')}</button>` : ''}<button class="btn main" data-act="close">${t('close')}</button></div>`,
-  {
-    friend: () => toggleFriend(r.nick),
-    report: () => confirmDialog(esc(t('report.ask', { name })), t('report'), () => report(id)),
-  });
 }
 
 /**
@@ -304,9 +314,10 @@ export function initLeaderboard() {
   $('#nickSave').onclick = saveNick;
   $('#avBtn').onclick = pickAvatar;
   $('#friendsOnly').onclick = () => { friendsOnly = !friendsOnly; renderBoard(); };
+  $('#raceBtn').onclick = openRaceLobby;
   $('#friendAddBtn').onclick = addFriendFromForm;
   onDataClick('#rows', 'friend', toggleFriend);
-  onDataClick('#rows', 'card', openPlayerCard);
+  onDataClick('#rows', 'card', openProfile);
   // Returning players: make sure the server has their latest scores.
   if (totalScore() > 0 || player.daily.d || eventScore(weekInfo().key) || player.endless.best) sync();
 }

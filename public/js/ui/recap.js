@@ -18,7 +18,8 @@ export function weekStatsHtml(week) {
 /** Shows last week's recap once, the first time the game opens in a new week. */
 export function showLastWeekRecap() {
   const week = takeLastWeek();
-  if (!week) return;
+  if (!week) return false;
   modal(`<span class="kick">${t('week.last')}</span><h2>${t('week.title')}</h2>${weekStatsHtml(week)}
   <div class="acts"><button class="btn main" data-act="close">${t('got.it')}</button></div>`);
+  return true;
 }

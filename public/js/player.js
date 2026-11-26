@@ -14,7 +14,10 @@
 //   stats   whether anonymous usage counts may be sent
 //   mus, cb, remind   music / colour-blind mode / daily reminder switched on
 //   endless { best: score, boards } of the best Endless run
-//   season  { id: month YYYY-MM, score: points earned in it }
+//   season  { id: month YYYY-MM, score: points earned in it }, lastSeason: the finished one awaiting its prize
+//   relax   relaxed mode switched on; mis: today's missions (see missions.js)
+//   past    { date: { s, b, t } } earlier daily boards played as practice
+//   club    { code, name } of the player's club, or null
 // The keys are part of the stored format: renaming one loses existing players' progress.
 
 import { TOTAL_LEVELS, LEVELS_PER_WORLD } from './content.js';
@@ -25,13 +28,15 @@ const DEFAULTS = {
   nick: '', coins: 120,
   pw: { smash: 1, radar: 3, freeze: 1, shield: 2, magnet: 1, heart: 1 },
   lv: {}, daily: { d: '', score: 0, time: 0 }, gift: '', ev: {}, bosses: {},
-  st: { cleared: 0, flawless: 0, bestCombo: 0, speed: 0, dailies: 0, powers: 0, arrows: 0, bumps: 0, plays: 0, events: 0, rushBest: 0 },
+  st: { cleared: 0, flawless: 0, bestCombo: 0, speed: 0, dailies: 0, powers: 0, arrows: 0, bumps: 0, plays: 0, events: 0, rushBest: 0,
+    missions: 0, duels: 0, races: 0, past: 0, seasons: 0, endlessBoards: 0 },
   ach: {}, snd: true, hap: true, rm: false, stats: true,
   streak: { n: 0, last: '', best: 0 },
   wk: { id: 0, wins: 0, stars: 0, coins: 0, best: 0, dailies: 0 }, prevWk: null,
   friends: [], skin: 'classic', skins: ['classic'], av: 0,
   mus: false, cb: false, remind: false,
-  endless: { best: 0, boards: 0 }, season: { id: '', score: 0 },
+  endless: { best: 0, boards: 0 }, season: { id: '', score: 0 }, lastSeason: null,
+  relax: false, mis: { d: '', base: {}, p: {}, c: [], seen: [] }, past: {}, club: null,
 };
 const fresh = () => JSON.parse(JSON.stringify(DEFAULTS));
 

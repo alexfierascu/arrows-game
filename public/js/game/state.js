@@ -38,6 +38,9 @@ export const game = {
   hintsLeft: 0, hint: null,       // hint: { id: arrow, until: time } while one is blinking
   undosLeft: 0, canUndo: false,   // canUndo: the last move was a bump that cost a heart
   challenge: null,    // { name, score }: the friend's score this game tries to beat
+  relaxed: false,     // relaxed mode: bumps cost nothing and the clock stands still
+  demo: false,        // a solution is being played back: the player only watches
+  race: null,         // live race: { name, avatar, left } of the other player
 };
 
 /** Resets everything that belongs to one run (a level attempt or a whole Time Attack). */
@@ -47,7 +50,7 @@ export function resetRun() {
     hearts: START_HEARTS, heartsLost: 0,
     score: 0, combo: 0, lastClear: 0, bestCombo: 0, goldCleared: 0,
     frozen: 0, shield: false, smash: false, radarUntil: 0, tutorial: false,
-    rushBoards: 0, rushArrows: 0, challenge: null,
+    rushBoards: 0, rushArrows: 0, challenge: null, relaxed: false, demo: false, race: null,
   });
 }
 

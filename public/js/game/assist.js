@@ -10,6 +10,7 @@ import { game } from './state.js';
 import { canLeave } from './arrows.js';
 import { renderHud, toast } from './hud.js';
 import { requestFrame } from './frame.js';
+import { say, describeArrow } from './a11y.js';
 
 const HINTS_PER_BOARD = 3, UNDOS_PER_BOARD = 1;
 const HINT_MS = 3500;
@@ -38,6 +39,8 @@ function showHint() {
   if (!arrow) { toast(t('hint.none')); return; } // every free arrow is still under ice
   game.hintsLeft--;
   game.hint = { id: arrow.id, until: performance.now() + HINT_MS };
+  game.cursor = arrow.id; // keyboard players land on it and hear where it is
+  say(describeArrow(arrow));
   sfx('hint');
   track('hint_used');
   renderAssist();

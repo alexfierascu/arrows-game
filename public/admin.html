@@ -16,6 +16,7 @@
  button.bad{border-color:var(--bad);color:var(--bad)}
  .wrap{overflow-x:auto}table{border-collapse:collapse;width:100%}
  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+ td.text{white-space:pre-wrap;min-width:260px;max-width:520px;overflow-wrap:anywhere}
  th{color:var(--mute);font-weight:600}td.num{text-align:right;font-variant-numeric:tabular-nums}
  .warn{color:var(--bad);font-weight:600}.mute{color:var(--mute)}
  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
@@ -29,8 +30,10 @@
  <div class="bar"><button id="reload">Reload</button><button id="logout">Lock</button><span class="mute" id="status"></span></div>
  <h2>Last 30 days</h2><div class="cards" id="totals"></div>
  <h2>Needs a look <span class="mute">(reported names and suspicious scores)</span></h2><div class="wrap"><table id="flagged"></table></div>
+ <h2>Feedback <span class="mute">(messages sent from Settings)</span></h2><div class="wrap"><table id="feedback"></table></div>
  <h2>Refused names <span class="mute">(newest first)</span></h2><div class="wrap"><table id="refused"></table></div>
  <h2>Players <span class="mute">(latest 500 by activity)</span></h2><div class="wrap"><table id="players"></table></div>
+ <h2>Clubs</h2><div class="wrap"><table id="clubs"></table></div>
  <h2>Usage per day</h2><div class="wrap"><table id="usage"></table></div>
 </main>
 <script type="module" src="/js/admin.js"></script>

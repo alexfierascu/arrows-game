@@ -6,6 +6,7 @@ import { ATTACKS, POWERS, START_HEARTS } from '../content.js';
 import { player } from '../player.js';
 import { clock, num } from '../format.js';
 import { heart, ico, portrait } from '../icons.js';
+import { avatarHtml } from '../avatars.js';
 import { t } from '../i18n.js';
 import { game, comboActive } from './state.js';
 
@@ -19,6 +20,8 @@ export function renderBoardHeader() {
   $('#gTitle').textContent = cfg.title;
   $('#gSub').textContent = cfg.subtitle;
   $('#bossBar').hidden = !boss;
+  $('#raceBar').hidden = !game.race;
+  $('#timer').hidden = game.relaxed;
   if (boss) {
     $('#bossPic').innerHTML = portrait(boss, '');
     $('#bossName').textContent = boss.name;
@@ -26,6 +29,7 @@ export function renderBoardHeader() {
 }
 
 function heartsHtml() {
+  if (game.relaxed) return `<b style="font-size:16px">${t('relax.short')}</b>`;
   if (game.cfg.kind === 'rush') return `<b style="font-size:18px">${t('hud.board', { n: game.rushBoards + 1 })}</b>`;
   const slots = Math.max(START_HEARTS, game.hearts);
   return Array.from({ length: slots }, (_, i) => heart(i < game.hearts ? '' : 'lost')).join('');
@@ -37,6 +41,15 @@ function renderBoss() {
   $('#bossHp').style.width = (100 * game.bossHP / game.bossMax) + '%';
   label.textContent = frozen > 0 ? t('hud.frozen') : t('hud.attack', { name: attack.name, n: seconds });
   label.classList.toggle('warn', seconds <= 3 && !frozen);
+}
+
+/** The other player of a live race: who they are and how far along. */
+function renderRace() {
+  const { name, avatar, left } = game.race, done = left < 0 ? 0 : game.total - left;
+  $('#racePic').innerHTML = avatarHtml(avatar);
+  $('#raceName').textContent = name || t('challenge.friend');
+  $('#raceLeft').innerHTML = left < 0 ? '' : t('hud.left', { n: `<b>${left}</b>` });
+  $('#raceHp').style.width = (100 * done / Math.max(1, game.total)) + '%';
 }
 
 function renderTimer() {
@@ -55,6 +68,7 @@ export function renderHud() {
   $('#gLeft').innerHTML = t('hud.left', { n: `<b>${game.left}</b>` });
   $('#gCombo').textContent = game.combo > 1 && comboActive(performance.now()) ? t('hud.combo', { n: game.combo }) : '';
   if (game.boss) renderBoss();
+  if (game.race) renderRace();
   renderTimer();
 }
 

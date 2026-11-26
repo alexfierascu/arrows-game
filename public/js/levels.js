@@ -74,6 +74,14 @@ export function endlessCfg(n) {
   };
 }
 
+/** The board of a live race: both players build it from the seed the server picked. */
+export function raceCfg(seed) {
+  return {
+    kind: 'race', practice: true, title: t('race'), subtitle: t('race.sub'), resultLabel: t('race'),
+    col: '#e5484d', W: 11, H: boardHeight(11), seed, maxL: 9, bias: .88, ice: .08, gold: .05, sec: 2.4, dark: false,
+  };
+}
+
 /** An event stage reward ({ coins, power }) in words, e.g. "20 coins + Radar". */
 export function rewardLabel(reward) {
   const power = POWERS.find(p => p.id === reward.power);

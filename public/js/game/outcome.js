@@ -5,7 +5,8 @@ import { esc } from '../dom.js';
 import { player, persist, totalStars } from '../player.js';
 import { addCoins, spendCoins } from '../economy.js';
 import { awardNewBadges, badgeName } from '../badges.js';
-import { recordWin, recordRush, recordEndless } from '../progress.js';
+import { recordWin, recordRush, recordEndless, recordPast } from '../progress.js';
+import { noteMissionProgress, missionText } from '../missions.js';
 import { coinMultiplier } from '../week.js';
 import { rushCfg, endlessCfg, nextCfg } from '../levels.js';
 import { addSeasonPoints } from '../season.js';
@@ -24,11 +25,14 @@ import { game } from './state.js';
 import { loadBoard, restartGame, exitGame } from './session.js';
 import { renderHud, toast } from './hud.js';
 import { undoAvailable, undoBump } from './assist.js';
+import { playSolution } from './solution.js';
+import { finishRace } from '../ui/race.js';
 
 const CONTINUE_SECONDS = 30;
 const TIME_POINTS = 5; // points per second left on the clock
 const WIN_TITLES = ['', 'win.1', 'win.2', 'win.3']; // text keys, by stars earned
 const WIN_EVENTS = { level: 'win', daily: 'daily_win', event: 'event_win' }; // usage counts
+const SOLUTION_KINDS = ['level', 'daily', 'event']; // boards whose solution can be played back after a loss
 
 // Modes that chain boards into one run. `cleared` rewards a finished board and returns the
 // message to show, `next` gives board number n, `loaded` adjusts the game once it is on screen.
@@ -101,10 +105,19 @@ function challengeHtml(score) {
   const challenge = game.challenge;
   if (!challenge) return '';
   const won = score > challenge.score, key = won ? 'challenge.won' : score === challenge.score ? 'challenge.tie' : 'challenge.lost';
-  if (won) track('challenge_win');
   const text = t(key, { name: challenge.name || t('challenge.friend'), mine: num(score), theirs: num(challenge.score) });
   return `<p class="duel ${won ? 'won' : ''}">${esc(text)}</p>`;
 }
+
+/** Counts a beaten challenge. Call before paying out, so its badge is awarded with the rest. */
+function noteDuel(score) {
+  if (!game.challenge || score <= game.challenge.score) return;
+  player.st.duels++;
+  track('challenge_win');
+}
+
+/** Counts a finished game towards today's missions. Returns a reward line per mission it completed. */
+const missionLines = delta => noteMissionProgress(delta).map(m => t('mission.done', { name: missionText(m) }));
 
 /** Pays the coins, awards badges, saves and posts the score. Returns the new badges. */
 function payOut(coins) {
@@ -121,37 +134,55 @@ const newBest = isNew => (isNew ? `<span class="new">${t('new.best')}</span>` : 
 const rewardLine = text => `<span>${ico(CHECK)}${esc(text)}</span>`;
 
 function win() {
-  const { cfg, boss, score, hearts, timeLeft, heartsLost, bestCombo, goldCleared } = game;
-  const used = cfg.limit - timeLeft, flawless = heartsLost === 0;
-  const earned = 1 + (flawless ? 1 : 0) + (used <= cfg.par ? 1 : 0);
-  const timeBonus = Math.floor(timeLeft) * TIME_POINTS, heartBonus = hearts * 50, flawlessBonus = flawless ? 200 : 0, bossBonus = boss ? 500 : 0;
+  if (game.race) { finishRace(true); return; }
+  const { cfg, boss, score, hearts, timeLeft, heartsLost, bestCombo, goldCleared, relaxed } = game;
+  // Relaxed mode: no hearts or clock to judge, so one star and no bonuses.
+  const used = cfg.limit - timeLeft, flawless = !relaxed && heartsLost === 0, inTime = !relaxed && used <= cfg.par;
+  const earned = 1 + (flawless ? 1 : 0) + (inTime ? 1 : 0);
+  const timeBonus = relaxed ? 0 : Math.floor(timeLeft) * TIME_POINTS, heartBonus = relaxed ? 0 : hearts * 50;
+  const flawlessBonus = flawless ? 200 : 0, bossBonus = boss ? 500 : 0;
   const final = score + timeBonus + heartBonus + flawlessBonus + bossBonus;
 
   // A practice board (opened from a challenge before the player unlocked it) leaves no trace.
   let coins = 0, isNew = false, extra = [], badges = [], next = null;
-  if (cfg.practice) sfx('win');
+  noteDuel(final);
+  if (cfg.past) {
+    // An earlier day's daily board: no leaderboard, but the first clear of each day pays a little.
+    ({ coins, isNew, extra } = recordPast(cfg, { final, stars: earned, used }));
+    badges = payOut(coins);
+    track('past_daily');
+  } else if (cfg.practice) { persist(); sfx('win'); }
   else {
     const starsBefore = totalStars(), firstWin = player.st.cleared === 0 && cfg.kind === 'level';
-    ({ coins, isNew, extra } = recordWin(cfg, { final, stars: earned, used, timeLeft, heartsLost, bestCombo, goldCleared }));
+    ({ coins, isNew, extra } = recordWin(cfg, {
+      final, stars: earned, bestCombo, goldCleared,
+      // Relaxed wins are neither flawless nor fast, and set no best time.
+      used: relaxed ? cfg.limit : used, timeLeft: relaxed ? 0 : timeLeft, heartsLost: relaxed ? 1 : heartsLost,
+    }));
     trackWeek({ stars: totalStars() - starsBefore, coins, score: final, daily: cfg.kind === 'daily' });
     addSeasonPoints(final);
+    extra.push(...missionLines({
+      wins: 1, flawless: flawless ? 1 : 0, three: earned === 3 ? 1 : 0, combo: bestCombo, score: final,
+      daily: cfg.kind === 'daily' ? 1 : 0, speed: !relaxed && timeLeft >= cfg.limit * .5 ? 1 : 0,
+    }));
     badges = payOut(coins);
     next = nextCfg(cfg);
-    track(firstWin ? 'first_win' : WIN_EVENTS[cfg.kind]);
+    track(firstWin ? 'first_win' : relaxed ? 'relaxed_win' : WIN_EVENTS[cfg.kind]);
   }
+  const recorded = !cfg.practice || cfg.past;
 
   const rows = [
     [t('row.arrows', { n: bestCombo }), num(score)],
-    [t('row.time', { time: clock(timeLeft) }), '+' + timeBonus],
-    [t('row.hearts', { n: hearts }), '+' + heartBonus],
+    !relaxed && [t('row.time', { time: clock(timeLeft) }), '+' + timeBonus],
+    !relaxed && [t('row.hearts', { n: hearts }), '+' + heartBonus],
     flawlessBonus && [t('row.flawless'), '+' + flawlessBonus],
     bossBonus && [t('row.boss'), '+' + bossBonus],
   ].filter(Boolean);
   modal(`${boss ? portrait(boss) : ''}<span class="kick" style="--c:${cfg.col}">${cfg.resultLabel}</span>
   <div class="bigstars">${stars(earned)}</div><h2>${t(boss ? 'win.boss' : WIN_TITLES[earned])}</h2>
-  ${challengeHtml(final)}${goalsHtml(cfg, [true, flawless, used <= cfg.par])}
+  ${challengeHtml(final)}${goalsHtml(cfg, [true, flawless, inTime])}${relaxed ? `<p class="note">${t('relax.note')}</p>` : ''}
   <table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`${t('total')} ${newBest(isNew)}`, num(final)], 'tot')}</table>
-  ${cfg.practice ? `<p class="note">${t('challenge.practice')}</p>` : `<div class="gain"><span>${COIN}+${coins}${coinMultiplier() > 1 ? ' ' + t('weekend.x2') : ''}</span>${[...extra, ...badges.map(badgeName)].map(rewardLine).join('')}</div>`}
+  ${!recorded ? `<p class="note">${t('challenge.practice')}</p>` : `<div class="gain"><span>${COIN}+${coins}${coinMultiplier() > 1 ? ' ' + t('weekend.x2') : ''}</span>${[...extra, ...badges.map(badgeName)].map(rewardLine).join('')}</div>`}
   ${shareButtonHtml()}${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn" data-act="again">${t('replay')}</button>${next ? `<button class="btn main" data-act="next">${t('next')}</button>` : ''}</div>`,
   { back: exitGame, again: restartGame, next: () => previewLevel(next) });
   armNickField();
@@ -172,12 +203,14 @@ function endRun() {
   const { coins, isNew } = run.record(cfg, { score, boards: rushBoards, bestCombo });
   trackWeek({ coins, score });
   addSeasonPoints(score);
+  noteDuel(score);
+  const missions = missionLines({ combo: bestCombo, score, endless: cfg.kind === 'endless' ? rushBoards : 0 });
   track(run.endEvent);
   const badges = payOut(coins);
   const rows = [[t('rush.row.boards'), rushBoards], [t('rush.row.arrows'), rushArrows], [t('rush.row.combo'), '×' + bestCombo]];
   modal(`<span class="kick" style="--c:${cfg.col}">${cfg.title}</span><h2>${t(run.overTitle)}</h2>
   ${challengeHtml(score)}<table class="brk">${rows.map(r => tableRow(r)).join('')}${tableRow([`${t('score')} ${newBest(isNew)}`, num(score)], 'tot')}</table>
-  <div class="gain"><span>${COIN}+${coins}</span>${badges.map(b => rewardLine(badgeName(b))).join('')}</div>
+  <div class="gain"><span>${COIN}+${coins}</span>${[...missions, ...badges.map(badgeName)].map(rewardLine).join('')}</div>
   ${shareButtonHtml()}${nickFieldHtml()}<div class="acts"><button class="btn" data-act="back">${t('back')}</button><button class="btn main" data-act="again">${t('run.again')}</button></div>`,
   { back: exitGame, again: restartGame });
   armNickField();
@@ -195,6 +228,7 @@ function continueGame(why) {
 }
 
 function showLose(why) {
+  if (game.race) { finishRace(false); return; }
   track('lose');
   sfx('lose');
   const { boss, total, left, continued } = game, outOfTime = why === 'time';
@@ -203,9 +237,10 @@ function showLose(why) {
   const undo = why === 'hearts' && undoAvailable() ? `<button class="btn main" style="width:100%;margin-bottom:8px" data-act="undo">${t('undo.offer')}</button>` : '';
   const offer = continued ? '' :
     `<button class="btn gold" style="width:100%" data-act="continue" ${player.coins >= CONTINUE_COST ? '' : 'disabled'}>${outOfTime ? t('continue.time', { n: CONTINUE_SECONDS, price }) : t('continue.heart', { price })}</button>`;
+  const solution = SOLUTION_KINDS.includes(game.cfg.kind) ? `<button class="btn" style="width:100%;margin-top:8px" data-act="solution">${t('solution.show')}</button>` : '';
   modal(`${picture}
   <h2>${t(outOfTime ? 'lose.time' : 'lose.hearts')}</h2><p>${boss ? t('lose.boss', { name: boss.name, n: game.bossHP }) + ' ' : ''}${t('lose.text', { done: total - left, total })}</p>
-  ${undo}${offer}
+  ${undo}${offer}${solution}
   <div class="acts"><button class="btn" data-act="quit">${t('quit')}</button><button class="btn ${undo ? '' : 'main'}" data-act="retry">${t('retry')}</button></div>`,
-  { continue: () => continueGame(why), undo: undoBump, quit: exitGame, retry: restartGame });
+  { continue: () => continueGame(why), undo: undoBump, solution: playSolution, quit: exitGame, retry: restartGame });
 }

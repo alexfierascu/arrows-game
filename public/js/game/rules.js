@@ -13,6 +13,7 @@ import { hitBoss } from './bosses.js';
 import { renderHud, renderPowers, toast, pop } from './hud.js';
 import { renderAssist } from './assist.js';
 import { requestFrame } from './frame.js';
+import { say } from './a11y.js';
 
 const BASE_POINTS = 10;
 const ERROR_FLASH_MS = 700;
@@ -30,12 +31,28 @@ function removeFromBoard(a) {
   hitBoss(a);
 }
 
+// Far enough to slide off the board and off the screen at any zoom.
+const runwayOf = a => Math.ceil(game.W + game.H + a.pts.length + (view.width + view.height) / view.scale + 4);
+
+/** A move of the solution playback: the arrow leaves, but nothing is scored or counted. */
+export function demoMove(a) {
+  a.ice = false;
+  a.state = 'exit';
+  for (const c of a.cells) game.own[c] = -1;
+  game.left--;
+  a.ext = extendedPath(a, runwayOf(a));
+  a.slide = 0;
+  animate({ kind: 'exit', a });
+  sfx('out', 1);
+  renderHud();
+  requestFrame();
+}
+
 /** Sends a free arrow off the board and scores it. */
 export function launch(a) {
   const now = performance.now();
   game.canUndo = false; // only the very last move can be taken back
-  // Far enough to slide off the board and off the screen at any zoom.
-  const runway = Math.ceil(game.W + game.H + a.pts.length + (view.width + view.height) / view.scale + 4);
+  const runway = runwayOf(a);
   a.state = 'exit';
   removeFromBoard(a);
   if (game.tutorial) { game.tutorial = false; game.radarUntil = 0; track('first_move'); } // lesson learned
@@ -49,6 +66,7 @@ export function launch(a) {
   pop('+' + points + (game.combo > 1 ? ' ×' + game.combo : ''), headOnScreen(a), a.gold ? '#d99a00' : null);
   animate({ kind: 'exit', a });
   sfx(a.gold ? 'gold' : game.combo > 2 ? 'combo' : 'out', game.combo);
+  say(t('sr.left', { n: game.left }));
   renderHud();
   requestFrame();
 }
@@ -105,6 +123,9 @@ export function bump(anim) {
     game.shield = false;
     sfx('power');
     toast(t('toast.shield.hit'));
+  } else if (game.relaxed) {
+    sfx('bump');
+    say(t('sr.bump'));
   } else {
     player.st.bumps++;
     sfx('bump');
@@ -115,6 +136,7 @@ export function bump(anim) {
       game.hearts--;
       game.heartsLost++;
       game.canUndo = true;
+      say(t('sr.bump') + ' ' + t('sr.hearts', { n: game.hearts }));
       if (game.hearts <= 0 && !game.over) { game.over = true; game.pendingLose = 'hearts'; }
     }
   }

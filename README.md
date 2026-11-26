@@ -111,6 +111,46 @@ Common changes:
 - **Challenges**: the Share button on a result sends a picture card and a link such as `/?c=l12&s=4800`.
   Whoever opens it plays the same board and sees who won. A board the opener has not unlocked is
   played as practice: no coins, no progress. The codes are explained in `challenge.js`.
+- **Today** (`ui/today.js`, `missions.js`): the home tile that holds the daily gift and three daily
+  missions. The missions are the same for everyone, picked from the date, and each pays coins once.
+- **Earlier days** (`ui/past.js`): the daily boards of the last 14 days, playable as practice from
+  the daily challenge dialog. No leaderboard and no streak; the first clear of a day pays a few coins.
+- **Season prizes** (`ui/season-prize.js`): when a month is over, the next visit pays coins for the
+  player's final place. The server keeps the finished month's points in the `season_results` table.
+- **Relaxed mode** (a switch in Settings): world levels without hearts or clock. A relaxed win gives
+  one star and no time or heart bonus, so the leaderboards stay fair. Daily, event, Endless and race
+  boards always play by the normal rules.
+- **Show me a solution** (`game/solution.js`): after a lost level, daily or event board, the board
+  is played back from the start. Nothing is scored.
+- **Live race** (`ui/race.js`, `src/race.js`): "Race a friend" on the leaderboard screen opens a
+  race and gives a link. When the friend opens it, both play the same board after a countdown and
+  see each other's progress; the first to clear it wins. There is no open connection: each game
+  asks the server every 1.5 seconds. Races are deleted after an hour.
+- **Clubs** (`ui/clubs.js`, `src/clubs.js`): the Clubs tab of the leaderboard. A player founds a club
+  or joins one by code or link (20 members at most). A club's score is the sum of its members'
+  season points.
+- **Public profile** (`ui/profile.js`): tap a name on the leaderboard, or "My public profile" on the
+  badges screen. The link `/?p=<player id>` shows name, avatar, club, numbers and badges.
+- **Feedback**: "Feedback" in Settings sends a message that appears on the admin page (5 a day per
+  player, 1,000 characters).
+
+## Link previews
+Chat apps show a title, a text and a picture for a pasted link. `src/preview.js` writes them into
+the page for challenge, race, club and profile links, for example "Ana scored 12,340 on level 2-3.
+Can you beat it?". The texts are English and the picture (`public/og.png`) is the same for every
+link. For this, requests for `/` run through the Worker (`run_worker_first` in `wrangler.jsonc`).
+If you move to your own domain, change the two `og.png` addresses in `public/index.html`.
+
+## Bot check (optional)
+The server can ask each browser to pass Cloudflare Turnstile once before it accepts scores. It is
+off until you create a Turnstile widget in the Cloudflare dashboard (Turnstile, Add widget, your
+domain, mode "Managed") and store its two keys:
+```
+npx wrangler secret put TURNSTILE_SECRET     # the widget's secret key
+```
+and add `"TURNSTILE_SITEKEY": "<the widget's site key>"` to `vars` in `wrangler.jsonc`, then deploy.
+A pass lasts 30 days per browser (`VERIFIED_MS` in `src/worker.js`). To switch it off again, delete
+the secret: `npx wrangler secret delete TURNSTILE_SECRET`.
 
 ## Installing, offline play and reminders
 The game is a PWA: `public/manifest.webmanifest` plus the service worker `public/sw.js`. Files are
@@ -152,14 +192,16 @@ new_player` (did they finish level 1), `daily_win / visit` (is the daily challen
 
 ## Accessibility
 - Keyboard: every menu is reachable with Tab. On the board, the arrow keys move a highlight between
-  arrows, Enter or Space taps the highlighted one and Escape pauses (`game/keyboard.js`).
+  arrows, Enter or Space taps the highlighted one, H gives a hint, U takes back a mistake and
+  Escape pauses (`game/keyboard.js`).
 - Dialogs take the keyboard focus when they open and give it back when they close.
 - Settings has a "Reduce motion" switch; the system-wide reduced-motion preference is also respected
   (`motion.js`).
 - Phones held sideways get their own layout: the board fills the height, with the clock and
   superpowers beside it.
-- In-game messages are announced to screen readers. The board itself is drawn on a canvas, so its
-  arrows are not individually described.
+- In-game messages are announced to screen readers. The board is drawn on a canvas, so the game
+  describes it in words instead (`game/a11y.js`): the highlighted arrow's direction, length,
+  position and whether it is free, then how many arrows and hearts are left after each move.
 
 ## Languages
 The game speaks English, Spanish, French, Italian, German, Romanian, Greek and Polish. It starts in
@@ -208,6 +250,7 @@ Players can report a name from the leaderboard (tap a name, then "Report name").
 **Admin page.** Open `/admin` on your site and enter the admin key. It lists reported names and
 suspicious scores, refused names, all players (rename, remove the name, delete) and the usage counts.
 Set the key once with `npx wrangler secret put ADMIN_KEY`; choose a long random one.
+The page also lists the feedback players sent from Settings and the clubs, each with a Delete button.
 
 **Cheat checks.** The server refuses scores no real game can produce: more stars or bosses than the
 cleared levels allow, a total above what those levels can pay (`TOTAL_CAPS` in `src/worker.js`), or

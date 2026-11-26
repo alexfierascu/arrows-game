@@ -7,7 +7,7 @@ import { today } from './format.js';
 import { t } from './i18n.js';
 
 // `progress` returns [current, target]; the badge is earned once current reaches target. It is
-// checked after every finished game. Names and descriptions are in the language files, under
+// checked after every finished game and whenever something else that counts has happened. Names and descriptions are in the language files, under
 // badge.<id>.name and badge.<id>.desc.
 export const BADGES = [
   { id: 'first',    progress: () => [player.st.cleared, 1] },
@@ -24,6 +24,14 @@ export const BADGES = [
   { id: 'w5',       progress: () => [clearedCount(), TOTAL_LEVELS] },
   { id: 'arrows',   progress: () => [player.st.arrows, 1000] },
   { id: 'stars',    progress: () => [totalStars(), 90] },
+  { id: 'endless5', progress: () => [Math.max(player.st.endlessBoards, player.endless.boards || 0), 5] },
+  { id: 'duel',     progress: () => [player.st.duels, 1] },
+  { id: 'race',     progress: () => [player.st.races, 1] },
+  { id: 'missions', progress: () => [player.st.missions, 10] },
+  { id: 'past',     progress: () => [player.st.past, 5] },
+  { id: 'streak7',  progress: () => [player.streak.best, 7] },
+  { id: 'season',   progress: () => [player.st.seasons, 1] },
+  { id: 'club',     progress: () => [player.club ? 1 : 0, 1] },
 ];
 
 export const badgeName = badge => t(`badge.${badge.id}.name`);
@@ -31,6 +39,11 @@ export const badgeDesc = badge => t(`badge.${badge.id}.desc`);
 export const hasBadge = badge => !!player.ach[badge.id];
 const isEarned = badge => { const [current, target] = badge.progress(); return current >= target; };
 export const badgeCount = () => BADGES.filter(hasBadge).length;
+
+// The player's badges as one number for the public profile: bit i is set when BADGES[i] is
+// earned. New badges must be added at the end of the list, or old profiles would change.
+export const badgeBits = () => BADGES.reduce((bits, badge, i) => (hasBadge(badge) ? bits | (1 << i) : bits), 0);
+export const badgesFromBits = bits => BADGES.filter((badge, i) => bits & (1 << i));
 
 /** Awards every badge earned since the last check and returns them. The caller saves. */
 export function awardNewBadges() {

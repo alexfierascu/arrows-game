@@ -7,11 +7,14 @@ import { today, yesterday } from './format.js';
 import { t } from './i18n.js';
 
 const REPLAY_COINS = 5;
+const PAST_DAILY_COINS = 15;
+const PAST_DAILIES_KEPT = 40;
 const ENDLESS_BOARD_COINS = 8;
 
 /** The player's earlier result on this board as { b: score, t: seconds }, if any. */
 export function bestFor(cfg) {
-  if (cfg.kind === 'daily') return player.daily.d === today() ? { b: player.daily.score, t: player.daily.time } : null;
+  if (cfg.past) return player.past[cfg.date] || null;
+  if (cfg.kind === 'daily') return cfg.date === today() && player.daily.d === today() ? { b: player.daily.score, t: player.daily.time } : null;
   if (cfg.kind === 'event') return eventState(cfg.wk.key).stages[cfg.stage];
   return player.lv[cfg.g];
 }
@@ -81,10 +84,20 @@ export function recordWin(cfg, run) {
   return { ...result, coins: result.coins * coinMultiplier() };
 }
 
+/** Records an earlier day's daily board, played as practice. Pays once per day played. */
+export function recordPast(cfg, { final, stars, used }) {
+  const old = player.past[cfg.date], time = Math.round(used);
+  player.past[cfg.date] = { s: Math.max(old ? old.s : 0, stars), b: Math.max(old ? old.b : 0, final), t: old ? Math.min(old.t, time) : time };
+  if (!old) player.st.past++;
+  for (const date of Object.keys(player.past).sort().slice(0, -PAST_DAILIES_KEPT)) delete player.past[date];
+  return { coins: old ? 0 : PAST_DAILY_COINS * coinMultiplier(), isNew: !old || final > old.b, extra: [] };
+}
+
 /** Records a finished Endless run. Returns { coins, isNew }; the caller pays out and saves. */
 export function recordEndless({ score, boards, bestCombo }) {
   const isNew = score > player.endless.best;
   if (isNew) player.endless = { best: score, boards };
+  player.st.endlessBoards = Math.max(player.st.endlessBoards, boards);
   player.st.bestCombo = Math.max(player.st.bestCombo, bestCombo);
   return { coins: boards * ENDLESS_BOARD_COINS * coinMultiplier(), isNew };
 }

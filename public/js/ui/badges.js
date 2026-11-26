@@ -10,6 +10,8 @@ import { t } from '../i18n.js';
 import { num } from '../format.js';
 import { ico, LOCK, CHECK } from '../icons.js';
 import { registerScreen } from '../router.js';
+import { openProfile } from './profile.js';
+import { playerId } from './leaderboard.js';
 
 // Badges still to earn show how far along the player is, when the target is more than one step.
 function badgeHtml(b) {
@@ -31,4 +33,5 @@ function renderBadges() {
 
 export function initBadges() {
   registerScreen('badges', renderBadges);
+  $('#profileBtn').onclick = () => openProfile(playerId);
 }

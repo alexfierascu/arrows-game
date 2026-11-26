@@ -8,6 +8,7 @@ import { COIN, portrait, star } from '../icons.js';
 import { startGame } from '../game/session.js';
 import { t } from '../i18n.js';
 import { modal } from './modal.js';
+import { openPast } from './past.js';
 
 const kicker = (cfg, text) => `<span class="kick" style="--c:${cfg.col}">${text}</span>`;
 
@@ -20,7 +21,7 @@ function bossHeader(cfg) {
 
 const HEADERS = {
   level: cfg => cfg.boss ? bossHeader(cfg) : `${kicker(cfg, t('preview.world', { n: cfg.w, name: cfg.world.name }))}<h2>${t('level.title', { id: cfg.title })}</h2>`,
-  daily: cfg => `${kicker(cfg, cfg.date)}<h2>${t('tile.daily')}</h2><p>${t('preview.daily.text')}</p>`,
+  daily: cfg => `${kicker(cfg, cfg.date)}<h2>${t('tile.daily')}</h2><p>${t(cfg.past ? 'past.note' : 'preview.daily.text')}</p>`,
   event: cfg => `${kicker(cfg, t('preview.event', { event: cfg.ev.name }))}<h2>${cfg.subtitle}</h2><p>${t('preview.reward', { reward: rewardLabel(STAGE_REWARDS[cfg.stage - 1]) })}</p>`,
 };
 
@@ -45,6 +46,7 @@ export function previewLevel(cfg) {
   const board = build(cfg), best = bestFor(cfg);
   modal(`${HEADERS[cfg.kind](cfg)}${facts(cfg, board)}${goalsHtml(cfg)}
   ${best ? `<p style="margin:12px 0 0;color:var(--mute)">${t('preview.best', { score: `<b style="color:var(--ink)">${num(best.b || 0)}</b>`, time: clock(best.t || 0) })}</p>` : ''}
+  ${cfg.kind === 'daily' && !cfg.practice ? `<button class="btn" style="width:100%;margin-top:12px" data-act="past">${t('past.open')}</button>` : ''}
   <div class="acts"><button class="btn" data-act="close">${t('close')}</button><button class="btn main" data-act="play">${cfg.boss ? t('fight') : t('play')}</button></div>`,
-  { play: () => startGame(cfg) });
+  { play: () => startGame(cfg), past: openPast });
 }

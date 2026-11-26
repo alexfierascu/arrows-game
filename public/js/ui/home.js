@@ -1,25 +1,22 @@
-// Home screen: the play button, the tiles that open every other screen, and the daily gift.
+// Home screen: the play button and the tiles that open every other screen.
 
 import { $ } from '../dom.js';
-import { POWERS, BOSSES, MAX_STARS, EVENT_STAGES, GIFT_COINS } from '../content.js';
+import { BOSSES, MAX_STARS, EVENT_STAGES } from '../content.js';
 import { player, nextLevel, eventState, totalStars, bossesBeaten, powersOwned, currentStreak } from '../player.js';
-import { addCoins } from '../economy.js';
-import { weekInfo, coinMultiplier } from '../week.js';
+import { weekInfo } from '../week.js';
 import { levelCfg, dailyCfg, worldOf } from '../levels.js';
 import { today, duration, num } from '../format.js';
-import { ico, COIN } from '../icons.js';
-import { randomInt } from '../rng.js';
-import { sfx } from '../feedback.js';
+import { ico } from '../icons.js';
 import { registerScreen, show, currentScreen } from '../router.js';
 import { t } from '../i18n.js';
 import { modal } from './modal.js';
 import { previewLevel } from './preview.js';
 import { startEndless } from '../game/session.js';
 import { openSettings } from './settings.js';
+import { openToday, giftReady } from './today.js';
+import { missionsDone, missionsToClaim } from '../missions.js';
 
 const REFRESH_MS = 30000; // keeps the event countdown current
-
-const giftReady = () => player.gift !== today();
 
 function renderEventTile(wk) {
   const ev = wk.ev, es = eventState(wk.key), tile = $('#tEvent');
@@ -40,23 +37,10 @@ function renderHome() {
   $('#endlessSub').textContent = player.endless.best ? t('home.best.run', { n: num(player.endless.best) }) : t('home.endless.new');
   $('#worldsSub').textContent = t('home.worlds', { stars: totalStars(), max: MAX_STARS, bosses: bossesBeaten(), total: BOSSES.length });
   $('#shopSub').textContent = t('home.bag', { n: powersOwned() });
-  $('#giftSub').textContent = giftReady() ? t('gift.ready') : t('gift.wait');
-  $('#tGift .dotb')?.remove();
-  if (giftReady()) $('#tGift').insertAdjacentHTML('beforeend', '<i class="dotb"></i>');
-}
-
-function openGift() {
-  if (!giftReady()) {
-    modal(`<h2>${t('gift.opened.title')}</h2><p>${t('gift.opened.text')}</p><div class="acts"><button class="btn main" data-act="close">${t('ok')}</button></div>`);
-    return;
-  }
-  const power = POWERS[randomInt(POWERS.length)], coins = GIFT_COINS * coinMultiplier();
-  player.gift = today();
-  player.pw[power.id]++;
-  addCoins(coins);
-  sfx('win');
-  modal(`<span class="kick" style="--c:#d99a00">${t('tile.gift')}</span><h2>${t('gift.title')}</h2><div class="gain"><span>${COIN}+${coins}</span><span>${ico(power.d)} +1 ${power.name}</span></div><div class="acts"><button class="btn main" data-act="close">${t('collect')}</button></div>`);
-  renderHome();
+  // The red dot says there is something to collect: the gift or a finished mission.
+  $('#todaySub').textContent = giftReady() ? t('gift.ready') : t('home.missions', { n: missionsDone(), total: 3 });
+  $('#tToday .dotb')?.remove();
+  if (giftReady() || missionsToClaim()) $('#tToday').insertAdjacentHTML('beforeend', '<i class="dotb"></i>');
 }
 
 function openEndless() {
@@ -82,7 +66,7 @@ export function initHome() {
   $('#tBoard').onclick = () => show('board');
   $('#tShop').onclick = () => show('shop');
   $('#badgeBtn').onclick = () => show('badges');
-  $('#tGift').onclick = openGift;
+  $('#tToday').onclick = openToday;
   $('#gear').onclick = openSettings;
   setInterval(() => { if (currentScreen() === 'home') renderHome(); }, REFRESH_MS);
 }

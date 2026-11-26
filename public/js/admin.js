@@ -36,13 +36,18 @@ function playerRow(p) {
 }
 const PLAYER_HEAD = ['Name', 'Problem', 'Score', 'Stars', 'Levels', 'Season', 'Endless', 'Last active', '', 'Id'];
 
-function render({ players, refused, events, reminders }) {
+function render({ players, refused, events, reminders, feedback = [], clubs = [] }) {
   const sum = name => events.filter(e => e.name === name).reduce((total, e) => total + e.count, 0);
   const totals = [['Players', players.length], ['Visits', sum('visit')], ['New players', sum('new_player')], ['Games started', sum('game_start')],
-    ['Wins', sum('win') + sum('first_win') + sum('daily_win') + sum('event_win')], ['Shares', sum('share')], ['Reminders on', reminders]];
+    ['Wins', sum('win') + sum('first_win') + sum('daily_win') + sum('event_win')], ['Shares', sum('share')], ['Reminders on', reminders],
+    ['Races started', sum('race_start')], ['Missions claimed', sum('mission_claimed')], ['Clubs', clubs.length]];
   $('#totals').innerHTML = totals.map(([label, n]) => `<div><b>${n}</b>${label}</div>`).join('');
   $('#flagged').innerHTML = table(PLAYER_HEAD, players.filter(p => p.reports || p.flagged).map(playerRow));
   $('#players').innerHTML = table(PLAYER_HEAD, players.map(playerRow));
+  $('#feedback').innerHTML = table(['When', 'Message', 'Language', 'Country', 'Player id', ''],
+    feedback.map(f => [td(when(f.at)), td(esc(f.text), 'text'), td(esc(f.lang)), td(esc(f.country)), td(`<span class="mute">${esc(f.player.slice(0, 8))}</span>`), td(button('unfeedback', f.id, 'Delete'))]));
+  $('#clubs').innerHTML = table(['Name', 'Code', 'Members', 'Created', ''],
+    clubs.map(c => [td(esc(c.name)), td(esc(c.code)), td(c.members, 'num'), td(when(c.created_at)), td(button('unclub', c.code, 'Delete', 'bad'))]));
   $('#refused').innerHTML = table(['When', 'Name tried', 'Country', 'Player id'],
     refused.map(r => [td(when(r.at)), td(esc(r.name)), td(esc(r.country)), td(`<span class="mute">${esc(r.player.slice(0, 8))}</span>`)]));
   const names = [...new Set(events.map(e => e.name))].sort(), days = [...new Set(events.map(e => e.day))];
@@ -64,6 +69,8 @@ const ACTIONS = {
   },
   clear: id => (confirm('Remove this player’s name? Their scores stay.') ? api('POST', '/api/admin/rename', { id, nick: '' }) : null),
   dismiss: id => api('DELETE', '/api/admin/reports/' + encodeURIComponent(id)),
+  unfeedback: id => api('DELETE', '/api/admin/feedback/' + encodeURIComponent(id)),
+  unclub: code => (confirm('Delete this club? Its members stay, without a club.') ? api('DELETE', '/api/admin/clubs/' + encodeURIComponent(code)) : null),
   delete: id => (confirm('Delete this player and all their scores? This cannot be undone.') ? api('DELETE', '/api/score/' + encodeURIComponent(id)) : null),
 };
 

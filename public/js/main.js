@@ -16,6 +16,10 @@ import { initShop } from './ui/shop.js';
 import { initBadges } from './ui/badges.js';
 import { initLeaderboard, acceptInvite } from './ui/leaderboard.js';
 import { openChallenge } from './ui/challenge.js';
+import { openRaceLink } from './ui/race.js';
+import { openClubLink } from './ui/clubs.js';
+import { openProfileLink } from './ui/profile.js';
+import { claimSeasonPrize } from './ui/season-prize.js';
 import { initPwa } from './pwa.js';
 import { initMusic } from './music.js';
 import { initTapSound } from './feedback.js';
@@ -38,10 +42,14 @@ initGame();
 show('home');
 initLockout();
 rollWeek();
-// A challenge link takes the place of the weekly recap: one dialog at a time.
-const invited = new URLSearchParams(location.search).has('c');
-acceptInvite(invited); // reads the link's friend before openChallenge clears the address
-if (!openChallenge()) showLastWeekRecap();
+// A link that brings its own dialog (challenge, race, club, profile) takes the place of the
+// season prize and the weekly recap: one dialog at a time.
+const query = new URLSearchParams(location.search);
+const invited = query.has('c') || query.has('race');
+acceptInvite(invited); // reads the link's friend before the dialogs below clear the address
+if (!(openChallenge() || openRaceLink() || openClubLink() || openProfileLink())) {
+  if (!showLastWeekRecap()) claimSeasonPrize();
+}
 trackVisit();
 initMusic();
 initTapSound();
